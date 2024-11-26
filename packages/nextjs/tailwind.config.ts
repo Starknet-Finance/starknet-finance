@@ -151,6 +151,7 @@ module.exports = {
           success: "#34EEB6",
           warning: "#FFCF72",
           error: "#FF8863",
+          ".text-white": "#FFF",
           ".bg-gradient-modal": {
             background: "#385183",
           },

@@ -132,3 +132,21 @@ p {
     clip-path: polygon(100% 100%, 100% 0, 90% 100%);
   }
 }
+
+.dashboard {
+  background: #1c1c1c;
+  padding: 14px;
+  border-radius: 8px;
+  max-width: 244px;
+  height: 100vh;
+}
+
+.dashboard .actions div:first-child {
+  border-top-right-radius: 8px;
+  border-top-left-radius: 8px;
+}
+
+.dashboard .actions div:last-child {
+  border-bottom-right-radius: 8px;
+  border-bottom-left-radius: 8px;
+}
