@@ -1,4 +1,5 @@
 import Image from "next/image";
+import { useRouter } from "next/navigation";
 import { useState } from "react";
 
 const MENU_ITEM = [
@@ -11,12 +12,14 @@ const MENU_ITEM = [
           title: "Overview",
           active: true,
           isComingSoon: false,
+          path: "/overview",
         },
         {
           icon: "/address-book-icon.svg",
           title: "Address Book",
           active: false,
           isComingSoon: false,
+          path: "/address-book",
         },
         {
           icon: "/mutil-owner-icon.svg",
@@ -29,6 +32,7 @@ const MENU_ITEM = [
           title: "AI Assistant",
           active: false,
           isComingSoon: false,
+          path: "/ai-assistant",
         },
         {
           icon: "/stake-icon.svg",
@@ -52,6 +56,7 @@ const MENU_ITEM = [
             {
               title: "Send",
               active: false,
+              path: "/send",
             },
             {
               title: "Receive",
@@ -68,6 +73,7 @@ const MENU_ITEM = [
           title: "Batch",
           active: false,
           isComingSoon: false,
+          path: "/transaction-batch",
         },
       ],
     },
@@ -88,9 +94,11 @@ interface MenuItem {
   title: string;
   active: boolean;
   isComingSoon?: boolean;
+  path?: string;
   subMenu?: {
     title: string;
     active: boolean;
+    path?: string;
   }[];
 }
 
@@ -104,10 +112,18 @@ interface MenuGroup {
 }
 
 export default function Sidebar() {
+  const router = useRouter();
+
   const [openSubmenu, setOpenSubmenu] = useState<string | null>(null);
 
   const toggleSubmenu = (menuTitle: string) => {
     setOpenSubmenu(openSubmenu === menuTitle ? null : menuTitle);
+  };
+
+  const handleNavigation = (path: string | undefined, hasSubMenu: boolean) => {
+    if (path && !hasSubMenu) {
+      router.push(path);
+    }
   };
 
   return (
@@ -131,7 +147,13 @@ export default function Sidebar() {
               {item.groupMenu.listMenu.map((menu: MenuItem) => (
                 <div key={menu.title} className="flex flex-col">
                   <div
-                    onClick={() => menu.subMenu && toggleSubmenu(menu.title)}
+                    onClick={() => {
+                      if (menu.subMenu) {
+                        toggleSubmenu(menu.title);
+                      } else {
+                        handleNavigation(menu.path, !!menu.subMenu);
+                      }
+                    }}
                     className={`cursor-pointer flex items-center justify-between py-3 px-3.5 rounded-lg ${
                       menu.active
                         ? "bg-[#252525] text-white font-semibold"
@@ -168,6 +190,7 @@ export default function Sidebar() {
                     <div className="ml-8 flex flex-col gap-1 mt-1">
                       {menu.subMenu.map((subItem) => (
                         <div
+                          onClick={() => handleNavigation(subItem.path, false)}
                           key={subItem.title}
                           className={`cursor-pointer py-2 px-3 rounded-lg hover:bg-[#252525] ${
                             subItem.active

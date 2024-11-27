@@ -104,7 +104,7 @@ const SendToken = ({ setIsNext }: SendTokenProps) => {
             />
             <span className="text-xl">{selectedToken.symbol}</span>
           </div>
-          <img src="/arrow-down.png" alt="dropdown" className="scale-[105%]" />
+          <img src="/arrow-down.svg" alt="dropdown" className="scale-[105%]" />
         </div>
 
         {/* Token Dropdown */}
@@ -149,7 +149,7 @@ const SendToken = ({ setIsNext }: SendTokenProps) => {
           ) : (
             <span className="text-gray-400">Address or ENS</span>
           )}
-          <img src="/arrow-down.png" alt="dropdown" className="scale-[105%]" />
+          <img src="/arrow-down.svg" alt="dropdown" className="scale-[105%]" />
         </div>
 
         {/* Recipient Dropdown */}
