@@ -9,16 +9,31 @@ const MENU_ITEM = [
           icon: "/overview.svg",
           title: "Overview",
           active: true,
+          isComingSoon: false,
         },
         {
-          icon: "/dashboard-tmp1.svg",
+          icon: "/address-book-icon.svg",
           title: "Address Book",
           active: false,
+          isComingSoon: false,
         },
         {
-          icon: "/dashboard-tmp1.svg",
-          title: "History",
+          icon: "/mutil-owner-icon.svg",
+          title: "Multi Owner",
           active: false,
+          isComingSoon: true,
+        },
+        {
+          icon: "/ai-assistant-icon.svg",
+          title: "AI Assistant",
+          active: false,
+          isComingSoon: false,
+        },
+        {
+          icon: "/stake-icon.svg",
+          title: "Stake",
+          active: false,
+          isComingSoon: true,
         },
       ],
     },
@@ -28,19 +43,16 @@ const MENU_ITEM = [
       name: "Actions",
       listMenu: [
         {
-          icon: "/dashboard-tmp1.svg",
-          title: "Send",
+          icon: "/transaction-icon.svg",
+          title: "Transaction",
           active: false,
+          isComingSoon: false,
         },
         {
-          icon: "/dashboard-tmp2.svg",
-          title: "Swap",
-          active: false,
-        },
-        {
-          icon: "/dashboard-tmp2.svg",
+          icon: "/batch-icon.svg",
           title: "Batch",
           active: false,
+          isComingSoon: false,
         },
       ],
     },
@@ -62,11 +74,11 @@ export default function Sidebar() {
       <div className="flex items-center justify-between">
         <div className="flex items-center gap-1">
           <div className="bg-[#D56AFF] rounded-full w-[28px] h-[28px]"></div>
-          <span className="text-[20px]">LOGO</span>
+          <div className="starknet-finace-text">
+            <span>starknet </span>
+            <span className="text-white">finance</span>
+          </div>
         </div>
-        <span className="px-3 py-2 rounded-lg bg-white text-[13px] font-semibold text-[#292929] w-fit">
-          Connect Wallet
-        </span>
       </div>
       <div className="flex-1 flex flex-col gap-1.5">
         {MENU_ITEM.map((item, index) => (
@@ -78,14 +90,19 @@ export default function Sidebar() {
               {item.groupMenu.listMenu.map((menu) => (
                 <div
                   key={menu.title}
-                  className={`cursor-pointer flex items-center gap-2.5 py-3 px-3.5 rounded-lg ${
+                  className={`cursor-pointer flex items-center justify-between  py-3 px-3.5 rounded-lg ${
                     menu.active
                       ? "bg-[#252525] text-white font-semibold"
                       : "text-[#9BA1B0]"
                   }`}
                 >
-                  <Image src={menu.icon} width={24} height={24} alt="icon" />
-                  <span className="text-[15px]">{menu.title}</span>
+                  <div className="flex gap-2.5">
+                    <Image src={menu.icon} width={24} height={24} alt="icon" />
+                    <span className="text-[15px]">{menu.title}</span>
+                  </div>
+                  {menu.isComingSoon && (
+                    <p className="comingsoon">Coming Soon</p>
+                  )}
                 </div>
               ))}
             </div>

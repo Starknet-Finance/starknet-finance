@@ -65,11 +65,29 @@
   caret-color: rgba(213, 106, 255, 1);
 }
 
+.create-term-btn {
+  border-radius: 8px;
+  background: linear-gradient(180deg, #552cd1 0%, #35176b 100%);
+  padding: 10px 24px;
+  cursor: pointer;
+}
+
+.dashboard .starknet-finace-text {
+  color: #d56aff;
+  font-family: Bahnschrift;
+  font-size: 22px;
+  font-style: normal;
+  font-weight: 700;
+  line-height: 110%;
+  text-transform: uppercase;
+}
+
 .dashboard {
   background: #1c1c1c;
   padding: 14px;
   border-radius: 8px;
   height: 100vh;
+  width: 272px;
 }
 
 .dashboard .actions div:first-child {
@@ -82,6 +100,29 @@
   border-bottom-left-radius: 8px;
 }
 
+.dashboard .comingsoon {
+  color: #000;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  height: 21px;
+  width: 75px;
+  font-size: 11px;
+  font-weight: 600;
+  text-align: center;
+  border-radius: 7px;
+  background: linear-gradient(90deg, #dd8eff 0%, #fff 100%);
+}
+
 .temp {
   color: #d56aff;
+}
+
+@keyframes slideIn {
+  from {
+    transform: translateX(100%);
+  }
+  to {
+    transform: translateX(0);
+  }
 }

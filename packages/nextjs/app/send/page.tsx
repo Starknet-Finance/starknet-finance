@@ -5,6 +5,9 @@ import Image from "next/image";
 import { useRouter } from "next/navigation";
 import SendToken from "~~/app/send/_components/SendToken";
 import TransactionOverview from "./_components/TransactionOverview";
+import { HeaderActions } from "~~/components/HeaderActions";
+import { BatchedTransaction } from "./_components/BatchedTransaction";
+import { useGlobalState } from "~~/services/store/store";
 
 type Transaction = {
   id: number;
@@ -95,10 +98,14 @@ const assets: Asset[] = [
 const Send = () => {
   const router = useRouter();
   const [isNext, setIsNext] = useState(false);
+  const { openBatchedTransaction } = useGlobalState();
 
   return (
-    <div className="p-8 h-full">
+    <div className="p-8 min-h-screen relative">
       {/* Header Section */}
+      <HeaderActions />
+      {openBatchedTransaction && <BatchedTransaction />}
+
       <div className="mb-8 grid grid-cols-3 gap-6">
         <div className="col-span-2">
           <h1 className="text-5xl font-semibold mt-5 mb-2">YOUR ACCOUNT</h1>

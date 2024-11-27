@@ -3,6 +3,7 @@
 import React from "react";
 import Image from "next/image";
 import { useRouter } from "next/navigation";
+import { HeaderActions } from "~~/components/HeaderActions";
 
 type Transaction = {
   id: number;
@@ -94,8 +95,9 @@ const Overview = () => {
   const router = useRouter();
 
   return (
-    <div className="p-8 h-full">
+    <div className="p-8 min-h-screen relative">
       {/* Header Section */}
+      <HeaderActions />
       <div className="mb-8 grid grid-cols-3 gap-6">
         <div className="col-span-2">
           <h1 className="text-5xl font-semibold mt-5 mb-2">YOUR ACCOUNT</h1>

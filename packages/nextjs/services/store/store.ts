@@ -18,6 +18,9 @@ type GlobalState = {
   setStrkCurrencyPrice: (newNativeCurrencyPriceState: number) => void;
   targetNetwork: ChainWithAttributes;
   setTargetNetwork: (newTargetNetwork: ChainWithAttributes) => void;
+
+  openBatchedTransaction: boolean;
+  setOpenBatchedTransaction: (open: boolean) => void;
 };
 
 export const useGlobalState = create<GlobalState>((set) => ({
@@ -30,4 +33,7 @@ export const useGlobalState = create<GlobalState>((set) => ({
   targetNetwork: scaffoldConfig.targetNetworks[0],
   setTargetNetwork: (newTargetNetwork: ChainWithAttributes) =>
     set(() => ({ targetNetwork: newTargetNetwork })),
+
+  openBatchedTransaction: false,
+  setOpenBatchedTransaction: (open) => set({ openBatchedTransaction: open }),
 }));
