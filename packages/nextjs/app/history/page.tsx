@@ -2,12 +2,12 @@
 
 import React from "react";
 import { Header } from "~~/components/Header";
-import { useAccountOverview } from "~~/hooks/useAccountBalanceOverview";
-import { useTransactionHistory } from "~~/hooks/useTransactionHistory";
+import useSupportedTokens from "~~/hooks/useSupportedTokens";
 
 const History = () => {
-  const { overview, loading, error, refetch } = useAccountOverview();
-  console.log(overview);
+  const { data: supportedTokens } = useSupportedTokens();
+  console.log(supportedTokens);
+
   return (
     <div>
       <Header />
