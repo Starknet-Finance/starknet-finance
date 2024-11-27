@@ -1,4 +1,5 @@
 import Image from "next/image";
+import { useState } from "react";
 
 const MENU_ITEM = [
   {
@@ -47,6 +48,20 @@ const MENU_ITEM = [
           title: "Transaction",
           active: false,
           isComingSoon: false,
+          subMenu: [
+            {
+              title: "Send",
+              active: false,
+            },
+            {
+              title: "Receive",
+              active: false,
+            },
+            {
+              title: "Swap",
+              active: false,
+            },
+          ],
         },
         {
           icon: "/batch-icon.svg",
@@ -68,12 +83,38 @@ const Actions = ({ name, icon }: { name: string; icon: string }) => {
   );
 };
 
+interface MenuItem {
+  icon: string;
+  title: string;
+  active: boolean;
+  isComingSoon?: boolean;
+  subMenu?: {
+    title: string;
+    active: boolean;
+  }[];
+}
+
+interface GroupMenu {
+  name: string;
+  listMenu: MenuItem[];
+}
+
+interface MenuGroup {
+  groupMenu: GroupMenu;
+}
+
 export default function Sidebar() {
+  const [openSubmenu, setOpenSubmenu] = useState<string | null>(null);
+
+  const toggleSubmenu = (menuTitle: string) => {
+    setOpenSubmenu(openSubmenu === menuTitle ? null : menuTitle);
+  };
+
   return (
     <div className="h-full dashboard w-full flex flex-col gap-10">
       <div className="flex items-center justify-between">
         <div className="flex items-center gap-1">
-          <div className="bg-[#D56AFF] rounded-full w-[28px] h-[28px]"></div>
+          <Image src={"/logo-app.svg"} alt="logo" width={20} height={30} />
           <div className="starknet-finace-text">
             <span>starknet </span>
             <span className="text-white">finance</span>
@@ -81,27 +122,63 @@ export default function Sidebar() {
         </div>
       </div>
       <div className="flex-1 flex flex-col gap-1.5">
-        {MENU_ITEM.map((item, index) => (
+        {MENU_ITEM.map((item: MenuGroup, index) => (
           <div key={index}>
             <span className="text-[#9BA1B0] text-[15px]">
               {item.groupMenu.name}
             </span>
             <div className="flex flex-col gap-1 mt-1.5">
-              {item.groupMenu.listMenu.map((menu) => (
-                <div
-                  key={menu.title}
-                  className={`cursor-pointer flex items-center justify-between  py-3 px-3.5 rounded-lg ${
-                    menu.active
-                      ? "bg-[#252525] text-white font-semibold"
-                      : "text-[#9BA1B0]"
-                  }`}
-                >
-                  <div className="flex gap-2.5">
-                    <Image src={menu.icon} width={24} height={24} alt="icon" />
-                    <span className="text-[15px]">{menu.title}</span>
+              {item.groupMenu.listMenu.map((menu: MenuItem) => (
+                <div key={menu.title} className="flex flex-col">
+                  <div
+                    onClick={() => menu.subMenu && toggleSubmenu(menu.title)}
+                    className={`cursor-pointer flex items-center justify-between py-3 px-3.5 rounded-lg ${
+                      menu.active
+                        ? "bg-[#252525] text-white font-semibold"
+                        : "text-[#9BA1B0]"
+                    }`}
+                  >
+                    <div className="flex gap-2.5">
+                      <Image
+                        src={menu.icon}
+                        width={24}
+                        height={24}
+                        alt="icon"
+                      />
+                      <span className="text-[15px]">{menu.title}</span>
+                    </div>
+                    <div className="flex items-center gap-2">
+                      {menu.subMenu && (
+                        <Image
+                          src="/arrow-down.svg"
+                          width={16}
+                          height={16}
+                          alt="arrow"
+                          className={`transform transition-transform duration-200 ${
+                            openSubmenu === menu.title ? "rotate-180" : ""
+                          }`}
+                        />
+                      )}
+                      {menu.isComingSoon && (
+                        <p className="comingsoon">Coming Soon</p>
+                      )}
+                    </div>
                   </div>
-                  {menu.isComingSoon && (
-                    <p className="comingsoon">Coming Soon</p>
+                  {menu.subMenu && openSubmenu === menu.title && (
+                    <div className="ml-8 flex flex-col gap-1 mt-1">
+                      {menu.subMenu.map((subItem) => (
+                        <div
+                          key={subItem.title}
+                          className={`cursor-pointer py-2 px-3 rounded-lg hover:bg-[#252525] ${
+                            subItem.active
+                              ? "text-white font-semibold"
+                              : "text-[#9BA1B0]"
+                          }`}
+                        >
+                          {subItem.title}
+                        </div>
+                      ))}
+                    </div>
                   )}
                 </div>
               ))}

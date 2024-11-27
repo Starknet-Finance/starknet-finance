@@ -10,7 +10,7 @@ interface TransactionCardProps {
   timestamp: string;
 }
 
-const TransactionCard: React.FC<TransactionCardProps> = ({
+const TransactionCardBlack: React.FC<TransactionCardProps> = ({
   amount,
   usdAmount,
   recipient,
@@ -18,7 +18,7 @@ const TransactionCard: React.FC<TransactionCardProps> = ({
 }) => {
   return (
     <div>
-      <div className="bg-[#343434] rounded-t-lg p-4">
+      <div className="bg-[#000] rounded-t-lg p-4">
         {/* Title */}
         <p className="text-sm text-white mb-2">Send</p>
 
@@ -69,7 +69,7 @@ const TransactionCard: React.FC<TransactionCardProps> = ({
         </div>
       </div>
       {/* Timestamp */}
-      <div className="bg-[#e8c2ff33] bg-opacity-40 rounded-b-lg py-4 flex items-center justify-center gap-2">
+      <div className="bg-[#E8C2FF33] rounded-b-lg py-4 flex items-center justify-center gap-2">
         <div className="w-4 h-4 rounded-full flex items-center justify-center">
           <Image src="/timer.svg" width={16} height={16} alt="icon" />
         </div>
@@ -79,4 +79,4 @@ const TransactionCard: React.FC<TransactionCardProps> = ({
   );
 };
 
-export default TransactionCard;
+export default TransactionCardBlack;

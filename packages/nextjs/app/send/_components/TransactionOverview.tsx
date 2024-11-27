@@ -1,6 +1,5 @@
 import Image from "next/image";
 import React, { useState } from "react";
-import TransactionCard from "~~/components/transactions/TransactionCard";
 import { useGlobalState } from "~~/services/store/store";
 import { TransactionFinanceCard } from "./TransactionFinanceCard";
 
