@@ -44,7 +44,7 @@ const TransactionOverview: React.FC<TransactionOverviewProps> = ({
   const [expandedId, setExpandedId] = useState<string | null>(null);
 
   return (
-    <div className="h-full mx-auto bg-[#161616] p-6 text-white">
+    <div className="h-full mx-auto bg-[#161616] p-6 text-white rounded-xl border border-[#FFFFFF0D]">
       {/* Header */}
       <div className="flex items-center gap-2 mb-3">
         <Image
@@ -78,13 +78,24 @@ const TransactionOverview: React.FC<TransactionOverviewProps> = ({
       </div>
 
       {/* Transaction Details */}
-      <div className="bg-[#2A2440] bg-opacity-40 rounded-lg p-4 mb-6">
-        <div className="flex items-center justify-between mb-4">
-          <span className="text-lg">Transaction checks</span>
-          <button className="px-6 py-2 bg-[#2A2440] rounded-lg text-[#C4AEFF]">
+      <div className="rounded-lg p-4 mb-6">
+        <div className="flex items-center justify-between p-2 mb-4 bg-[#E8C2FF] rounded-md">
+          <div className="flex items-center gap-1.5">
+            <span className="text-[#000] font-semibold">
+              Transaction checks
+            </span>
+            <Image
+              src={"/transaction-check-noti.svg"}
+              alt="icon"
+              width={14}
+              height={14}
+            />
+          </div>
+          <button className="px-6 py-2 font-medium rounded-lg text-[#D56AFF] border border-[#D56AFF]">
             Simulate
           </button>
         </div>
+        <div className="bg-[#65656566] h-[1px] w-full my-2.5"></div>
         <div className="space-y-3">
           <div className="flex justify-between">
             <span className="text-gray-400">Min Receive</span>
