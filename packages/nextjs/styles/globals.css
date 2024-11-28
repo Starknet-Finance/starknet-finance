@@ -75,7 +75,7 @@
 .dashboard .starknet-finace-text {
   color: #d56aff;
   font-family: Bahnschrift;
-  font-size: 22px;
+  font-size: 20px;
   font-style: normal;
   font-weight: 700;
   line-height: 110%;
@@ -106,12 +106,18 @@
   justify-content: center;
   align-items: center;
   height: 21px;
-  width: 75px;
+  width: 78px;
   font-size: 11px;
   font-weight: 600;
   text-align: center;
   border-radius: 7px;
   background: linear-gradient(90deg, #dd8eff 0%, #fff 100%);
+}
+
+.ai-assistant-card {
+  border-radius: 5px;
+  background: rgba(136, 136, 136, 0.15);
+  background-blend-mode: luminosity;
 }
 
 .temp {

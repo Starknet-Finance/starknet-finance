@@ -7,7 +7,7 @@ async function getBestQuote(data: {
 }): Promise<string> {
   const response = await api.get(
     `/swap/v2/quotes?sellTokenAddress=${data.sellTokenAddress}&buyTokenAddress=${data.buyTokenAddress}&sellAmount=${data.sellAmount}`,
-    {}
+    {},
   );
   console.log(response);
   return JSON.stringify(response.data);

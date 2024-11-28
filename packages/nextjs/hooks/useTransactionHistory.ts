@@ -101,27 +101,27 @@ export const useTransactionHistory = (contractAddresses: string[]) => {
           sentEvents.events,
           contractAddress,
           address,
-          "send"
+          "send",
         );
 
         const processedApproveEvents = await processEvents(
           approvalEvents.events,
           contractAddress,
           address,
-          "approve"
+          "approve",
         );
 
         const processedSwapEvents = await processEvents(
           swapEvents.events,
           contractAddress,
           address,
-          "swap"
+          "swap",
         );
 
         allEvents.push(
           ...processedSentEvents,
           ...processedApproveEvents,
-          ...processedSwapEvents
+          ...processedSwapEvents,
         );
 
         // then do transaction receipt here
@@ -156,7 +156,7 @@ async function processEvents(
   events: EmittedEvent[],
   contractAddress: string,
   accountAddress: string,
-  type: "send" | "approve" | "swap"
+  type: "send" | "approve" | "swap",
 ): Promise<TransactionEvent[]> {
   const processedEvents: TransactionEvent[] = [];
 
@@ -177,7 +177,7 @@ async function processEvents(
                 low: event.data[2],
                 high: event.data[3],
               })
-              .toString()
+              .toString(),
           ),
           from: event.data[0],
           to: event.data[1],
@@ -194,7 +194,7 @@ async function processEvents(
                 low: event.data[2],
                 high: event.data[3],
               })
-              .toString()
+              .toString(),
           ),
           from: event.data[0],
           to: event.data[1],
@@ -215,7 +215,7 @@ async function processEvents(
                   low: event.data[2],
                   high: event.data[3],
                 })
-                .toString()
+                .toString(),
             ),
             buy_address: event.data[4],
             buy_amount: formatEther(
@@ -224,7 +224,7 @@ async function processEvents(
                   low: event.data[5],
                   high: event.data[6],
                 })
-                .toString()
+                .toString(),
             ),
             beneficiary: event.data[7],
           },
