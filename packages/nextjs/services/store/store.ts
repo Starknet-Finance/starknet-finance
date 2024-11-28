@@ -21,6 +21,9 @@ type GlobalState = {
 
   openBatchedTransaction: boolean;
   setOpenBatchedTransaction: (open: boolean) => void;
+
+  // openCreateNewAddress: boolean;
+  // setOpenCreateNewAddress: (open: boolean) => void;
 };
 
 export const useGlobalState = create<GlobalState>((set) => ({
@@ -36,4 +39,7 @@ export const useGlobalState = create<GlobalState>((set) => ({
 
   openBatchedTransaction: false,
   setOpenBatchedTransaction: (open) => set({ openBatchedTransaction: open }),
+
+  // openCreateNewAddress: false,
+  // setOpenCreateNewAddress: (open) => set({ openCreateNewAddress: open }),
 }));

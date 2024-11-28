@@ -12,6 +12,7 @@ const CHAT_MESSAGES = [
     timestamp: "2024-11-28T09:00:00Z",
     status: "read", // read, delivered, sent
   },
+
   {
     id: 2,
     sender: {
@@ -73,6 +74,16 @@ const CHAT_MESSAGES = [
     content: "...",
     timestamp: "2024-11-28T09:00:00Z",
     status: "read", // read, delivered, sent
+  },
+  {
+    id: 11,
+    sender: {
+      id: "user1",
+      name: "John Doe",
+    },
+    content: "Swap 1s",
+    timestamp: "2024-11-28T09:00:00Z",
+    status: "read",
   },
 ];
 

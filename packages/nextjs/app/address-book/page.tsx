@@ -4,6 +4,8 @@ import React from "react";
 import Image from "next/image";
 import { PlusIcon } from "@radix-ui/react-icons";
 import { HeaderActions } from "~~/components/HeaderActions";
+import CreateNewAddressModal from "~~/components/Modals/CreateNewAddressModal";
+import RemoveAddressModal from "~~/components/Modals/RemoveAddressModal";
 
 const DATA_ITEM_ROW = [
   {
@@ -52,9 +54,7 @@ const ItemRow = ({ name, address }: { name: string; address: string }) => {
       </div>
       <div className="flex items-center gap-4">
         <div className="flex gap-2">
-          <div className="bg-[#FF959621] p-[5px] rounded-[7px] w-fit cursor-pointer">
-            <Image src={"/delete-icon.svg"} width={14} height={14} alt="icon" />
-          </div>
+          <RemoveAddressModal />
           <div className="bg-[#FFFFFF21] p-[5px] rounded-[7px] w-fit cursor-pointer">
             <Image src={"/edit-icon.svg"} width={14} height={14} alt="icon" />
           </div>
@@ -82,10 +82,7 @@ const AddressBook = () => {
             blockchain security.
           </p>
         </div>
-        <div className="flex items-center gap-1 create-term-btn">
-          <PlusIcon width={20} height={20} />
-          <p className="font-medium">Create Entry</p>
-        </div>
+        <CreateNewAddressModal />
       </div>
 
       {/* Main Content Grid */}
