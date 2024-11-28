@@ -1,10 +1,17 @@
+"use client";
+
 import React, { useState } from "react";
+import toast from "react-hot-toast";
+import { useAccount } from "~~/hooks/useAccount";
+import { isAddress } from "~~/utils/scaffold-stark/common";
 
 interface SendTokenProps {
   setIsNext: (isNext: boolean) => void;
 }
 
 const SendToken = ({ setIsNext }: SendTokenProps) => {
+  const { account } = useAccount();
+
   // State management
   const [amount, setAmount] = useState<number | null>(null);
   const [selectedToken, setSelectedToken] = useState({
@@ -18,6 +25,7 @@ const SendToken = ({ setIsNext }: SendTokenProps) => {
     address: string;
   }>(null);
   const [inputRef, setInputRef] = useState<HTMLInputElement | null>(null);
+  const [recipientInput, setRecipientInput] = useState("");
 
   // Sample data
   const availableTokens = [
@@ -34,12 +42,45 @@ const SendToken = ({ setIsNext }: SendTokenProps) => {
 
   // Handlers
   const handleAmountChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    // fetch token price
     setAmount(Number(e.target.value));
   };
 
   const handleCopyAddress = (address: string) => {
     navigator.clipboard.writeText(address);
     // Optional: Add toast notification here
+  };
+
+  const handleNext = () => {
+    if (!account) {
+      toast.error("Please connect your wallet");
+      return;
+    }
+    if (!amount || amount <= 0) {
+      toast.error("Please enter a valid amount");
+      return;
+    }
+
+    if (!selectedRecipient || !recipientInput) {
+      toast.error("Please select a recipient");
+      return;
+    }
+
+    // check if sending address to selectedRecipient or recipientInput
+
+    let recipientAddress = "";
+    if (selectedRecipient) {
+      recipientAddress = selectedRecipient.address;
+    } else {
+      recipientAddress = recipientInput;
+    }
+
+    if (!isAddress(recipientAddress)) {
+      toast.error("Please enter a valid recipient address");
+      return;
+    }
+
+    setIsNext(true);
   };
 
   return (
@@ -134,7 +175,7 @@ const SendToken = ({ setIsNext }: SendTokenProps) => {
           className="bg-[#1E1E1E] h-[70px] border border-transparent transition hover:border-gray-500 p-3 rounded-lg flex items-center justify-between cursor-pointer"
           onClick={() => setIsRecipientDropdownOpen(!isRecipientDropdownOpen)}
         >
-          {selectedRecipient ? (
+          {selectedRecipient && recipientInput == "" ? (
             <div className="flex items-center gap-3">
               <div className="w-10 h-10 bg-[#474747] rounded-lg flex items-center justify-center text-xl">
                 {selectedRecipient.name[0]}
@@ -147,45 +188,82 @@ const SendToken = ({ setIsNext }: SendTokenProps) => {
               </div>
             </div>
           ) : (
-            <span className="text-gray-400">Address or ENS</span>
+            <span className="text-gray-400">
+              {recipientInput || "Address or ENS"}
+            </span>
           )}
           <img src="/arrow-down.svg" alt="dropdown" className="scale-[105%]" />
         </div>
 
-        {/* Recipient Dropdown */}
+        {/* Updated Recipient Dropdown */}
         {isRecipientDropdownOpen && (
-          <div className="space-y-2 mt-2">
-            {recipients.map((recipient, index) => (
-              <div
-                key={index}
-                className="bg-[#1E1E1E] p-3 px-5 rounded-lg flex items-center justify-between cursor-pointer hover:bg-[#2c2c2c]"
-                onClick={() => {
-                  setSelectedRecipient(recipient);
-                  setIsRecipientDropdownOpen(false);
-                }}
-              >
-                <div className="flex items-center gap-3">
-                  <div className="w-10 h-10 bg-[#474747] rounded-lg flex items-center justify-center text-xl">
-                    {recipient.name[0]}
-                  </div>
-                  <div>
-                    <div className="text-lg">{recipient.name}</div>
-                    <div className="text-gray-400 text-sm">
-                      {recipient.address}
+          <div className="absolute w-full mt-2 bg-[#1E1E1E] rounded-lg overflow-hidden z-10">
+            {/* Search/Input field at top of dropdown */}
+            <div className="p-3 border-b border-[#2c2c2c]">
+              <input
+                type="text"
+                value={recipientInput}
+                onChange={(e) => setRecipientInput(e.target.value)}
+                className="w-full bg-[#2c2c2c] p-2 rounded-lg focus:outline-none text-lg"
+                placeholder="Search or paste address"
+                onClick={(e) => e.stopPropagation()}
+              />
+            </div>
+
+            {/* Scrollable recipients list */}
+            <div className="max-h-[240px] overflow-y-auto">
+              {/* Recent/Saved Recipients section */}
+              <div className="p-3 text-sm text-gray-400">Recent Recipients</div>
+              {recipients.map((recipient, index) => (
+                <div
+                  key={index}
+                  className="p-3 px-5 hover:bg-[#2c2c2c] cursor-pointer"
+                  onClick={() => {
+                    setSelectedRecipient(recipient);
+                    setRecipientInput("");
+                    setIsRecipientDropdownOpen(false);
+                  }}
+                >
+                  <div className="flex items-center gap-3">
+                    <div className="w-10 h-10 bg-[#474747] rounded-lg flex items-center justify-center text-xl">
+                      {recipient.name[0]}
+                    </div>
+                    <div>
+                      <div className="text-lg">{recipient.name}</div>
+                      <div className="text-gray-400 text-sm">
+                        {recipient.address}
+                      </div>
                     </div>
                   </div>
                 </div>
-                <img
-                  src="/copy.png"
-                  alt="copy"
-                  className="scale-[110%]"
-                  onClick={(e) => {
-                    e.stopPropagation();
-                    handleCopyAddress(recipient.address);
+              ))}
+
+              {/* Show input as an option if it's a valid address */}
+              {recipientInput && isAddress(recipientInput) && (
+                <div
+                  className="p-3 px-5 hover:bg-[#2c2c2c] cursor-pointer border-t border-[#2c2c2c]"
+                  onClick={() => {
+                    setSelectedRecipient({
+                      name: "Custom Address",
+                      address: recipientInput,
+                    });
+                    setIsRecipientDropdownOpen(false);
                   }}
-                />
-              </div>
-            ))}
+                >
+                  <div className="flex items-center gap-3">
+                    <div className="w-10 h-10 bg-[#474747] rounded-lg flex items-center justify-center text-xl">
+                      #
+                    </div>
+                    <div>
+                      <div className="text-lg">Custom Address</div>
+                      <div className="text-gray-400 text-sm">
+                        {recipientInput}
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              )}
+            </div>
           </div>
         )}
       </div>
@@ -193,9 +271,7 @@ const SendToken = ({ setIsNext }: SendTokenProps) => {
       {/* Next Button */}
       <button
         className={`${amount != null && amount > 0 && selectedRecipient != null ? "next-button-bg border-[2.5px] border-[c4aeff]" : "bg-[#474747]"} w-full  text-xl py-4 rounded-lg mt-4 transition-colors`}
-        onClick={() => {
-          setIsNext(true);
-        }}
+        onClick={handleNext}
       >
         Next
       </button>
