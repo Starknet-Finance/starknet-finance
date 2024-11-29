@@ -1,5 +1,4 @@
 "use client";
-
 import React, { useState } from "react";
 import Image from "next/image";
 import { useRouter } from "next/navigation";
@@ -11,53 +10,51 @@ import SendToken from "./_component/SendToken";
 import { Routes } from "~~/utils/Routes";
 import TransactionTable from "../_components/TransactionTable";
 
-type Asset = {
-  symbol: string;
-  name: string;
+interface TransactionData {
   amount: number;
-  value: number;
-  percentage: number;
-  icon: string;
-};
-
-const assets: Asset[] = [
-  {
-    symbol: "USDT",
-    name: "Tether",
-    amount: 4098.01,
-    value: 30.89,
-    percentage: 79,
-    icon: "/usdt.svg", // You'll need to add these icons to your public folder
-  },
-  {
-    symbol: "BTC",
-    name: "Bitcoin",
-    amount: 0.019268,
-    value: 1135.96,
-    percentage: 20,
-    icon: "/usdt.svg",
-  },
-  {
-    symbol: "MTH",
-    name: "Monetha",
-    amount: 100.01,
-    value: 30.89,
-    percentage: 1,
-    icon: "/usdt.svg",
-  },
-];
+  token: {
+    symbol: string;
+    logo: string;
+    name: string;
+    address: string;
+  };
+  recipient: {
+    name: string;
+    address: string;
+  };
+}
 
 const Send = () => {
   const router = useRouter();
   const [isNext, setIsNext] = useState(false);
-  const { openBatchedTransaction } = useGlobalState();
+  const { openBatchedTransaction, setOpenBatchedTransaction } =
+    useGlobalState();
+  const [currentTransaction, setCurrentTransaction] =
+    useState<TransactionData | null>(null);
+
+  const handleTransactionSubmit = (transaction: TransactionData) => {
+    setCurrentTransaction(transaction);
+  };
+
+  const handleSend = () => {
+    // Handle the send action
+    console.log("Sending transaction:", currentTransaction);
+    // Add your send logic here
+  };
+
+  const handleAddToBatch = () => {
+    if (currentTransaction) {
+      // Add to batch logic here
+      setOpenBatchedTransaction(true);
+      window.scrollTo({ top: 0, behavior: "smooth" });
+    }
+  };
 
   return (
     <div className="p-8 min-h-screen relative">
       {/* Header Section */}
       <HeaderActions />
       {openBatchedTransaction && <BatchedTransaction />}
-
       <div className="mb-8 grid grid-cols-3 gap-6">
         <div className="col-span-2">
           <h1 className="text-5xl font-semibold mt-5 mb-2">YOUR ACCOUNT</h1>
@@ -74,7 +71,7 @@ const Send = () => {
           <button className="w-[130px] flex justify-center button-bg px-6 py-3 rounded-lg items-center gap-2">
             <span className="mr-2">
               <Image src="/down.svg" width={10} height={10} alt="icon" />
-            </span>{" "}
+            </span>
             Receive
           </button>
           <button
@@ -83,7 +80,7 @@ const Send = () => {
           >
             <span className="mr-2">
               <Image src="/up.svg" width={10} height={10} alt="icon" />
-            </span>{" "}
+            </span>
             Send
           </button>
           <button
@@ -92,12 +89,11 @@ const Send = () => {
           >
             <span className="mr-2">
               <Image src="/swap.svg" width={14} height={14} alt="icon" />
-            </span>{" "}
+            </span>
             Swap
           </button>
         </div>
       </div>
-
       {/* Main Content Grid */}
       <div className="grid grid-cols-3 gap-3">
         <div className="col-span-2 flex flex-col">
@@ -110,14 +106,17 @@ const Send = () => {
         </div>
         {/* Balance Section */}
         <div className="bg-black/40 rounded-xl">
-          {isNext ? (
+          {isNext && currentTransaction ? (
             <TransactionOverview
-              amount={1000}
-              token={{ symbol: "USDT", logo: "/usdt.svg" }}
-              recipient={{ name: "John Doe", address: "0x1234567890" }}
+              {...currentTransaction}
+              onAddToBatch={handleAddToBatch}
+              onSend={handleSend}
             />
           ) : (
-            <SendToken setIsNext={setIsNext} />
+            <SendToken
+              setIsNext={setIsNext}
+              onTransactionSubmit={handleTransactionSubmit}
+            />
           )}
         </div>
       </div>

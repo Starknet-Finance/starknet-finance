@@ -6,8 +6,23 @@ import { CheckIcon } from "@heroicons/react/24/solid";
 import { getChecksumAddress, validateChecksumAddress } from "starknet";
 import useSupportedTokens from "~~/hooks/useSupportedTokens";
 
+interface TransactionData {
+  amount: number;
+  token: {
+    symbol: string;
+    logo: string;
+    name: string;
+    address: string;
+  };
+  recipient: {
+    name: string;
+    address: string;
+  };
+}
+
 interface SendTokenProps {
   setIsNext: (isNext: boolean) => void;
+  onTransactionSubmit: (transaction: TransactionData) => void;
 }
 
 interface AddressEntry {
@@ -31,7 +46,7 @@ const STORAGE_KEYS = {
   ADDRESS_BOOK: "addressBook",
 };
 
-const SendToken = ({ setIsNext }: SendTokenProps) => {
+const SendToken = ({ setIsNext, onTransactionSubmit }: SendTokenProps) => {
   const [amount, setAmount] = useState<number | null>(null);
   const [isTokenDropdownOpen, setIsTokenDropdownOpen] = useState(false);
   const [isRecipientDropdownOpen, setIsRecipientDropdownOpen] = useState(false);
@@ -166,7 +181,22 @@ const SendToken = ({ setIsNext }: SendTokenProps) => {
       return;
     }
 
+    const transactionData = {
+      amount: amount,
+      token: {
+        symbol: selectedToken.symbol,
+        logo: selectedToken.logoUri,
+        name: selectedToken.name,
+        address: selectedToken.address,
+      },
+      recipient: {
+        name: selectedRecipient?.name || "Custom Address",
+        address: recipientAddress,
+      },
+    };
+
     setIsNext(true);
+    onTransactionSubmit(transactionData); // Pass to parent
   };
 
   const isNextButtonEnabled =

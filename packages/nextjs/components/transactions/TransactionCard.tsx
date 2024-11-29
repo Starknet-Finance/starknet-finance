@@ -1,6 +1,13 @@
 import Image from "next/image";
+import { toast } from "react-hot-toast";
 
 interface TransactionCardProps {
+  token: {
+    symbol: string;
+    logo: string;
+    name: string;
+    address: string;
+  };
   amount: string;
   usdAmount: string;
   recipient: {
@@ -11,29 +18,34 @@ interface TransactionCardProps {
 }
 
 const TransactionCard: React.FC<TransactionCardProps> = ({
+  token,
   amount,
   usdAmount,
   recipient,
   timestamp,
 }) => {
+  const handleCopyAddress = () => {
+    navigator.clipboard.writeText(recipient.address);
+    toast.success("Address copied to clipboard");
+  };
+
   return (
     <div>
       <div className="bg-[#343434] rounded-t-lg p-4">
         {/* Title */}
         <p className="text-sm text-white mb-2">Send</p>
-
         {/* Amount Section */}
         <div className="flex items-center gap-1 mb-6">
-          <Image src="/btc.png" alt="BTC" width={32} height={32} />
+          <img src={token.logo} alt={token.symbol} width={32} height={32} />
           <div className="flex items-center gap-1.5">
-            <span className="text-[26px] text-white">{amount}</span>
+            <span className="text-[26px] text-white">
+              {amount} {token.symbol}
+            </span>
             <span className="text-sm text-[#C0C0C0]"> ~${usdAmount}</span>
           </div>
         </div>
-
         <div className="relative">
           <div className="w-full h-[1px] bg-[#65656526] mb-5"></div>
-
           {/* To Label */}
           <div className="absolute top-[-13px] left-1/2 -translate-x-1/2">
             <div className="flex justify-center">
@@ -43,11 +55,10 @@ const TransactionCard: React.FC<TransactionCardProps> = ({
             </div>
           </div>
         </div>
-
         {/* Recipient Section */}
         <div className="flex items-center gap-3 mb-4">
           <div className="w-8 h-8 bg-[#474747] rounded-lg flex items-center justify-center">
-            <p className="text-[15px] text-white"> {recipient.name[0]}</p>
+            <p className="text-[15px] text-white">{recipient.name[0]}</p>
           </div>
           <div className="flex-1">
             <div className="text-[15px] font-bold text-white">
@@ -55,7 +66,7 @@ const TransactionCard: React.FC<TransactionCardProps> = ({
             </div>
             <div className="flex items-center justify-between">
               <span className="text-sm text-[#929292]">
-                {recipient.address}
+                {`${recipient.address.slice(0, 6)}...${recipient.address.slice(-4)}`}
               </span>
               <Image
                 src="/copy-icon.svg"
@@ -63,6 +74,7 @@ const TransactionCard: React.FC<TransactionCardProps> = ({
                 className="cursor-pointer"
                 width={16}
                 height={16}
+                onClick={handleCopyAddress}
               />
             </div>
           </div>

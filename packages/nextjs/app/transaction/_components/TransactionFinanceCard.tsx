@@ -1,6 +1,25 @@
 import Image from "next/image";
 import TransactionCard from "~~/components/transactions/TransactionCard";
 
+interface TransactionFinanceCardProps {
+  token: {
+    symbol: string;
+    logo: string;
+    name: string;
+    address: string;
+  };
+  amount: number;
+  recipient: {
+    name: string;
+    address: string;
+  };
+  canRemove?: boolean;
+  isExpanded: boolean;
+  onExpand: (isExpanded: boolean) => void;
+  onRemove?: () => void;
+  id: string;
+}
+
 export const TransactionFinanceCard = ({
   token,
   amount,
@@ -8,19 +27,20 @@ export const TransactionFinanceCard = ({
   canRemove,
   isExpanded,
   onExpand,
+  onRemove,
   id,
-}: {
-  token: any;
-  amount: any;
-  recipient: any;
-  canRemove?: boolean;
-  isExpanded: boolean;
-  onExpand: (isExpanded: boolean) => void;
-  id: string;
-}) => {
+}: TransactionFinanceCardProps) => {
+  const handleRemove = (e: React.MouseEvent) => {
+    e.stopPropagation();
+    onRemove?.();
+  };
+
   return (
     <div className="bg-[#2B2B2B] rounded-md">
-      <div className="flex items-center gap-2 p-2">
+      <div
+        className="flex items-center gap-2 p-2 cursor-pointer"
+        onClick={() => onExpand(!isExpanded)}
+      >
         <div className="w-10 h-10 bg-[#F8F8F82B] rounded-md flex items-center justify-center">
           <Image
             src="/arrow-narrow-up.png"
@@ -32,15 +52,19 @@ export const TransactionFinanceCard = ({
         </div>
         <div className="ml-2 flex-1">
           <div className="flex items-center gap-2">
-            <Image
+            <img
               src={token.logo}
               alt={token.symbol}
               className="w-6 h-6"
               width={24}
               height={24}
             />
-            <span className="text-xl">{amount}</span>
-            <span className="text-gray-400">~${amount * 40000}</span>
+            <span className="text-xl">
+              {amount} {token.symbol}
+            </span>
+            <span className="text-gray-400">
+              ~${(amount * 40000).toLocaleString()}
+            </span>
           </div>
           <div className="text-gray-400">
             To{" "}
@@ -55,18 +79,17 @@ export const TransactionFinanceCard = ({
               className="cursor-pointer"
               width={16}
               height={16}
+              onClick={handleRemove}
             />
           )}
-
           <Image
             src="/arrow-down.svg"
             alt="expand"
             className={`cursor-pointer transition-transform duration-300 ${
-              isExpanded ? "rotate-[-90deg]" : ""
+              isExpanded ? "rotate-180" : ""
             }`}
             width={20}
             height={20}
-            onClick={() => onExpand(!isExpanded)}
           />
         </div>
       </div>
@@ -81,12 +104,10 @@ export const TransactionFinanceCard = ({
         <div className="overflow-hidden">
           <div className="p-2">
             <TransactionCard
+              token={token}
               amount={amount.toString()}
-              recipient={{
-                name: recipient.name,
-                address: recipient.address,
-              }}
-              usdAmount={(amount * 40000).toString()}
+              recipient={recipient}
+              usdAmount={(amount * 40000).toLocaleString()}
               timestamp={new Date().toLocaleString()}
             />
           </div>
