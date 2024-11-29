@@ -15,9 +15,10 @@ interface Recipient {
 interface Token {
   symbol: string;
   logo: string;
+  name: string;
+  price: number;
 }
 
-// Local storage keys
 const STORAGE_KEYS = {
   RECENT_RECIPIENTS: "recent_recipients",
   SELECTED_TOKEN: "selected_token",
@@ -26,10 +27,17 @@ const STORAGE_KEYS = {
 const SendToken = ({ setIsNext }: SendTokenProps) => {
   const [step, setStep] = useState(1);
   const [amount, setAmount] = useState<number | null>(null);
+  const availableTokens: Token[] = [
+    { symbol: "BTC", logo: "/btc.png", name: "Bitcoin", price: 0.2 },
+    { symbol: "ETH", logo: "/eth.svg", name: "Ethereum", price: 0.2 },
+    { symbol: "BNB", logo: "/binance.svg", name: "Binance Coin", price: 0.2 },
+  ];
+
   const [selectedToken, setSelectedToken] = useState<Token>(() => {
     const stored = localStorage.getItem(STORAGE_KEYS.SELECTED_TOKEN);
-    return stored ? JSON.parse(stored) : { symbol: "BTC", logo: "/btc.png" };
+    return stored ? JSON.parse(stored) : availableTokens[0];
   });
+
   const [isTokenDropdownOpen, setIsTokenDropdownOpen] = useState(false);
   const [isRecipientDropdownOpen, setIsRecipientDropdownOpen] = useState(false);
   const [selectedRecipient, setSelectedRecipient] = useState<Recipient | null>(
@@ -37,12 +45,6 @@ const SendToken = ({ setIsNext }: SendTokenProps) => {
   );
   const [inputRef, setInputRef] = useState<HTMLInputElement | null>(null);
   const [showTokenList, setShowTokenList] = useState(true);
-
-  const availableTokens: Token[] = [
-    { symbol: "BTC", logo: "/btc.png" },
-    { symbol: "ETH", logo: "/eth.svg" },
-    { symbol: "BNB", logo: "/binance.svg" },
-  ];
 
   const [recipients, setRecipients] = useState<Recipient[]>(() => {
     const stored = localStorage.getItem(STORAGE_KEYS.RECENT_RECIPIENTS);
@@ -77,6 +79,11 @@ const SendToken = ({ setIsNext }: SendTokenProps) => {
     navigator.clipboard.writeText(address);
   };
 
+  const handleTokenSelect = (token: Token) => {
+    setSelectedToken(token);
+    setIsTokenDropdownOpen(false);
+  };
+
   const handleBack = () => {
     if (step === 2) {
       setStep(1);
@@ -93,7 +100,6 @@ const SendToken = ({ setIsNext }: SendTokenProps) => {
       }
     } else if (step === 2) {
       if (selectedRecipient !== null) {
-        // Add recipient to recent list if not already present
         if (!recipients.find((r) => r.address === selectedRecipient.address)) {
           setRecipients((prev) => [selectedRecipient, ...prev].slice(0, 5));
         }
@@ -110,7 +116,7 @@ const SendToken = ({ setIsNext }: SendTokenProps) => {
     <div className="h-full mx-auto bg-[#161616] p-6 text-white rounded-lg relative">
       {/* Header */}
       <div className="flex items-center justify-between mb-4">
-        <div className="flex flex-col">
+        <div className="flex flex-col ml-8">
           <div className="flex items-center gap-3">
             <img src="/arrow-narrow-up.png" alt="" className="-mt-2" />
             <h1 className="text-2xl font-bold gradient-text">
@@ -174,7 +180,12 @@ const SendToken = ({ setIsNext }: SendTokenProps) => {
                   alt={selectedToken.symbol}
                   className="w-8 h-8"
                 />
-                <span className="text-xl">{selectedToken.symbol}</span>
+                <div className="flex flex-col">
+                  <span className="text-xl">{selectedToken.symbol}</span>
+                  <span className="text-sm text-gray-400">
+                    {selectedToken.name}
+                  </span>
+                </div>
               </div>
               <img
                 src="/arrow-down.svg"
@@ -191,17 +202,19 @@ const SendToken = ({ setIsNext }: SendTokenProps) => {
                   <div
                     key={token.symbol}
                     className="p-3 hover:bg-[#2c2c2c] cursor-pointer flex items-center gap-2 transition-colors"
-                    onClick={() => {
-                      setSelectedToken(token);
-                      setIsTokenDropdownOpen(false);
-                    }}
+                    onClick={() => handleTokenSelect(token)}
                   >
                     <img
                       src={token.logo}
                       alt={token.symbol}
                       className="w-8 h-8"
                     />
-                    <span className="text-xl">{token.symbol}</span>
+                    <div className="flex flex-col">
+                      <span className="text-xl">{token.symbol}</span>
+                      <span className="text-sm text-gray-400">
+                        {token.name}
+                      </span>
+                    </div>
                   </div>
                 ))}
               </div>
@@ -210,7 +223,11 @@ const SendToken = ({ setIsNext }: SendTokenProps) => {
 
           {showTokenList && (
             <div className="mb-6">
-              <SelectTokenList isBg />
+              <SelectTokenList
+                isBg
+                selectedToken={selectedToken}
+                onSelect={handleTokenSelect}
+              />
             </div>
           )}
         </>

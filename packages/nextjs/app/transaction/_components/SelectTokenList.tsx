@@ -1,14 +1,21 @@
 import Image from "next/image";
 import { useState } from "react";
+import { CheckIcon } from "@heroicons/react/24/solid";
 
-interface TokenData {
-  icon: string;
+interface Token {
+  symbol: string;
+  logo: string;
   name: string;
-  subName: string;
   price: number;
 }
 
-const TOKEN_LIST_DATA: TokenData[] = [
+interface SelectTokenListProps {
+  isBg?: boolean;
+  selectedToken?: Token;
+  onSelect?: (token: Token) => void;
+}
+
+const TOKEN_LIST_DATA = [
   {
     icon: "/eth.svg",
     name: "Ethereum",
@@ -29,13 +36,9 @@ const TOKEN_LIST_DATA: TokenData[] = [
   },
 ];
 
-interface SelectTokenListProps {
-  isBg?: boolean;
-  onSelect?: (token: TokenData) => void;
-}
-
 export default function SelectTokenList({
   isBg = false,
+  selectedToken,
   onSelect,
 }: SelectTokenListProps) {
   const [searchTerm, setSearchTerm] = useState("");
@@ -49,6 +52,15 @@ export default function SelectTokenList({
         token.subName.toLowerCase().includes(term.toLowerCase()),
     );
     setFilteredTokens(filtered);
+  };
+
+  const handleTokenSelect = (token: any) => {
+    onSelect?.({
+      symbol: token.subName,
+      logo: token.icon,
+      name: token.name,
+      price: token.price,
+    });
   };
 
   return (
@@ -74,49 +86,57 @@ export default function SelectTokenList({
       </div>
 
       <div className="space-y-2 max-h-[300px] overflow-y-auto custom-scrollbar">
-        {filteredTokens.map((item, index) => (
-          <div
-            key={index}
-            className="p-2 rounded-lg flex items-center justify-between cursor-pointer 
-              bg-[#313131] hover:bg-[#3a3a3a] transition-colors"
-            onClick={() => onSelect?.(item)}
-          >
-            <div className="flex items-start gap-2 w-full">
-              <Image src={item.icon} alt="icon" width={24} height={24} />
-              <div className="flex items-center justify-between flex-1">
-                <div>
-                  <div className="flex items-center gap-1">
-                    <div className="text-lg text-white">{item.name}</div>
-                    <Image
-                      src="/open-new-window.svg"
-                      alt="icon"
-                      width={16}
-                      height={16}
-                      className="opacity-60 hover:opacity-100 transition-opacity"
-                    />
+        {filteredTokens.map((item, index) => {
+          const isSelected = selectedToken?.name === item.name;
+          return (
+            <div
+              key={index}
+              className={`p-2 rounded-lg flex items-center justify-between cursor-pointer 
+                ${isSelected ? "bg-[#3a3a3a]" : "bg-[#313131]"} 
+                hover:bg-[#3a3a3a] transition-colors`}
+              onClick={() => handleTokenSelect(item)}
+            >
+              <div className="flex items-start gap-2 w-full">
+                <Image src={item.icon} alt="icon" width={24} height={24} />
+                <div className="flex items-center justify-between flex-1">
+                  <div>
+                    <div className="flex items-center gap-1">
+                      <div className="text-lg text-white">{item.name}</div>
+                      <Image
+                        src="/open-new-window.svg"
+                        alt="icon"
+                        width={16}
+                        height={16}
+                        className="opacity-60 hover:opacity-100 transition-opacity"
+                      />
+                    </div>
+                    <div className="text-gray-400 text-sm uppercase">
+                      {item.subName}
+                    </div>
                   </div>
-                  <div className="text-gray-400 text-sm uppercase">
-                    {item.subName}
-                  </div>
-                </div>
-                <div className="flex items-center gap-2">
-                  <p className="text-sm text-white">{item.price}</p>
-                  <div className="w-20 h-8 bg-[#262626] rounded-lg flex items-center justify-center">
-                    <span className="text-xs text-gray-400">
-                      ${(item.price * 40000).toLocaleString()}
-                    </span>
+                  <div className="flex items-center gap-2">
+                    <p className="text-sm text-white">{item.price}</p>
+                    <div className="w-20 h-8 bg-[#262626] rounded-lg flex items-center justify-center">
+                      <span className="text-xs text-gray-400">
+                        ${(item.price * 40000).toLocaleString()}
+                      </span>
+                    </div>
                   </div>
                 </div>
               </div>
+              {isSelected && (
+                <div className="ml-2">
+                  <div className="w-6 h-6 rounded-full bg-[#c4aeff] flex items-center justify-center">
+                    <CheckIcon className="w-4 h-4 text-black" />
+                  </div>
+                </div>
+              )}
             </div>
-          </div>
-        ))}
-
+          );
+        })}
         {filteredTokens.length === 0 && (
           <div className="text-center py-4 text-gray-400">
-            <div className="text-center py-4 text-gray-400">
-              No tokens found matching &quot;{searchTerm}&quot;
-            </div>
+            No tokens found matching &quot;{searchTerm}&quot;
           </div>
         )}
       </div>
