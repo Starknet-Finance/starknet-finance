@@ -205,6 +205,7 @@ export const TransactionInfoSingle = ({
 
   const handleAddToBatch = async () => {
     console.log("add to batch");
+    toast.success("Added to batch");
   };
 
   if (status) {
@@ -504,6 +505,7 @@ export const TransactionInfoBatch = ({
 
   const handleAddToBatch = async () => {
     console.log("add to batch");
+    toast.success("Added to batch");
   };
 
   if (status) {
