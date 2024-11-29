@@ -10,54 +10,159 @@ import { useGlobalState } from "~~/services/store/store";
 import SendToken from "./_component/SendToken";
 import { Routes } from "~~/utils/Routes";
 import TransactionTable from "../_components/TransactionTable";
-import TransactionButtons from "~~/components/transactions/TransactionButtons";
+import { Contract, RpcProvider } from "starknet";
+import { useAccount } from "~~/hooks/useAccount";
+import { universalErc20Abi } from "~~/utils/Constants";
+import toast from "react-hot-toast";
+import { parseEther } from "ethers";
+import scaffoldConfig from "~~/scaffold.config";
 
-type Asset = {
-  symbol: string;
-  name: string;
+
+interface TransactionData {
   amount: number;
-  value: number;
-  percentage: number;
-  icon: string;
-};
-
-const assets: Asset[] = [
-  {
-    symbol: "USDT",
-    name: "Tether",
-    amount: 4098.01,
-    value: 30.89,
-    percentage: 79,
-    icon: "/usdt.svg", // You'll need to add these icons to your public folder
-  },
-  {
-    symbol: "BTC",
-    name: "Bitcoin",
-    amount: 0.019268,
-    value: 1135.96,
-    percentage: 20,
-    icon: "/usdt.svg",
-  },
-  {
-    symbol: "MTH",
-    name: "Monetha",
-    amount: 100.01,
-    value: 30.89,
-    percentage: 1,
-    icon: "/usdt.svg",
-  },
-];
+  token: {
+    symbol: string;
+    logo: string;
+    name: string;
+    address: string;
+  };
+  recipient: {
+    name: string;
+    address: string;
+  };
+}
 
 const Send = () => {
   const router = useRouter();
   const [isNext, setIsNext] = useState(false);
-  const { openBatchedTransaction } = useGlobalState();
+  const { openBatchedTransaction, setOpenBatchedTransaction } =
+    useGlobalState();
+  const [currentTransaction, setCurrentTransaction] =
+    useState<TransactionData | null>(null);
+  const [batch, setBatch] = useState<any[]>([]);
+  const { account } = useAccount();
+
+  const handleTransactionSubmit = (transaction: TransactionData) => {
+    setCurrentTransaction(transaction);
+  };
+
+  const handleSend = async () => {
+    if (!currentTransaction || !account) {
+      toast.error("Missing transaction details or wallet not connected");
+      return;
+    }
+
+    try {
+      const provider = new RpcProvider({
+        nodeUrl: `https://starknet-sepolia.public.blastapi.io/rpc/v0_7`,
+      });
+
+      const tokenContract = new Contract(
+        universalErc20Abi,
+        currentTransaction.token.address,
+        provider,
+      );
+
+      // Create transfer call using contract's populate method
+      const transferCall = tokenContract.populate("transfer", [
+        currentTransaction.recipient.address,
+        parseEther(currentTransaction.amount.toString()),
+      ]);
+
+      // Execute the transaction
+      const response = await account.execute([transferCall]);
+      console.log("Transaction submitted:", response);
+      toast.success(
+        `Successfully sent ${currentTransaction.amount} ${currentTransaction.token.symbol} to ${currentTransaction.recipient.name}`,
+      );
+
+      // Reset states
+      setCurrentTransaction(null);
+      setIsNext(false);
+    } catch (error) {
+      console.error("Transaction failed:", error);
+      toast.error("Transaction failed. Please try again.");
+    }
+  };
+
+  const handleAddToBatch = () => {
+    if (!currentTransaction) {
+      toast.error("No transaction to add to batch");
+      return;
+    }
+
+    try {
+      const provider = new RpcProvider({
+        nodeUrl: scaffoldConfig.targetNetworks[0].rpcUrls.blast.http[0],
+      });
+
+      const tokenContract = new Contract(
+        universalErc20Abi,
+        currentTransaction.token.address,
+        provider,
+      );
+
+      const transferCall = tokenContract.populate("transfer", [
+        currentTransaction.recipient.address,
+        parseEther(currentTransaction.amount.toString()),
+      ]);
+
+      // Add metadata along with the transferCall
+      setBatch((prevBatch) => [
+        ...prevBatch,
+        {
+          meta: {
+            ...currentTransaction,
+          },
+          callData: transferCall,
+        },
+      ]);
+
+      setOpenBatchedTransaction(true);
+      window.scrollTo({ top: 0, behavior: "smooth" });
+      toast.success(
+        `Added ${currentTransaction.amount} ${currentTransaction.token.symbol} transfer to batch`,
+      );
+
+      // Reset states
+      setCurrentTransaction(null);
+      setIsNext(false);
+    } catch (error) {
+      console.error("Failed to add to batch:", error);
+      toast.error("Failed to add to batch. Please try again.");
+    }
+  };
+
+  const handleRemoveFromBatch = (index: number) => {
+    setBatch((prevBatch) => prevBatch.filter((_, i) => i !== index));
+    toast.success("Transaction removed from batch");
+  };
 
   return (
     <div className="p-8 min-h-screen relative">
       {/* Header Section */}
       <HeaderActions />
-      {openBatchedTransaction && <BatchedTransaction />}
+      {openBatchedTransaction && (
+        <BatchedTransaction
+          transactions={batch}
+          onRemoveTransaction={handleRemoveFromBatch}
+          onSubmit={() => {
+            if (account && batch.length > 0) {
+              account
+                .execute(batch.map((tx) => tx.callData))
+                .then(() => {
+                  toast.success("Batch transactions submitted successfully!");
+                  setBatch([]);
+                  setOpenBatchedTransaction(false);
+                })
+                .catch((error) => {
+                  console.error("Batch transaction failed:", error);
+                  toast.error("Batch transaction failed. Please try again.");
+                });
+            }
+          }}
+        />
+      )}
 
       <div className="mb-8 grid grid-cols-3 gap-6">
         <div className="col-span-2">
@@ -71,7 +176,32 @@ const Send = () => {
           </p>
         </div>
         {/* Action Buttons */}
-        <TransactionButtons />
+        <div className="flex items-end gap-4">
+          <button className="w-[130px] flex justify-center button-bg px-6 py-3 rounded-lg items-center gap-2">
+            <span className="mr-2">
+              <Image src="/down.svg" width={10} height={10} alt="icon" />
+            </span>
+            Receive
+          </button>
+          <button
+            onClick={() => router.push(Routes.transactionSend)}
+            className="w-[130px] button-bg px-6 py-3 rounded-lg flex justify-center items-center gap-2 shadow-[inset_0_0_0_2.5px_#c4aeff]"
+          >
+            <span className="mr-2">
+              <Image src="/up.svg" width={10} height={10} alt="icon" />
+            </span>
+            Send
+          </button>
+          <button
+            className="w-[130px] button-bg px-6 py-3 rounded-lg flex justify-center items-center gap-2"
+            onClick={() => router.push(Routes.transactionSwap)}
+          >
+            <span className="mr-2">
+              <Image src="/swap.svg" width={14} height={14} alt="icon" />
+            </span>
+            Swap
+          </button>
+        </div>
       </div>
 
       {/* Main Content Grid */}
@@ -86,14 +216,17 @@ const Send = () => {
         </div>
         {/* Balance Section */}
         <div className="bg-black/40 rounded-xl">
-          {isNext ? (
+          {isNext && currentTransaction ? (
             <TransactionOverview
-              amount={1000}
-              token={{ symbol: "USDT", logo: "/usdt.svg" }}
-              recipient={{ name: "John Doe", address: "0x1234567890" }}
+              {...currentTransaction}
+              onAddToBatch={handleAddToBatch}
+              onSend={handleSend}
             />
           ) : (
-            <SendToken setIsNext={setIsNext} />
+            <SendToken
+              setIsNext={setIsNext}
+              onTransactionSubmit={handleTransactionSubmit}
+            />
           )}
         </div>
       </div>

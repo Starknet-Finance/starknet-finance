@@ -1,61 +1,38 @@
 "use client";
 
-import React from "react";
+import React, { useEffect, useState } from "react";
 import Image from "next/image";
 import { PlusIcon } from "@radix-ui/react-icons";
 import { HeaderActions } from "~~/components/HeaderActions";
 import CreateNewAddressModal from "~~/components/Modals/CreateNewAddressModal";
 import RemoveAddressModal from "~~/components/Modals/RemoveAddressModal";
+import { Address } from "~~/components/scaffold-stark";
 
-const DATA_ITEM_ROW = [
-  {
-    id: 1,
-    name: "Jupeng",
-    address: "eth:0xBB...dc7",
-  },
-  {
-    id: 2,
-    name: "Carlos",
-    address: "eth:0xBB...dc7",
-  },
-  {
-    id: 3,
-    name: "Mehdi109",
-    address: "eth:0xBB...dc7",
-  },
-  {
-    id: 4,
-    name: "Eliverse25",
-    address: "eth:0xBB...dc7",
-  },
-  {
-    id: 5,
-    name: "Eliverse25(1)",
-    address: "eth:0xBB...dc7",
-  },
-];
+interface ItemRowProps {
+  id: number;
+  name: string;
+  address: string;
+  onRemove: () => void;
+  onEdit: (name: string, address: string) => void;
+  onCopy: () => void;
+}
 
-const ItemRow = ({ name, address }: { name: string; address: string }) => {
+const ItemRow = ({ name, address, onRemove, onEdit }: ItemRowProps) => {
   return (
     <div className="flex items-center gap-4 py-2.5">
       <p className="font-medium text-[#D56AFF] text-[15px] min-w-[152px] truncate">
         {name}
       </p>
       <div className="flex items-center gap-2 flex-1">
-        <div className="w-[24px] h-[24px] rounded-full bg-white"></div>
-        <p>{address}</p>
-        <Image
-          src={"/copy-icon.svg"}
-          width={16}
-          height={16}
-          alt="icon"
-          className="cursor-pointer"
-        />
+        <Address address={address as `0x${string}`} />
       </div>
       <div className="flex items-center gap-4">
         <div className="flex gap-2">
-          <RemoveAddressModal />
-          <div className="bg-[#FFFFFF21] p-[5px] rounded-[7px] w-fit cursor-pointer">
+          <RemoveAddressModal addressName={name} onRemove={onRemove} />
+          <div
+            className="bg-[#FFFFFF21] p-[5px] rounded-[7px] w-fit cursor-pointer"
+            onClick={() => onEdit(name, address)}
+          >
             <Image src={"/edit-icon.svg"} width={14} height={14} alt="icon" />
           </div>
         </div>
@@ -67,7 +44,104 @@ const ItemRow = ({ name, address }: { name: string; address: string }) => {
   );
 };
 
+interface AddressEntry {
+  id: number;
+  name: string;
+  address: string;
+  timestamp: number;
+}
+
 const AddressBook = () => {
+  const [addresses, setAddresses] = useState<AddressEntry[]>(() => {
+    if (typeof window !== "undefined") {
+      try {
+        const savedAddresses = localStorage.getItem("addressBook");
+        if (savedAddresses) {
+          const parsedAddresses = JSON.parse(savedAddresses);
+          if (Array.isArray(parsedAddresses)) {
+            return parsedAddresses;
+          }
+        }
+      } catch (error) {
+        console.error("Error loading addresses from localStorage:", error);
+      }
+    }
+    return [];
+  });
+  const [searchTerm, setSearchTerm] = useState("");
+
+  // Save addresses to localStorage whenever they change
+  useEffect(() => {
+    try {
+      localStorage.setItem("addressBook", JSON.stringify(addresses));
+    } catch (error) {
+      console.error("Error saving addresses to localStorage:", error);
+    }
+  }, [addresses]);
+
+  const handleAddAddress = (name: string, address: string) => {
+    const newEntry: AddressEntry = {
+      id: Date.now(),
+      name,
+      address,
+      timestamp: Date.now(),
+    };
+    setAddresses((prev) => [...prev, newEntry]);
+  };
+
+  const handleRemoveAddress = (id: number) => {
+    setAddresses((prev) => prev.filter((addr) => addr.id !== id));
+  };
+
+  const handleEditAddress = (id: number, name: string, address: string) => {
+    setAddresses((prev) =>
+      prev.map((addr) => (addr.id === id ? { ...addr, name, address } : addr)),
+    );
+  };
+
+  const filteredAddresses = addresses.filter(
+    (addr) =>
+      addr.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      addr.address.toLowerCase().includes(searchTerm.toLowerCase()),
+  );
+
+  const copyToClipboard = async (text: string) => {
+    try {
+      await navigator.clipboard.writeText(text);
+      // Could add a toast notification here
+    } catch (err) {
+      console.error("Failed to copy text: ", err);
+    }
+  };
+
+  const exportAddresses = () => {
+    const dataStr = JSON.stringify(addresses, null, 2);
+    const dataUri = `data:application/json;charset=utf-8,${encodeURIComponent(dataStr)}`;
+    const exportFileDefaultName = `address-book-${new Date().toISOString()}.json`;
+
+    const linkElement = document.createElement("a");
+    linkElement.setAttribute("href", dataUri);
+    linkElement.setAttribute("download", exportFileDefaultName);
+    linkElement.click();
+  };
+
+  const importAddresses = (event: React.ChangeEvent<HTMLInputElement>) => {
+    const file = event.target.files?.[0];
+    if (file) {
+      const reader = new FileReader();
+      reader.onload = (e) => {
+        try {
+          const importedAddresses = JSON.parse(e.target?.result as string);
+          setAddresses((prev) => [...prev, ...importedAddresses]);
+        } catch (err) {
+          console.error("Failed to parse imported file: ", err);
+          // Could add error toast here
+        }
+      };
+      reader.readAsText(file);
+    }
+  };
+
   return (
     <div className="p-8 min-h-screen relative">
       {/* Header Section */}
@@ -82,7 +156,10 @@ const AddressBook = () => {
             blockchain security.
           </p>
         </div>
-        <CreateNewAddressModal />
+        <CreateNewAddressModal
+          onSave={handleAddAddress}
+          addresses={addresses}
+        />
       </div>
 
       {/* Main Content Grid */}
@@ -107,6 +184,8 @@ const AddressBook = () => {
                 type="text"
                 placeholder="Search token"
                 className="bg-gray-800/50 rounded-lg px-4 py-4 w-full"
+                value={searchTerm}
+                onChange={(e) => setSearchTerm(e.target.value)}
               />
               <span className="absolute right-4 top-1/2 -translate-y-1/2 text-gray-400">
                 ⌘ + K
@@ -115,17 +194,40 @@ const AddressBook = () => {
           </div>
         </div>
         <div>
-          {DATA_ITEM_ROW.map((item) => (
-            <ItemRow key={item.id} {...item} />
+          {filteredAddresses.map((item) => (
+            <ItemRow
+              key={item.id}
+              {...item}
+              onRemove={() => handleRemoveAddress(item.id)}
+              onEdit={(name, address) =>
+                handleEditAddress(item.id, name, address)
+              }
+              onCopy={() => copyToClipboard(item.address)}
+            />
           ))}
         </div>
       </div>
       <div className="mt-2 flex items-center gap-2">
-        <div className="flex items-center gap-1.5 cursor-pointer px-4 py-1.5 bg-[#6161613B] rounded-lg w-fit">
-          <PlusIcon width={20} height={20} />
-          <p className="font-medium">Import Address</p>
+        <div className="relative">
+          <input
+            type="file"
+            id="import-file"
+            className="hidden"
+            accept=".json"
+            onChange={importAddresses}
+          />
+          <label
+            htmlFor="import-file"
+            className="flex items-center gap-1.5 cursor-pointer px-4 py-1.5 bg-[#6161613B] rounded-lg w-fit"
+          >
+            <PlusIcon width={20} height={20} />
+            <p className="font-medium">Import Address</p>
+          </label>
         </div>
-        <div className="flex items-center gap-1.5 cursor-pointer px-4 py-1.5 bg-[#6161613B] rounded-lg w-fit">
+        <div
+          onClick={exportAddresses}
+          className="flex items-center gap-1.5 cursor-pointer px-4 py-1.5 bg-[#6161613B] rounded-lg w-fit"
+        >
           <PlusIcon width={20} height={20} />
           <p className="font-medium">Export List</p>
         </div>

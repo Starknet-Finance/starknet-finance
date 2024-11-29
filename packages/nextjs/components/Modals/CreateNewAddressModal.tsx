@@ -2,14 +2,71 @@ import { useRef, useState } from "react";
 import GenericModal from "../scaffold-stark/CustomConnectButton/GenericModal";
 import { PlusIcon } from "@radix-ui/react-icons";
 import Image from "next/image";
-import { CloseIcon } from "../Icons/CloseIcon";
+import { getChecksumAddress, validateChecksumAddress } from "starknet";
 
-const CreateNewAddressModal = () => {
+interface CreateNewAddressModalProps {
+  onSave: (name: string, address: string) => void;
+  addresses: Array<{ name: string; address: string }>;
+}
+
+const CreateNewAddressModal = ({
+  onSave,
+  addresses,
+}: CreateNewAddressModalProps) => {
   const modalRef = useRef<HTMLInputElement>(null);
-  const [showError, setShowError] = useState(false);
+  const [name, setName] = useState("");
+  const [address, setAddress] = useState("");
+  const [errors, setErrors] = useState<{
+    name?: string;
+    address?: string;
+  }>({});
+
+  const validateForm = () => {
+    const newErrors: { name?: string; address?: string } = {};
+
+    // Validate name
+    if (!name.trim()) {
+      newErrors.name = "Name is required";
+    } else if (
+      addresses.some((a) => a.name.toLowerCase() === name.toLowerCase())
+    ) {
+      newErrors.name = "This name already exists";
+    }
+
+    // Validate address
+    if (!address.trim()) {
+      newErrors.address = "Address is required";
+    } else if (!validateChecksumAddress(getChecksumAddress(address))) {
+      newErrors.address = "Invalid address";
+    } else if (
+      addresses.some((a) => a.address.toLowerCase() === address.toLowerCase())
+    ) {
+      newErrors.address = "This address already exists";
+    }
+
+    setErrors(newErrors);
+    return Object.keys(newErrors).length === 0;
+  };
 
   const handleSave = () => {
-    setShowError(true);
+    if (validateForm()) {
+      onSave(name, address);
+      setName("");
+      setAddress("");
+      setErrors({});
+      if (modalRef.current) {
+        modalRef.current.checked = false;
+      }
+    }
+  };
+
+  const handleCloseModal = () => {
+    setName("");
+    setAddress("");
+    setErrors({});
+    if (modalRef.current) {
+      modalRef.current.checked = false;
+    }
   };
 
   return (
@@ -27,13 +84,15 @@ const CreateNewAddressModal = () => {
         id="create-address-modal"
         className="modal-toggle"
       />
-
       <GenericModal
         modalId="create-address-modal"
         className="flex flex-col gap-3 relative px-4 py-5 rounded-xl bg-[#0F0F0F] w-[422px]"
       >
-        <div className="bg-[#2D2F35] rounded-full p-2 cursor-pointer absolute right-2 top-2">
-          <Image src="/close-icon.svg" alt="icon" width={14} height={14} />
+        <div
+          className="bg-[#2D2F35] rounded-full p-1 cursor-pointer absolute right-2 top-2"
+          onClick={handleCloseModal}
+        >
+          <Image src="/close-icon.svg" alt="icon" width={24} height={24} />
         </div>
         <div className="mx-auto mt-6">
           <Image
@@ -51,36 +110,32 @@ const CreateNewAddressModal = () => {
             addresses
           </p>
         </div>
-        {showError && (
-          <p className="font-medium text-[#FF4C4C] text-center py-2 px-3 w-full bg-[#FF484833] rounded-lg">
-            This name is existed
-          </p>
-        )}
         <div>
           <p className="mb-0.5">Address</p>
           <input
-            className="bg-[#2D2D2D] rounded-md px-3 py-2.5 w-full"
+            className={`bg-[#2D2D2D] rounded-md px-3 py-2.5 w-full ${
+              errors.address ? "border border-[#FF4C4C]" : ""
+            }`}
             placeholder="Enter address"
+            value={address}
+            onChange={(e) => setAddress(e.target.value)}
           />
+          {errors.address && (
+            <p className="text-[#FF4C4C] text-sm mt-1">{errors.address}</p>
+          )}
         </div>
         <div>
           <p className="mb-0.5">Remember Name</p>
-          {showError ? (
-            <div className="font-medium text-[#FF4C4C] border border-[#FF4C4C] py-2 px-3 w-full bg-[#FF484833] rounded-lg flex items-center justify-between">
-              <p>Namm</p>
-              <CloseIcon
-                width={24}
-                height={24}
-                color="#FF4C4C"
-                className="cursor-pointer"
-                onClick={() => setShowError(false)}
-              />
-            </div>
-          ) : (
-            <input
-              className="bg-[#2D2D2D] rounded-md px-3 py-2.5 w-full"
-              placeholder="Enter name"
-            />
+          <input
+            className={`bg-[#2D2D2D] rounded-md px-3 py-2.5 w-full ${
+              errors.name ? "border border-[#FF4C4C]" : ""
+            }`}
+            placeholder="Enter name"
+            value={name}
+            onChange={(e) => setName(e.target.value)}
+          />
+          {errors.name && (
+            <p className="text-[#FF4C4C] text-sm mt-1">{errors.name}</p>
           )}
         </div>
         <button
