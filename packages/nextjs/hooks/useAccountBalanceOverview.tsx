@@ -57,14 +57,14 @@ export const useAccountOverview = () => {
   };
 
   const fetchTokenBalance = async (
-    tokenData: TokenData,
+    tokenData: TokenData
   ): Promise<TokenBalance | null> => {
     try {
       // Create contract instance
       const contract = new Contract(
         universalErc20Abi,
         tokenData.address,
-        publicClient,
+        publicClient
       );
 
       const balanceResult = await contract.balance_of(address);
@@ -95,17 +95,17 @@ export const useAccountOverview = () => {
       const supportedTokens = await fetchTokens();
 
       const balancePromises = supportedTokens.map((token) =>
-        fetchTokenBalance(token),
+        fetchTokenBalance(token)
       );
       const balanceResults = await Promise.all(balancePromises);
 
       const validBalances = balanceResults.filter(
-        (b): b is TokenBalance => b !== null && parseFloat(b.balance) > 0,
+        (b): b is TokenBalance => b !== null && parseFloat(b.balance) > 0
       );
 
       const totalUsdValue = validBalances.reduce(
         (sum, b) => sum + b.usdValue,
-        0,
+        0
       );
 
       const balancesWithProportions = validBalances.map((balance) => ({
