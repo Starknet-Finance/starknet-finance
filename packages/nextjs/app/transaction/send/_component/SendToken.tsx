@@ -9,9 +9,11 @@ interface SendTokenProps {
   setIsNext: (isNext: boolean) => void;
 }
 
-interface Recipient {
+interface AddressEntry {
+  id: number;
   name: string;
   address: string;
+  timestamp: number;
 }
 
 interface Token {
@@ -23,8 +25,8 @@ interface Token {
 }
 
 const STORAGE_KEYS = {
-  RECENT_RECIPIENTS: "recent_recipients",
   SELECTED_TOKEN: "selected_token",
+  ADDRESS_BOOK: "addressBook",
 };
 
 const TOKEN_LIST_DATA = [
@@ -58,20 +60,20 @@ const SendToken = ({ setIsNext }: SendTokenProps) => {
   });
 
   const [tokenInput, setTokenInput] = useState("");
-  const [selectedRecipient, setSelectedRecipient] = useState<Recipient | null>(
-    null,
-  );
+  const [selectedRecipient, setSelectedRecipient] =
+    useState<AddressEntry | null>(null);
   const [recipientInput, setRecipientInput] = useState("");
-
-  const [recipients, setRecipients] = useState<Recipient[]>(() => {
-    const stored = localStorage.getItem(STORAGE_KEYS.RECENT_RECIPIENTS);
-    return stored
-      ? JSON.parse(stored)
-      : [
-          { name: "Jupeng", address: "0xd325hbt5bhyb3b4y5h36bh54" },
-          { name: "Carlos", address: "0xd325hbt5bhyb3b4y5h36b32c" },
-          { name: "Mehdi", address: "0xd325hbt5bhyb3b4y5h36b32c" },
-        ];
+  const [addressBook, setAddressBook] = useState<AddressEntry[]>(() => {
+    if (typeof window !== "undefined") {
+      try {
+        const saved = localStorage.getItem(STORAGE_KEYS.ADDRESS_BOOK);
+        return saved ? JSON.parse(saved) : [];
+      } catch (error) {
+        console.error("Error loading address book:", error);
+        return [];
+      }
+    }
+    return [];
   });
 
   useEffect(() => {
@@ -80,13 +82,6 @@ const SendToken = ({ setIsNext }: SendTokenProps) => {
       JSON.stringify(selectedToken),
     );
   }, [selectedToken]);
-
-  useEffect(() => {
-    localStorage.setItem(
-      STORAGE_KEYS.RECENT_RECIPIENTS,
-      JSON.stringify(recipients),
-    );
-  }, [recipients]);
 
   const handleAmountChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     setAmount(Number(e.target.value));
@@ -100,10 +95,9 @@ const SendToken = ({ setIsNext }: SendTokenProps) => {
   const handleTokenInput = (value: string) => {
     setTokenInput(value);
     if (validateChecksumAddress(getChecksumAddress(value))) {
-      // If it's a valid address, create a custom token
       setSelectedToken({
         symbol: "Custom Token",
-        logo: "/token-placeholder.png", // Use a placeholder image
+        logo: "/token-placeholder.png",
         name: "Custom Token",
         price: 0,
         address: value,
@@ -122,13 +116,31 @@ const SendToken = ({ setIsNext }: SendTokenProps) => {
     setRecipientInput(value);
     if (validateChecksumAddress(getChecksumAddress(value))) {
       setSelectedRecipient({
+        id: Date.now(),
         name: "Custom Address",
         address: value,
+        timestamp: Date.now(),
       });
     } else {
       setSelectedRecipient(null);
     }
   };
+
+  const [filteredAddressBook, setFilteredAddressBook] =
+    useState<AddressEntry[]>(addressBook);
+
+  useEffect(() => {
+    if (recipientInput) {
+      const filtered = addressBook.filter(
+        (entry) =>
+          entry.name.toLowerCase().includes(recipientInput.toLowerCase()) ||
+          entry.address.toLowerCase().includes(recipientInput.toLowerCase()),
+      );
+      setFilteredAddressBook(filtered);
+    } else {
+      setFilteredAddressBook(addressBook);
+    }
+  }, [recipientInput, addressBook]);
 
   const handleNext = () => {
     if (!amount || amount <= 0) {
@@ -150,20 +162,6 @@ const SendToken = ({ setIsNext }: SendTokenProps) => {
       return;
     }
 
-    if (
-      recipientInput &&
-      validateChecksumAddress(getChecksumAddress(recipientInput))
-    ) {
-      const newRecipient = {
-        name: "Custom Address",
-        address: recipientInput,
-      };
-      if (!recipients.find((r) => r.address === recipientInput)) {
-        setRecipients((prev) => [newRecipient, ...prev].slice(0, 5));
-      }
-      setSelectedRecipient(newRecipient);
-    }
-
     setIsNext(true);
   };
 
@@ -176,7 +174,7 @@ const SendToken = ({ setIsNext }: SendTokenProps) => {
 
   return (
     <div className="h-full mx-auto bg-[#161616] p-6 text-white rounded-lg relative">
-      {/* Header */}
+      {/* Header Section - Remains the same */}
       <div className="flex items-center justify-between mb-4">
         <div className="flex flex-col">
           <div className="flex items-center gap-3">
@@ -191,7 +189,7 @@ const SendToken = ({ setIsNext }: SendTokenProps) => {
 
       <div className="w-full h-[1px] bg-[#65656526] mb-5"></div>
 
-      {/* Amount Input Section */}
+      {/* Amount Input Section - Remains the same */}
       <div className="text-center mb-8">
         {amount == null ? (
           <h2
@@ -217,7 +215,7 @@ const SendToken = ({ setIsNext }: SendTokenProps) => {
         </p>
       </div>
 
-      {/* Token Selection Section */}
+      {/* Token Selection Section - Remains the same */}
       <div className="mb-6 relative">
         <label className="text-xl mb-2 block">Token</label>
         <div
@@ -260,6 +258,7 @@ const SendToken = ({ setIsNext }: SendTokenProps) => {
           />
         </div>
 
+        {/* Token Dropdown - Remains the same */}
         {isTokenDropdownOpen && (
           <div className="absolute w-full mt-2 bg-[#1E1E1E] rounded-lg overflow-hidden z-10 shadow-lg">
             <div className="p-3 border-b border-[#2c2c2c]">
@@ -306,35 +305,12 @@ const SendToken = ({ setIsNext }: SendTokenProps) => {
                   </div>
                 );
               })}
-
-              {tokenInput &&
-                validateChecksumAddress(getChecksumAddress(tokenInput)) && (
-                  <div
-                    className="p-3 px-5 hover:bg-[#2c2c2c] cursor-pointer border-t border-[#2c2c2c]"
-                    onClick={() => {
-                      handleTokenInput(tokenInput);
-                      setIsTokenDropdownOpen(false);
-                    }}
-                  >
-                    <div className="flex items-center gap-3">
-                      <div className="w-10 h-10 bg-[#474747] rounded-lg flex items-center justify-center text-xl">
-                        #
-                      </div>
-                      <div>
-                        <div className="text-lg">Custom Token</div>
-                        <div className="text-gray-400 text-sm">
-                          {`${tokenInput.slice(0, 6)}...${tokenInput.slice(-4)}`}
-                        </div>
-                      </div>
-                    </div>
-                  </div>
-                )}
             </div>
           </div>
         )}
       </div>
 
-      {/* Recipient Selection Section */}
+      {/* Recipient Selection Section - Updated */}
       <div className="mb-6 relative">
         <label className="text-xl mb-2 block">Recipient Wallet</label>
         <div
@@ -367,6 +343,7 @@ const SendToken = ({ setIsNext }: SendTokenProps) => {
           />
         </div>
 
+        {/* Address Book Dropdown */}
         {isRecipientDropdownOpen && (
           <div className="absolute w-full mt-2 bg-[#1E1E1E] rounded-lg overflow-hidden z-10 shadow-lg">
             <div className="p-3 border-b border-[#2c2c2c]">
@@ -375,47 +352,55 @@ const SendToken = ({ setIsNext }: SendTokenProps) => {
                 value={recipientInput}
                 onChange={(e) => handleRecipientInput(e.target.value)}
                 className="w-full bg-[#2c2c2c] p-2 rounded-lg focus:outline-none text-lg text-white"
-                placeholder="Enter wallet address"
+                placeholder="Search or enter address"
                 onClick={(e) => e.stopPropagation()}
               />
             </div>
 
             <div className="max-h-[240px] overflow-y-auto">
-              <div className="p-3 text-sm text-gray-400">Recent Recipients</div>
-              {recipients.map((recipient, index) => (
-                <div
-                  key={index}
-                  className="p-3 px-5 hover:bg-[#2c2c2c] cursor-pointer transition-colors"
-                  onClick={() => {
-                    setSelectedRecipient(recipient);
-                    setRecipientInput("");
-                    setIsRecipientDropdownOpen(false);
-                  }}
-                >
-                  <div className="flex items-center justify-between">
-                    <div className="flex items-center gap-3">
-                      <div className="w-10 h-10 bg-[#474747] rounded-lg flex items-center justify-center text-xl">
-                        {recipient.name[0]}
-                      </div>
-                      <div>
-                        <div className="text-lg">{recipient.name}</div>
-                        <div className="text-gray-400 text-sm">
-                          {`${recipient.address.slice(0, 6)}...${recipient.address.slice(-4)}`}
+              <div className="p-3 text-sm text-gray-400">Address Book</div>
+              {filteredAddressBook.length > 0 ? (
+                filteredAddressBook.map((entry) => (
+                  <div
+                    key={entry.id}
+                    className="p-3 px-5 hover:bg-[#2c2c2c] cursor-pointer transition-colors"
+                    onClick={() => {
+                      setSelectedRecipient(entry);
+                      setRecipientInput("");
+                      setIsRecipientDropdownOpen(false);
+                    }}
+                  >
+                    <div className="flex items-center justify-between">
+                      <div className="flex items-center gap-3">
+                        <div className="w-10 h-10 bg-[#474747] rounded-lg flex items-center justify-center text-xl">
+                          {entry.name[0]}
+                        </div>
+                        <div>
+                          <div className="text-lg">{entry.name}</div>
+                          <div className="text-gray-400 text-sm">
+                            {`${entry.address.slice(0, 6)}...${entry.address.slice(-4)}`}
+                          </div>
                         </div>
                       </div>
+                      <img
+                        src="/copy.png"
+                        alt="copy"
+                        className="scale-[110%] hover:opacity-80 transition-opacity"
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          handleCopyAddress(entry.address);
+                        }}
+                      />
                     </div>
-                    <img
-                      src="/copy.png"
-                      alt="copy"
-                      className="scale-[110%] hover:opacity-80 transition-opacity"
-                      onClick={(e) => {
-                        e.stopPropagation();
-                        handleCopyAddress(recipient.address);
-                      }}
-                    />
                   </div>
+                ))
+              ) : (
+                <div className="p-4 text-center text-gray-400">
+                  {addressBook.length === 0
+                    ? "No addresses in address book"
+                    : "No matching addresses found"}
                 </div>
-              ))}
+              )}
             </div>
           </div>
         )}
