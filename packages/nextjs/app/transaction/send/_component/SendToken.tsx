@@ -1,5 +1,5 @@
 import Image from "next/image";
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { handleNumberInput } from "~~/utils/validateData";
 import SelectTokenList from "../../_components/SelectTokenList";
 
@@ -17,12 +17,18 @@ interface Token {
   logo: string;
 }
 
+// Local storage keys
+const STORAGE_KEYS = {
+  RECENT_RECIPIENTS: "recent_recipients",
+  SELECTED_TOKEN: "selected_token",
+};
+
 const SendToken = ({ setIsNext }: SendTokenProps) => {
   const [step, setStep] = useState(1);
   const [amount, setAmount] = useState<number | null>(null);
-  const [selectedToken, setSelectedToken] = useState<Token>({
-    symbol: "BTC",
-    logo: "/btc.png",
+  const [selectedToken, setSelectedToken] = useState<Token>(() => {
+    const stored = localStorage.getItem(STORAGE_KEYS.SELECTED_TOKEN);
+    return stored ? JSON.parse(stored) : { symbol: "BTC", logo: "/btc.png" };
   });
   const [isTokenDropdownOpen, setIsTokenDropdownOpen] = useState(false);
   const [isRecipientDropdownOpen, setIsRecipientDropdownOpen] = useState(false);
@@ -34,14 +40,34 @@ const SendToken = ({ setIsNext }: SendTokenProps) => {
 
   const availableTokens: Token[] = [
     { symbol: "BTC", logo: "/btc.png" },
-    { symbol: "ETH", logo: "/btc.png" },
+    { symbol: "ETH", logo: "/eth.svg" },
+    { symbol: "BNB", logo: "/binance.svg" },
   ];
 
-  const recipients: Recipient[] = [
-    { name: "Jupeng", address: "0xd325hbt5bhyb3b4y5h36bh54" },
-    { name: "Carlos", address: "0xd325hbt5bhyb3b4y5h36b32c" },
-    { name: "Mehdi", address: "0xd325hbt5bhyb3b4y5h36b32c" },
-  ];
+  const [recipients, setRecipients] = useState<Recipient[]>(() => {
+    const stored = localStorage.getItem(STORAGE_KEYS.RECENT_RECIPIENTS);
+    return stored
+      ? JSON.parse(stored)
+      : [
+          { name: "Jupeng", address: "0xd325hbt5bhyb3b4y5h36bh54" },
+          { name: "Carlos", address: "0xd325hbt5bhyb3b4y5h36b32c" },
+          { name: "Mehdi", address: "0xd325hbt5bhyb3b4y5h36b32c" },
+        ];
+  });
+
+  useEffect(() => {
+    localStorage.setItem(
+      STORAGE_KEYS.SELECTED_TOKEN,
+      JSON.stringify(selectedToken),
+    );
+  }, [selectedToken]);
+
+  useEffect(() => {
+    localStorage.setItem(
+      STORAGE_KEYS.RECENT_RECIPIENTS,
+      JSON.stringify(recipients),
+    );
+  }, [recipients]);
 
   const handleAmountChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     setAmount(Number(e.target.value));
@@ -49,6 +75,14 @@ const SendToken = ({ setIsNext }: SendTokenProps) => {
 
   const handleCopyAddress = (address: string) => {
     navigator.clipboard.writeText(address);
+  };
+
+  const handleBack = () => {
+    if (step === 2) {
+      setStep(1);
+      setShowTokenList(true);
+      setSelectedRecipient(null);
+    }
   };
 
   const handleNext = () => {
@@ -59,6 +93,10 @@ const SendToken = ({ setIsNext }: SendTokenProps) => {
       }
     } else if (step === 2) {
       if (selectedRecipient !== null) {
+        // Add recipient to recent list if not already present
+        if (!recipients.find((r) => r.address === selectedRecipient.address)) {
+          setRecipients((prev) => [selectedRecipient, ...prev].slice(0, 5));
+        }
         setIsNext(true);
       }
     }
@@ -69,52 +107,59 @@ const SendToken = ({ setIsNext }: SendTokenProps) => {
     (step === 2 && selectedRecipient !== null);
 
   return (
-    <div className="h-full mx-auto bg-[#161616] p-6 text-white rounded-lg">
-      <div className="flex flex-col">
-        <div className="flex items-center gap-3">
-          <img src="/arrow-narrow-up.png" alt="" className="-mt-2" />
-          <h1 className="text-2xl font-bold gradient-text">SEND TOKENS</h1>
+    <div className="h-full mx-auto bg-[#161616] p-6 text-white rounded-lg relative">
+      {/* Header */}
+      <div className="flex items-center justify-between mb-4">
+        <div className="flex flex-col">
+          <div className="flex items-center gap-3">
+            <img src="/arrow-narrow-up.png" alt="" className="-mt-2" />
+            <h1 className="text-2xl font-bold gradient-text">
+              {step === 1 ? "SEND TOKENS" : "SELECT RECIPIENT"}
+            </h1>
+          </div>
+          <p className="text-gray-400 m-0">
+            {step === 1
+              ? "Send tokens to a wallet or ENS name"
+              : "Choose or enter recipient address"}
+          </p>
         </div>
-        <p className="text-gray-400 m-0 mb-5">
-          Send tokens to a wallet or ENS name
-        </p>
       </div>
 
       <div className="w-full h-[1px] bg-[#65656526] mb-5"></div>
 
-      <div className="text-center mb-8">
-        {amount == null ? (
-          <h2
-            onClick={() => setAmount(0.0)}
-            className="text-4xl font-bold mb-2 cursor-pointer"
-          >
-            Enter Amount
-          </h2>
-        ) : (
-          <input
-            ref={setInputRef}
-            value={amount}
-            onChange={(e) => {
-              if (handleNumberInput(e.target.value)) {
-                handleAmountChange(e);
-              }
-            }}
-            className="bg-transparent text-center text-4xl font-bold w-full focus:outline-none"
-            placeholder="0.00"
-          />
-        )}
-        <input
-          type="text"
-          value={null ?? "0"}
-          onChange={handleAmountChange}
-          className="customize-caret bg-transparent text-center text-4xl font-bold w-full focus:outline-none hidden"
-          placeholder="0.00"
-        />
-        <p className="text-gray-400">
-          ~ {amount ? `${Number(amount) * 40000} USD` : "0.00 USD"}
-        </p>
-      </div>
+      {/* Amount Input Section */}
+      {step === 1 && (
+        <div className="text-center mb-8">
+          {amount == null ? (
+            <h2
+              onClick={() => setAmount(0.0)}
+              className="text-4xl font-bold mb-2 cursor-pointer hover:text-gray-300 transition-colors"
+            >
+              Enter Amount
+            </h2>
+          ) : (
+            <input
+              ref={setInputRef}
+              value={amount}
+              onChange={(e) => {
+                if (handleNumberInput(e.target.value)) {
+                  handleAmountChange(e);
+                }
+              }}
+              className="bg-transparent text-center text-4xl font-bold w-full focus:outline-none"
+              placeholder="0.00"
+            />
+          )}
+          <p className="text-gray-400">
+            ~{" "}
+            {amount
+              ? `${(Number(amount) * 40000).toLocaleString()} USD`
+              : "0.00 USD"}
+          </p>
+        </div>
+      )}
 
+      {/* Token Selection Section */}
       {step >= 1 && (
         <>
           <div className="mb-6 relative">
@@ -134,16 +179,18 @@ const SendToken = ({ setIsNext }: SendTokenProps) => {
               <img
                 src="/arrow-down.svg"
                 alt="dropdown"
-                className="scale-[105%]"
+                className={`transition-transform duration-200 ${
+                  isTokenDropdownOpen ? "rotate-180" : ""
+                }`}
               />
             </div>
 
             {isTokenDropdownOpen && (
-              <div className="absolute w-full mt-2 bg-[#1E1E1E] rounded-lg overflow-hidden z-10">
+              <div className="absolute w-full mt-2 bg-[#1E1E1E] rounded-lg overflow-hidden z-10 shadow-lg">
                 {availableTokens.map((token) => (
                   <div
                     key={token.symbol}
-                    className="p-3 hover:bg-[#2c2c2c] cursor-pointer flex items-center gap-2"
+                    className="p-3 hover:bg-[#2c2c2c] cursor-pointer flex items-center gap-2 transition-colors"
                     onClick={() => {
                       setSelectedToken(token);
                       setIsTokenDropdownOpen(false);
@@ -169,6 +216,7 @@ const SendToken = ({ setIsNext }: SendTokenProps) => {
         </>
       )}
 
+      {/* Recipient Selection Section */}
       {step >= 2 && (
         <div className="mb-6 relative">
           <label className="text-xl mb-2 block">Recipient Wallet</label>
@@ -184,7 +232,7 @@ const SendToken = ({ setIsNext }: SendTokenProps) => {
                 <div>
                   <div className="text-lg">{selectedRecipient.name}</div>
                   <div className="text-gray-400 text-sm">
-                    {selectedRecipient.address}
+                    {`${selectedRecipient.address.slice(0, 6)}...${selectedRecipient.address.slice(-4)}`}
                   </div>
                 </div>
               </div>
@@ -194,7 +242,9 @@ const SendToken = ({ setIsNext }: SendTokenProps) => {
             <img
               src="/arrow-down.svg"
               alt="dropdown"
-              className="scale-[105%]"
+              className={`transition-transform duration-200 ${
+                isRecipientDropdownOpen ? "rotate-180" : ""
+              }`}
             />
           </div>
 
@@ -203,7 +253,7 @@ const SendToken = ({ setIsNext }: SendTokenProps) => {
               {recipients.map((recipient, index) => (
                 <div
                   key={index}
-                  className="bg-[#1E1E1E] p-3 px-5 rounded-lg flex items-center justify-between cursor-pointer hover:bg-[#2c2c2c]"
+                  className="bg-[#1E1E1E] p-3 px-5 rounded-lg flex items-center justify-between cursor-pointer hover:bg-[#2c2c2c] transition-colors"
                   onClick={() => {
                     setSelectedRecipient(recipient);
                     setIsRecipientDropdownOpen(false);
@@ -216,14 +266,14 @@ const SendToken = ({ setIsNext }: SendTokenProps) => {
                     <div>
                       <div className="text-lg">{recipient.name}</div>
                       <div className="text-gray-400 text-sm">
-                        {recipient.address}
+                        {`${recipient.address.slice(0, 6)}...${recipient.address.slice(-4)}`}
                       </div>
                     </div>
                   </div>
                   <img
                     src="/copy.png"
                     alt="copy"
-                    className="scale-[110%]"
+                    className="scale-[110%] hover:opacity-80 transition-opacity"
                     onClick={(e) => {
                       e.stopPropagation();
                       handleCopyAddress(recipient.address);
@@ -236,17 +286,28 @@ const SendToken = ({ setIsNext }: SendTokenProps) => {
         </div>
       )}
 
-      <button
-        disabled={!isNextButtonEnabled}
-        className={`${
-          isNextButtonEnabled
-            ? "next-button-bg border-[2.5px] border-[c4aeff] cursor-pointer"
-            : "bg-[#474747] cursor-not-allowed"
-        } w-full text-xl py-4 rounded-lg mt-4 transition-colors`}
-        onClick={handleNext}
-      >
-        Next
-      </button>
+      {/* Button Group */}
+      <div className="flex gap-4 mt-4">
+        {step > 1 && (
+          <button
+            onClick={handleBack}
+            className="w-1/3 text-xl py-4 rounded-lg border-[2.5px] border-[#c4aeff] bg-transparent hover:bg-[#2c2c2c] transition-all duration-200"
+          >
+            Back
+          </button>
+        )}
+        <button
+          disabled={!isNextButtonEnabled}
+          className={`${
+            isNextButtonEnabled
+              ? "next-button-bg border-[2.5px] border-[#c4aeff] cursor-pointer hover:brightness-110"
+              : "bg-[#474747] cursor-not-allowed"
+          } ${step > 1 ? "w-2/3" : "w-full"} text-xl py-4 rounded-lg transition-all duration-200`}
+          onClick={handleNext}
+        >
+          {step === 1 ? "Next" : "Confirm"}
+        </button>
+      </div>
     </div>
   );
 };
