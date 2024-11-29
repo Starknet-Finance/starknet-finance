@@ -8,14 +8,9 @@ interface Message {
 }
 
 interface TransactionStep {
-  chainId: string;
-  from: string;
-  to: string;
-  value: string;
-  data: string;
-  selector?: string;
-  calldata?: string[];
-  entrypoint?: string;
+  calldata: string[];
+  entrypoint: string;
+  contractAddress: string;
 }
 
 interface Transaction {
@@ -32,6 +27,15 @@ interface Transaction {
     symbol: string;
     decimals: number;
   };
+  toToken: {
+    address: string;
+    symbol: string;
+    decimals: number;
+  };
+  fromAmountUSD?: number;
+  toAmountUSD?: number;
+  fromAmount?: string;
+  toAmount?: string;
 }
 
 interface BatchTransaction extends Transaction {

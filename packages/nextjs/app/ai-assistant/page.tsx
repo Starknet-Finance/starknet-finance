@@ -3,6 +3,7 @@
 import Image from "next/image";
 import React from "react";
 import ListMessage from "~~/components/AIAssistant/ListMessage";
+import TransactionCard from "~~/components/transactions/TransactionCard";
 import { useAIAssistantState } from "~~/services/store/assistant";
 
 const AIAssistant = () => {
@@ -21,10 +22,10 @@ const AIAssistant = () => {
             </p>
           </div>
           <div className="flex items-center gap-2">
+            {/* <TransactionCard />
             <TransactionCard />
             <TransactionCard />
-            <TransactionCard />
-            <TransactionCard />
+            <TransactionCard /> */}
           </div>
           <div className="flex items-center gap-1.5 mt-2 cursor-pointer w-fit">
             <Image
@@ -39,7 +40,6 @@ const AIAssistant = () => {
       ) : (
         <ListMessage />
       )}
-
     </div>
   );
 };

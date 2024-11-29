@@ -34,10 +34,27 @@ export default function FormMessage() {
         createNewChat();
       }
 
-      const tempMessages = messages.map((message) => ({
+      // if this is first message, add address book to chat history
+
+      let tempMessages = messages.map((message) => ({
         sender: message.sender,
         content: message.content,
       }));
+
+      if (messages.length === 0) {
+        const addressBook = localStorage.getItem("addressBook");
+        const addressBookData = addressBook
+          ? `Here is the current connected account's address book: ${addressBook}, if user ask to do something with address book, you can use this data, for example, send 100 USDC to [name] in address book, you can read that address from name and construct the transaction`
+          : "";
+        tempMessages = [
+          {
+            sender: "user",
+            content: addressBookData,
+          },
+          ...tempMessages,
+        ];
+      }
+
       setMessages((prevMessages) => [
         ...prevMessages,
         {

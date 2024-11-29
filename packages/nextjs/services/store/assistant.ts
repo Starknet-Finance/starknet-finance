@@ -20,6 +20,8 @@ type AIAssistantState = {
 export const useAIAssistantState = create<AIAssistantState>()(
   persist(
     (set, get) => ({
+      // get local storage address book
+
       messages: [],
       setMessages: (newMessages) =>
         set((state) => {
