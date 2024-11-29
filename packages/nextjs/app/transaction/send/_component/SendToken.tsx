@@ -3,7 +3,7 @@
 import React, { useState, useEffect } from "react";
 import toast from "react-hot-toast";
 import { CheckIcon } from "@heroicons/react/24/solid";
-import { isAddress } from "~~/utils/scaffold-stark/common";
+import { getChecksumAddress, validateChecksumAddress } from "starknet";
 
 interface SendTokenProps {
   setIsNext: (isNext: boolean) => void;
@@ -99,7 +99,7 @@ const SendToken = ({ setIsNext }: SendTokenProps) => {
 
   const handleTokenInput = (value: string) => {
     setTokenInput(value);
-    if (isAddress(value)) {
+    if (validateChecksumAddress(getChecksumAddress(value))) {
       // If it's a valid address, create a custom token
       setSelectedToken({
         symbol: "Custom Token",
@@ -120,7 +120,7 @@ const SendToken = ({ setIsNext }: SendTokenProps) => {
 
   const handleRecipientInput = (value: string) => {
     setRecipientInput(value);
-    if (isAddress(value)) {
+    if (validateChecksumAddress(getChecksumAddress(value))) {
       setSelectedRecipient({
         name: "Custom Address",
         address: value,
@@ -145,12 +145,15 @@ const SendToken = ({ setIsNext }: SendTokenProps) => {
       ? selectedRecipient.address
       : recipientInput;
 
-    if (!isAddress(recipientAddress)) {
+    if (!validateChecksumAddress(getChecksumAddress(recipientAddress))) {
       toast.error("Please enter a valid recipient address");
       return;
     }
 
-    if (recipientInput && isAddress(recipientInput)) {
+    if (
+      recipientInput &&
+      validateChecksumAddress(getChecksumAddress(recipientInput))
+    ) {
       const newRecipient = {
         name: "Custom Address",
         address: recipientInput,
@@ -168,7 +171,8 @@ const SendToken = ({ setIsNext }: SendTokenProps) => {
     amount !== null &&
     amount > 0 &&
     (selectedRecipient !== null ||
-      (recipientInput && isAddress(recipientInput)));
+      (recipientInput &&
+        validateChecksumAddress(getChecksumAddress(recipientInput))));
 
   return (
     <div className="h-full mx-auto bg-[#161616] p-6 text-white rounded-lg relative">
@@ -303,27 +307,28 @@ const SendToken = ({ setIsNext }: SendTokenProps) => {
                 );
               })}
 
-              {tokenInput && isAddress(tokenInput) && (
-                <div
-                  className="p-3 px-5 hover:bg-[#2c2c2c] cursor-pointer border-t border-[#2c2c2c]"
-                  onClick={() => {
-                    handleTokenInput(tokenInput);
-                    setIsTokenDropdownOpen(false);
-                  }}
-                >
-                  <div className="flex items-center gap-3">
-                    <div className="w-10 h-10 bg-[#474747] rounded-lg flex items-center justify-center text-xl">
-                      #
-                    </div>
-                    <div>
-                      <div className="text-lg">Custom Token</div>
-                      <div className="text-gray-400 text-sm">
-                        {`${tokenInput.slice(0, 6)}...${tokenInput.slice(-4)}`}
+              {tokenInput &&
+                validateChecksumAddress(getChecksumAddress(tokenInput)) && (
+                  <div
+                    className="p-3 px-5 hover:bg-[#2c2c2c] cursor-pointer border-t border-[#2c2c2c]"
+                    onClick={() => {
+                      handleTokenInput(tokenInput);
+                      setIsTokenDropdownOpen(false);
+                    }}
+                  >
+                    <div className="flex items-center gap-3">
+                      <div className="w-10 h-10 bg-[#474747] rounded-lg flex items-center justify-center text-xl">
+                        #
+                      </div>
+                      <div>
+                        <div className="text-lg">Custom Token</div>
+                        <div className="text-gray-400 text-sm">
+                          {`${tokenInput.slice(0, 6)}...${tokenInput.slice(-4)}`}
+                        </div>
                       </div>
                     </div>
                   </div>
-                </div>
-              )}
+                )}
             </div>
           </div>
         )}
