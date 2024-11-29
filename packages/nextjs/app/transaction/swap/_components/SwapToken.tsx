@@ -1,11 +1,21 @@
 /* eslint-disable react/no-unescaped-entities */
 import Image from "next/image";
-import React, { useState } from "react";
+import React, { use, useCallback, useEffect, useRef, useState } from "react";
 import SelectTokenList from "../../_components/SelectTokenList";
+import useSupportedTokens from "~~/hooks/useSupportedTokens";
+import { SwapQuoteResponse, TokenData } from "~~/types/avnu";
+import useBestQuote from "~~/hooks/avnu/useBestQuote";
+import { buildSwap, getBestQuote } from "~~/services/api/quotes";
+import { debounce } from "lodash";
+import { ethers, formatUnits } from "ethers";
+import { num } from "starknet";
+import toast from "react-hot-toast";
+import { useAccount } from "~~/hooks/useAccount";
 
 type Token = {
   symbol: string;
   icon: string;
+  address: string;
 };
 
 type TokenInputProps = {
@@ -15,6 +25,7 @@ type TokenInputProps = {
   readOnly?: boolean;
   onTokenSelect: () => void;
   variant?: "top" | "bottom" | "none";
+  onAmountChange: (value: string) => void;
 };
 
 type TransactionDetailProps = {
@@ -46,7 +57,7 @@ const TokenSelector = ({
     onClick={onClick}
     className="flex items-center gap-[5px] bg-[#181818] rounded-[7px] w-fit p-1 cursor-pointer"
   >
-    <Image src={token.icon} alt={token.symbol} width={20} height={20} />
+    <img src={token.icon} alt={token.symbol} width={20} height={20} />
     <p className="text-sm">{token.symbol}</p>
     <Image src="/arrow-down.svg" alt="select token" width={16} height={16} />
   </div>
@@ -59,20 +70,25 @@ const TokenInput = ({
   readOnly = false,
   onTokenSelect,
   variant,
-}: TokenInputProps) => (
-  <div className={`bg-[#2B2B2B] p-3 ${getRadiusClass(variant)}`}>
-    <div className="flex justify-end">
-      <TokenSelector token={token} onClick={onTokenSelect} />
+  onAmountChange,
+}: TokenInputProps) => {
+  return (
+    <div className={`bg-[#2B2B2B] p-3 ${getRadiusClass(variant)}`}>
+      <div className="flex justify-end">
+        <TokenSelector token={token} onClick={onTokenSelect} />
+      </div>
+      <input
+        type="number"
+        className="bg-[#2B2B2B] outline-none text-[28px] w-full [&::-webkit-inner-spin-button]:appearance-none"
+        placeholder="0.00"
+        value={amount}
+        readOnly={readOnly}
+        onChange={(e) => onAmountChange(e.target.value)}
+      />
+      <p className="text-sm text-[#767C82]">~ {usdValue} USD</p>
     </div>
-    <input
-      className="bg-[#2B2B2B] outline-none text-[28px] w-full"
-      placeholder="0.15272"
-      value={amount}
-      readOnly={readOnly}
-    />
-    <p className="text-sm text-[#767C82]">~ {usdValue} USD</p>
-  </div>
-);
+  );
+};
 
 const TransactionDetail = ({ label, value }: TransactionDetailProps) => (
   <div className="flex items-center justify-between">
@@ -102,13 +118,150 @@ const SwapHeader = () => (
 const Divider = () => <div className="w-full h-[1px] bg-[#65656526] my-5" />;
 
 const SwapToken = () => {
+  const { account } = useAccount();
   const [showList, setShowList] = useState(false);
-  const [fromToken] = useState<Token>({ symbol: "BTC", icon: "/btc.png" });
-  const [toToken] = useState<Token>({ symbol: "BTC", icon: "/btc.png" });
+  const [fromToken, setFromToken] = useState<Token>({
+    symbol: "",
+    icon: "",
+    address: "",
+  });
+  const [toToken, setToToken] = useState<Token>({
+    symbol: "",
+    icon: "",
+    address: "",
+  });
+  const [selectedTokenType, setSelectedTokenType] = useState<"from" | "to">(
+    "from"
+  );
+  const [swapFromAmount, setSwapFromAmount] = useState<string>("");
+  const [swapToAmount, setSwapToAmount] = useState<string>("");
+  const [isLoadingQuote, setIsLoadingQuote] = useState(false);
+  const [quoteError, setQuoteError] = useState<string>("");
+  const [buyAmountInUSD, setBuyAmountInUSD] = useState<string>("");
+  const [sellAmountInUSD, setSellAmountInUSD] = useState<string>("");
+  const [bestQuote, setBestQuote] = useState<string | null>(null);
+  const timeoutRef = useRef<NodeJS.Timeout>();
 
-  const handleTokenSelect = () => {
-    setShowList(!showList);
+  const { data: supportedTokens, isLoading } = useSupportedTokens();
+
+  const handleTokenSelect = (type: "from" | "to") => {
+    setSelectedTokenType(type);
+    setShowList(true);
   };
+
+  const handleTokenChoice = (token: TokenData) => {
+    const selectedToken = {
+      symbol: token.symbol,
+      icon: token.logoUri,
+      address: token.address,
+    };
+
+    if (selectedTokenType === "from") {
+      setFromToken(selectedToken);
+    } else {
+      setToToken(selectedToken);
+    }
+    setShowList(false);
+  };
+
+  const handleFromAmountChange = async (value: string) => {
+    setSwapFromAmount(value);
+    setQuoteError(""); // Clear previous errors
+
+    // Clear previous timeout if exists
+    if (timeoutRef.current) {
+      clearTimeout(timeoutRef.current);
+    }
+
+    // Don't fetch if we don't have both tokens or amount
+    if (!fromToken?.address || !toToken?.address || !value) {
+      setSwapToAmount("");
+      return;
+    }
+
+    // Set new timeout
+    timeoutRef.current = setTimeout(async () => {
+      setIsLoadingQuote(true);
+      try {
+        const valueInWei = ethers.parseUnits(value, 18);
+        const hexValue = ethers.toBeHex(valueInWei);
+        const response: SwapQuoteResponse = JSON.parse(
+          await getBestQuote({
+            sellTokenAddress: fromToken.address,
+            buyTokenAddress: toToken.address,
+            sellAmount: hexValue,
+          })
+        );
+
+        if (response?.length > 0) {
+          // set the amount back to number
+          const amount = response[0].buyAmount;
+          setSwapToAmount(
+            formatUnits(num.hexToDecimalString(amount.toString()), 18)
+          );
+          setBuyAmountInUSD(response[0].buyAmountInUsd.toString());
+          setSellAmountInUSD(response[0].sellAmountInUsd.toString());
+          setBestQuote(response[0].quoteId);
+        } else {
+          setQuoteError("No quote available for this swap");
+        }
+      } catch (error) {
+        console.error("Error fetching quote:", error);
+        setSwapToAmount("");
+        setQuoteError("Failed to get quote. Please try again.");
+      } finally {
+        setIsLoadingQuote(false);
+      }
+    }, 1000); // 1 second delay
+  };
+
+  const handleSwap = async () => {
+    if (!account) return toast.error("Please connect your wallet");
+    if (!bestQuote) return toast.error("No best quote found");
+    // build transaction
+    const response = await JSON.parse(
+      await buildSwap({
+        quoteId: bestQuote,
+        slippage: 0.05,
+        includeApprove: true,
+        takerAddress: account?.address as string,
+      })
+    );
+    try {
+      await account.execute(response?.calls);
+    } catch (error) {
+      console.log(error);
+    }
+  };
+
+  // Clean up timeout on unmount
+  useEffect(() => {
+    return () => {
+      if (timeoutRef.current) {
+        clearTimeout(timeoutRef.current);
+      }
+    };
+  }, []);
+
+  useEffect(() => {
+    if (supportedTokens?.content && supportedTokens.content.length > 0) {
+      // Set default tokens only if they haven't been set yet
+      if (!fromToken?.symbol) {
+        setFromToken({
+          symbol: supportedTokens.content[0].symbol,
+          icon: supportedTokens.content[0].logoUri,
+          address: supportedTokens.content[0].address,
+        });
+      }
+      if (!toToken?.symbol && supportedTokens.content.length > 1) {
+        setToToken({
+          symbol: supportedTokens.content[1].symbol,
+          icon: supportedTokens.content[1].logoUri,
+          address: supportedTokens.content[1].address,
+        });
+      }
+    }
+  }, [supportedTokens, fromToken?.symbol, toToken?.symbol]);
 
   return (
     <div className="h-full mx-auto bg-[#161616] p-6 text-white rounded-lg flex flex-col">
@@ -130,43 +283,65 @@ const SwapToken = () => {
           )}
 
           <TokenInput
-            variant="top"
-            amount="0.15272"
-            usdValue="325"
+            variant={showList && selectedTokenType === "from" ? "none" : "top"}
+            amount={swapFromAmount}
+            usdValue={sellAmountInUSD}
             token={fromToken}
-            onTokenSelect={handleTokenSelect}
+            onAmountChange={handleFromAmountChange}
+            onTokenSelect={() => handleTokenSelect("from")}
           />
 
-          {showList && (
-            <div className="bg-[#1D1D1D]">
-              <SelectTokenList />
+          {showList && selectedTokenType === "from" && (
+            <div className="bg-[#1D1D1D] rounded-b-xl">
+              <SelectTokenList
+                tokens={supportedTokens?.content || []}
+                onSelect={handleTokenChoice}
+                isLoading={isLoading}
+              />
             </div>
           )}
 
           <div className="h-[1px] bg-[#65656580] w-full" />
 
           <TokenInput
-            variant="bottom"
-            amount="0.15272"
-            usdValue="325"
+            variant={showList && selectedTokenType === "to" ? "none" : "bottom"}
+            amount={swapToAmount}
+            usdValue={buyAmountInUSD}
             token={toToken}
             readOnly
-            onTokenSelect={handleTokenSelect}
+            onTokenSelect={() => handleTokenSelect("to")}
+            onAmountChange={(value) => setSwapToAmount(value)}
           />
-        </div>
 
-        <Divider />
-
-        <div>
-          <TransactionDetail label="Min Receive" value="4" />
-          <TransactionDetail label="Blockchain Fee" value="$500" />
-          <TransactionDetail label="Transaction Fee" value="$20,000" />
+          {showList && selectedTokenType === "to" && (
+            <div className="bg-[#1D1D1D] rounded-b-xl">
+              <SelectTokenList
+                tokens={supportedTokens?.content || []}
+                onSelect={handleTokenChoice}
+                isLoading={isLoading}
+              />
+            </div>
+          )}
         </div>
       </div>
 
-      <button className="bg-[#474747] w-full py-3 rounded-lg mt-5">
-        Swap now
+      <button
+        onClick={handleSwap}
+        disabled={!!quoteError || isLoadingQuote}
+        className={`w-full py-3 rounded-lg mt-5 ${
+          quoteError || isLoadingQuote
+            ? "bg-[#474747] opacity-50 cursor-not-allowed"
+            : "bg-[#474747] hover:bg-[#525252]"
+        }`}
+      >
+        {isLoadingQuote ? "Getting best quote..." : "Swap now"}
       </button>
+
+      {quoteError && (
+        <div className="mt-2 text-red-500 text-sm text-center">
+          {quoteError}
+        </div>
+      )}
     </div>
   );
 };
