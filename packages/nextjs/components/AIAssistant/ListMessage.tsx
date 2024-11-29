@@ -9,6 +9,7 @@ export default function ListMessage() {
   const { messages } = useAIAssistantState();
   const messagesEndRef = useRef<HTMLDivElement>(null);
 
+
   console.log(messages);
 
   const scrollToBottom = () => {

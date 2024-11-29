@@ -5,26 +5,6 @@ import React from "react";
 import ListMessage from "~~/components/AIAssistant/ListMessage";
 import { useAIAssistantState } from "~~/services/store/assistant";
 
-const TransactionCard = () => {
-  return (
-    <div className="w-[195px] h-[110px] ai-assistant-card px-2 py-1.5 flex flex-col justify-between">
-      <p className="text-[13px] text-[#D5D5D5]">
-        Swap 100 USDC to BTC then send to{" "}
-        <span className="text-[#D56AFF] underline">Carlos</span>
-      </p>
-      <div className="flex items-center gap-1">
-        <Image
-          src={"/ai-assistant/send.svg"}
-          width={16}
-          height={16}
-          alt="icon"
-        />
-        <p className="text-[13px] font-medium">Send</p>
-      </div>
-    </div>
-  );
-};
-
 const AIAssistant = () => {
   const { messages } = useAIAssistantState();
 
@@ -59,6 +39,7 @@ const AIAssistant = () => {
       ) : (
         <ListMessage />
       )}
+
     </div>
   );
 };

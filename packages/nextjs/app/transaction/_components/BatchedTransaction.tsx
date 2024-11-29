@@ -3,24 +3,37 @@ import { useGlobalState } from "~~/services/store/store";
 import { TransactionFinanceCard } from "./TransactionFinanceCard";
 import { useState } from "react";
 
-const LIST_TRANSACTION = [
-  {
-    id: "1",
-    token: { symbol: "USDT", logo: "/usdt.svg" },
-    amount: 1000,
-    recipient: { name: "Jupeng", address: "0x123" },
-  },
-  {
-    id: "2",
-    token: { symbol: "USDT", logo: "/usdt.svg" },
-    amount: 2000,
-    recipient: { name: "Carlos", address: "0x456" },
-  },
-];
+interface BatchedTransactionProps {
+  transactions: any[];
+  onSubmit: () => void;
+  onRemoveTransaction: (index: number) => void;
+}
 
-export const BatchedTransaction = () => {
+export const BatchedTransaction = ({
+  transactions,
+  onSubmit,
+  onRemoveTransaction,
+}: BatchedTransactionProps) => {
   const { setOpenBatchedTransaction } = useGlobalState();
   const [expandedId, setExpandedId] = useState<string | null>(null);
+
+  const handleRemoveTransaction = (id: string) => {
+    const index = Number(id.split("-")[1]);
+    onRemoveTransaction(index);
+  };
+
+  const formatTransactions = (batch: any[]) => {
+    return batch.map((tx, index) => ({
+      id: `tx-${index}`,
+      token: tx.meta.token,
+      amount: tx.meta.amount,
+      recipient: tx.meta.recipient,
+      canRemove: true,
+    }));
+  };
+
+  const formattedTransactions = formatTransactions(transactions);
+
   return (
     <div className="flex flex-col absolute right-0 top-0 h-full bg-[#1C1C1C] w-[476px] p-4 z-50 animate-[slideIn_0.3s_ease-out] translate-x-0">
       <div className="flex items-center justify-between">
@@ -58,9 +71,11 @@ export const BatchedTransaction = () => {
           />
         </div>
       </div>
+
       <div className="h-[1px] bg-[#65656526] w-full mt-[22px] mb-[14px]"></div>
+
       <div className="flex-1 flex flex-col gap-2.5 mb-6 max-h-[900px] overflow-y-auto">
-        {LIST_TRANSACTION.map((transaction) => (
+        {formattedTransactions.map((transaction) => (
           <TransactionFinanceCard
             key={transaction.id}
             {...transaction}
@@ -68,15 +83,29 @@ export const BatchedTransaction = () => {
             onExpand={(isExpanded) => {
               setExpandedId(isExpanded ? transaction.id : null);
             }}
+            canRemove={true}
+            onRemove={() => handleRemoveTransaction(transaction.id)}
           />
         ))}
       </div>
+
       <div className="flex gap-4">
-        <button className="flex-1 py-4 rounded-lg text-xl shadow-[inset_0_0_0_2px_#d56aff] text-[#C4AEFF]">
+        <button
+          onClick={() => setOpenBatchedTransaction(false)}
+          className="flex-1 py-4 rounded-lg text-xl shadow-[inset_0_0_0_2px_#d56aff] text-[#C4AEFF]"
+        >
           Add new transaction
         </button>
-        <button className="flex-1 py-4 rounded-lg text-xl button-bg">
-          Confirm batch
+        <button
+          onClick={onSubmit}
+          disabled={transactions.length === 0}
+          className={`flex-1 py-4 rounded-lg text-xl ${
+            transactions.length > 0
+              ? "button-bg cursor-pointer"
+              : "bg-gray-600 cursor-not-allowed"
+          }`}
+        >
+          Review batch ({transactions.length})
         </button>
       </div>
     </div>
