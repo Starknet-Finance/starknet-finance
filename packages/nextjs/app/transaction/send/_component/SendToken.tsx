@@ -4,6 +4,7 @@ import React, { useState, useEffect } from "react";
 import toast from "react-hot-toast";
 import { CheckIcon } from "@heroicons/react/24/solid";
 import { getChecksumAddress, validateChecksumAddress } from "starknet";
+import useSupportedTokens from "~~/hooks/useSupportedTokens";
 
 interface SendTokenProps {
   setIsNext: (isNext: boolean) => void;
@@ -17,11 +18,12 @@ interface AddressEntry {
 }
 
 interface Token {
-  symbol: string;
-  logo: string;
   name: string;
-  price: number;
-  address?: string;
+  address: string;
+  symbol: string;
+  decimals: number;
+  chainId: string;
+  logoUri: string;
 }
 
 const STORAGE_KEYS = {
@@ -29,34 +31,22 @@ const STORAGE_KEYS = {
   ADDRESS_BOOK: "addressBook",
 };
 
-const TOKEN_LIST_DATA = [
-  {
-    symbol: "ETH",
-    logo: "/eth.svg",
-    name: "Ethereum",
-    price: 0.2,
-  },
-  {
-    symbol: "BTC",
-    logo: "/btc.png",
-    name: "Bitcoin",
-    price: 0.2,
-  },
-  {
-    symbol: "BNB",
-    logo: "/binance.svg",
-    name: "Binance Coin",
-    price: 0.2,
-  },
-];
-
 const SendToken = ({ setIsNext }: SendTokenProps) => {
   const [amount, setAmount] = useState<number | null>(null);
   const [isTokenDropdownOpen, setIsTokenDropdownOpen] = useState(false);
   const [isRecipientDropdownOpen, setIsRecipientDropdownOpen] = useState(false);
+
+  const { data: supportedToken } = useSupportedTokens();
+  const { content: supportedTokenData } = supportedToken
+    ? supportedToken
+    : { content: [] };
+
   const [selectedToken, setSelectedToken] = useState<Token>(() => {
     const stored = localStorage.getItem(STORAGE_KEYS.SELECTED_TOKEN);
-    return stored ? JSON.parse(stored) : TOKEN_LIST_DATA[0];
+    if (stored) {
+      return JSON.parse(stored);
+    }
+    return null;
   });
 
   const [tokenInput, setTokenInput] = useState("");
@@ -76,11 +66,23 @@ const SendToken = ({ setIsNext }: SendTokenProps) => {
     return [];
   });
 
+  // Set default token when supported tokens load
   useEffect(() => {
-    localStorage.setItem(
-      STORAGE_KEYS.SELECTED_TOKEN,
-      JSON.stringify(selectedToken),
-    );
+    if (supportedTokenData && supportedTokenData.length > 0 && !selectedToken) {
+      const defaultToken =
+        supportedTokenData.find((t) => t.symbol === "ETH") ||
+        supportedTokenData[0];
+      setSelectedToken(defaultToken as any);
+    }
+  }, [supportedTokenData, selectedToken]);
+
+  useEffect(() => {
+    if (selectedToken) {
+      localStorage.setItem(
+        STORAGE_KEYS.SELECTED_TOKEN,
+        JSON.stringify(selectedToken),
+      );
+    }
   }, [selectedToken]);
 
   const handleAmountChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -95,13 +97,15 @@ const SendToken = ({ setIsNext }: SendTokenProps) => {
   const handleTokenInput = (value: string) => {
     setTokenInput(value);
     if (validateChecksumAddress(getChecksumAddress(value))) {
-      setSelectedToken({
+      const customToken = {
         symbol: "Custom Token",
-        logo: "/token-placeholder.png",
+        logoUri: "/token-placeholder.png",
         name: "Custom Token",
-        price: 0,
+        decimals: 18,
+        chainId: "0x534e5f474f45524c49",
         address: value,
-      });
+      };
+      setSelectedToken(customToken);
       setIsTokenDropdownOpen(false);
     }
   };
@@ -174,7 +178,7 @@ const SendToken = ({ setIsNext }: SendTokenProps) => {
 
   return (
     <div className="h-full mx-auto bg-[#161616] p-6 text-white rounded-lg relative">
-      {/* Header Section - Remains the same */}
+      {/* Header */}
       <div className="flex items-center justify-between mb-4">
         <div className="flex flex-col">
           <div className="flex items-center gap-3">
@@ -189,7 +193,7 @@ const SendToken = ({ setIsNext }: SendTokenProps) => {
 
       <div className="w-full h-[1px] bg-[#65656526] mb-5"></div>
 
-      {/* Amount Input Section - Remains the same */}
+      {/* Amount Input Section */}
       <div className="text-center mb-8">
         {amount == null ? (
           <h2
@@ -215,29 +219,17 @@ const SendToken = ({ setIsNext }: SendTokenProps) => {
         </p>
       </div>
 
-      {/* Token Selection Section - Remains the same */}
+      {/* Token Selection Section */}
       <div className="mb-6 relative">
         <label className="text-xl mb-2 block">Token</label>
         <div
           className="bg-[#1E1E1E] h-[70px] border border-transparent transition hover:border-gray-500 p-3 rounded-lg flex items-center justify-between cursor-pointer"
           onClick={() => setIsTokenDropdownOpen(!isTokenDropdownOpen)}
         >
-          {selectedToken.address ? (
-            <div className="flex items-center gap-3">
-              <div className="w-10 h-10 bg-[#474747] rounded-lg flex items-center justify-center text-xl">
-                #
-              </div>
-              <div>
-                <div className="text-lg">{selectedToken.name}</div>
-                <div className="text-gray-400 text-sm">
-                  {`${selectedToken.address.slice(0, 6)}...${selectedToken.address.slice(-4)}`}
-                </div>
-              </div>
-            </div>
-          ) : (
+          {selectedToken && (
             <div className="flex items-center gap-2">
               <img
-                src={selectedToken.logo}
+                src={selectedToken.logoUri}
                 alt={selectedToken.name}
                 className="w-8 h-8"
               />
@@ -258,7 +250,6 @@ const SendToken = ({ setIsNext }: SendTokenProps) => {
           />
         </div>
 
-        {/* Token Dropdown - Remains the same */}
         {isTokenDropdownOpen && (
           <div className="absolute w-full mt-2 bg-[#1E1E1E] rounded-lg overflow-hidden z-10 shadow-lg">
             <div className="p-3 border-b border-[#2c2c2c]">
@@ -273,19 +264,19 @@ const SendToken = ({ setIsNext }: SendTokenProps) => {
             </div>
 
             <div className="max-h-[240px] overflow-y-auto">
-              <div className="p-3 text-sm text-gray-400">Popular Tokens</div>
-              {TOKEN_LIST_DATA.map((token, index) => {
-                const isSelected = selectedToken.symbol === token.symbol;
+              <div className="p-3 text-sm text-gray-400">Supported Tokens</div>
+              {supportedTokenData?.map((token) => {
+                const isSelected = selectedToken?.address === token.address;
                 return (
                   <div
-                    key={index}
+                    key={token.address}
                     className="p-3 px-5 hover:bg-[#2c2c2c] cursor-pointer transition-colors"
-                    onClick={() => handleTokenSelect(token)}
+                    onClick={() => handleTokenSelect(token as any)}
                   >
                     <div className="flex items-center justify-between">
                       <div className="flex items-center gap-3">
                         <img
-                          src={token.logo}
+                          src={token.logoUri}
                           alt={token.name}
                           className="w-8 h-8"
                         />
@@ -310,7 +301,7 @@ const SendToken = ({ setIsNext }: SendTokenProps) => {
         )}
       </div>
 
-      {/* Recipient Selection Section - Updated */}
+      {/* Recipient Selection Section */}
       <div className="mb-6 relative">
         <label className="text-xl mb-2 block">Recipient Wallet</label>
         <div
@@ -343,7 +334,6 @@ const SendToken = ({ setIsNext }: SendTokenProps) => {
           />
         </div>
 
-        {/* Address Book Dropdown */}
         {isRecipientDropdownOpen && (
           <div className="absolute w-full mt-2 bg-[#1E1E1E] rounded-lg overflow-hidden z-10 shadow-lg">
             <div className="p-3 border-b border-[#2c2c2c]">
