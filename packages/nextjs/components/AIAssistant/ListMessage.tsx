@@ -1,7 +1,7 @@
 "use client";
 
 import Image from "next/image";
-import { TransactionInfo } from "./TransactionInfo";
+import { TransactionInfoBatch, TransactionInfoSingle } from "./TransactionInfo";
 import { useAIAssistantState } from "~~/services/store/assistant";
 import { useEffect, useRef } from "react";
 
@@ -76,7 +76,11 @@ export default function ListMessage() {
             </div>
             {message.transaction && (
               <div className="ml-12 mt-2">
-                <TransactionInfo />
+                {message.transaction.isBatch ? (
+                  <TransactionInfoBatch transaction={message.transaction} />
+                ) : (
+                  <TransactionInfoSingle transaction={message.transaction} />
+                )}
               </div>
             )}
           </div>

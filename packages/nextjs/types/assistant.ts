@@ -15,6 +15,7 @@ interface TransactionStep {
   data: string;
   selector?: string;
   calldata?: string[];
+  entrypoint?: string;
 }
 
 interface Transaction {
@@ -22,6 +23,15 @@ interface Transaction {
   steps: TransactionStep[];
   estimatedFee?: string;
   multicallData?: Call[];
+  isBatch?: boolean;
+  subTransactions?: Transaction[];
+  receiver?: string;
+  toAmount?: string;
+  fromToken: {
+    address: string;
+    symbol: string;
+    decimals: number;
+  };
 }
 
 interface BatchTransaction extends Transaction {
@@ -43,4 +53,11 @@ interface ChatState {
   chatHistories: ChatHistory[];
 }
 
-export type { Message, Transaction, BatchTransaction, ChatHistory, ChatState };
+export type {
+  Message,
+  Transaction,
+  TransactionStep,
+  BatchTransaction,
+  ChatHistory,
+  ChatState,
+};
