@@ -101,14 +101,22 @@ const Send = () => {
         provider,
       );
 
-      // Create transfer call using contract's populate method
       const transferCall = tokenContract.populate("transfer", [
         currentTransaction.recipient.address,
         parseEther(currentTransaction.amount.toString()),
       ]);
 
-      // Add to batch
-      setBatch((prevBatch) => [...prevBatch, transferCall]);
+      // Add metadata along with the transferCall
+      setBatch((prevBatch) => [
+        ...prevBatch,
+        {
+          meta: {
+            ...currentTransaction,
+          },
+          callData: transferCall,
+        },
+      ]);
+
       setOpenBatchedTransaction(true);
       window.scrollTo({ top: 0, behavior: "smooth" });
       toast.success(
@@ -140,7 +148,7 @@ const Send = () => {
           onSubmit={() => {
             if (account && batch.length > 0) {
               account
-                .execute(batch)
+                .execute(batch.map((tx) => tx.callData))
                 .then(() => {
                   toast.success("Batch transactions submitted successfully!");
                   setBatch([]);

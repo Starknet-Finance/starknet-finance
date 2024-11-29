@@ -22,51 +22,12 @@ export const BatchedTransaction = ({
     onRemoveTransaction(index);
   };
 
-  // Convert Contract calls to display format
-  const formatTransactions = (transactions: any[]) => {
-    return transactions.map((tx, index) => ({
+  const formatTransactions = (batch: any[]) => {
+    return batch.map((tx, index) => ({
       id: `tx-${index}`,
-      token: {
-        symbol:
-          tx._contract.address ===
-          "0x49d36570d4e46f48e99674bd3fcc84644ddd6b96f7c741b1562b82f9e004dc7"
-            ? "ETH"
-            : tx._contract.address ===
-                "0x53c91253bc9682c04929ca02ed00b3e423f6710d2ee7e0d5ebb06f3ecf368a8"
-              ? "USDC"
-              : tx._contract.address ===
-                  "0x68f5c6a61780768455de69077e07e89787839bf8166decfbf92b645209c0fb8"
-                ? "USDT"
-                : "Unknown",
-        logo:
-          tx._contract.address ===
-          "0x49d36570d4e46f48e99674bd3fcc84644ddd6b96f7c741b1562b82f9e004dc7"
-            ? "/eth.svg"
-            : tx._contract.address ===
-                "0x53c91253bc9682c04929ca02ed00b3e423f6710d2ee7e0d5ebb06f3ecf368a8"
-              ? "/usdc.svg"
-              : tx._contract.address ===
-                  "0x68f5c6a61780768455de69077e07e89787839bf8166decfbf92b645209c0fb8"
-                ? "/usdt.svg"
-                : "/token-placeholder.png",
-        name:
-          tx._contract.address ===
-          "0x49d36570d4e46f48e99674bd3fcc84644ddd6b96f7c741b1562b82f9e004dc7"
-            ? "Ethereum"
-            : tx._contract.address ===
-                "0x53c91253bc9682c04929ca02ed00b3e423f6710d2ee7e0d5ebb06f3ecf368a8"
-              ? "USD Coin"
-              : tx._contract.address ===
-                  "0x68f5c6a61780768455de69077e07e89787839bf8166decfbf92b645209c0fb8"
-                ? "Tether"
-                : "Unknown Token",
-        address: tx._contract.address,
-      },
-      amount: Number(tx.calldata[1]) / 1e18, // Convert from wei
-      recipient: {
-        name: `Recipient ${index + 1}`,
-        address: tx.calldata[0],
-      },
+      token: tx.meta.token,
+      amount: tx.meta.amount,
+      recipient: tx.meta.recipient,
       canRemove: true,
     }));
   };
