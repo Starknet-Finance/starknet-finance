@@ -12,6 +12,15 @@ const nextConfig = {
     config.externals.push("pino-pretty", "lokijs", "encoding");
     return config;
   },
+  async redirects() {
+    return [
+      {
+        source: "/",
+        destination: "/overview",
+        permanent: true,
+      },
+    ];
+  },
 };
 
 export default nextConfig;

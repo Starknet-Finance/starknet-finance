@@ -1,3 +1,4 @@
+/* eslint-disable react/no-unescaped-entities */
 import Image from "next/image";
 import React, { useState } from "react";
 import SelectTokenList from "../../_components/SelectTokenList";
@@ -82,8 +83,14 @@ const TransactionDetail = ({ label, value }: TransactionDetailProps) => (
 
 const SwapHeader = () => (
   <div className="flex flex-col">
-    <div className="flex items-center gap-3">
-      <img src="/arrow-narrow-up.png" alt="swap direction" className="-mt-2" />
+    <div className="flex items-center gap-2">
+      <Image
+        src="/arrow-narrow-up.png"
+        alt="swap direction"
+        className="-mt-2"
+        width={22}
+        height={22}
+      />
       <h1 className="text-xl font-bold gradient-text uppercase">swap tokens</h1>
     </div>
     <p className="text-[#FFFFFF80] text-sm">
