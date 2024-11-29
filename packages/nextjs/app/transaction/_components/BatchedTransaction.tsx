@@ -105,7 +105,7 @@ export const BatchedTransaction = ({
               : "bg-gray-600 cursor-not-allowed"
           }`}
         >
-          Confirm batch ({transactions.length})
+          Review batch ({transactions.length})
         </button>
       </div>
     </div>
