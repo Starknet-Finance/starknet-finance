@@ -1,3 +1,4 @@
+/* eslint-disable react/no-unescaped-entities */
 import Image from "next/image";
 type Transaction = {
   id: number;
@@ -7,6 +8,8 @@ type Transaction = {
   toAmount?: number;
   toToken?: string;
   date: string;
+  sendTo: string;
+  status: "Succeed" | "Failed";
 };
 const transactions: Transaction[] = [
   {
@@ -15,6 +18,8 @@ const transactions: Transaction[] = [
     amount: 12000,
     token: "USDT",
     date: "25/11/2024, 07:15",
+    sendTo: "0xd3...1d4f",
+    status: "Succeed",
   },
   {
     id: 2,
@@ -22,6 +27,8 @@ const transactions: Transaction[] = [
     amount: 7159,
     token: "USDT",
     date: "22/11/2024, 23:59",
+    sendTo: "0xd3...1d4f",
+    status: "Succeed",
   },
   {
     id: 3,
@@ -31,6 +38,8 @@ const transactions: Transaction[] = [
     toAmount: 0.15272,
     toToken: "BTC",
     date: "15/11/2024, 16:30",
+    sendTo: "0xd3...1d4f",
+    status: "Failed",
   },
   {
     id: 4,
@@ -38,6 +47,8 @@ const transactions: Transaction[] = [
     amount: 12000,
     token: "USDT",
     date: "10/11/2024, 14:20",
+    sendTo: "0xd3...1d4f",
+    status: "Failed",
   },
   {
     id: 5,
@@ -45,13 +56,15 @@ const transactions: Transaction[] = [
     amount: 4159,
     token: "USD",
     date: "05/11/2024, 09:45",
+    sendTo: "0xd3...1d4f",
+    status: "Failed",
   },
 ];
 export default function TransactionTable() {
   return (
     <div className="border border-[#0b0b0b] bg-black rounded-xl p-6 h-full">
       <div className="flex justify-between items-center mb-6">
-        <div className="">
+        <div>
           <div className="flex gap-2">
             <Image src="/info.svg" width={14} height={14} alt="icon" />
             <h3 className="text-xl gradient-text font-bold">
@@ -62,6 +75,7 @@ export default function TransactionTable() {
             Lorem Ipsum has been the industry's standard
           </p>
         </div>
+
         <div className="relative w-[50%]">
           <input
             type="text"
@@ -73,27 +87,31 @@ export default function TransactionTable() {
           </span>
         </div>
       </div>
-
+      <div className="flex items-center gap-4 pb-2 my-4 border-b border-[#65656580]">
+        <p className="text-sm cursor-pointer">History</p>
+        <p className="text-sm text-[#3D3D3D] cursor-pointer">
+          Pending Transaction
+        </p>
+      </div>
       {/* Transactions List */}
       <div className="space-y-4">
         {transactions.map((tx) => (
-          <div
-            key={tx.id}
-            className="flex items-center justify-between hover:bg-gray-800/30 p-2 rounded-lg"
-          >
-            <div className="flex items-center gap-4">
-              <span className="text-gray-500">NO.{tx.id}</span>
-              <span className="w-[100px] text-center  transaction-type-bg transaction-type-border px-4 py-1 rounded-lg">
+          <div key={tx.id} className="hover:bg-gray-800/30 p-2 rounded-lg">
+            <div className="grid grid-cols-12 items-center gap-1">
+              <span className="text-[#666] col-span-1">
+                NO.<a className="text-[#D56AFF] no-underline">{tx.id}</a>
+              </span>
+              <span className="col-span-2 text-center transaction-type-bg transaction-type-border px-4 py-1 rounded-lg">
                 {tx.type}
               </span>
-              <div className="flex items-center gap-2">
+              <div className="col-span-3 flex items-center gap-2">
                 <div className="bg-emerald-500 w-6 h-6 rounded-full flex items-center justify-center">
                   {tx.token === "USDT" ? "T" : "$"}
                 </div>
                 <span>{tx.amount.toLocaleString()}</span>
                 {tx.type === "Swap" && (
                   <>
-                    <span className="text-gray-500">to</span>
+                    <span className="text-[#C0C0C0]">to</span>
                     <div className="bg-orange-500 w-6 h-6 rounded-full flex items-center justify-center">
                       ₿
                     </div>
@@ -101,10 +119,21 @@ export default function TransactionTable() {
                   </>
                 )}
               </div>
-            </div>
-            <div className="flex items-center gap-4">
-              <span className="text-gray-500">{tx.date}</span>
-              <span className="text-gray-500">›</span>
+              <div className="col-span-3">
+                <p className="font-medium">
+                  To: <span>{tx.sendTo}</span>
+                </p>
+              </div>
+              <span className="col-span-2 text-[#C0C0C0] text-sm">
+                {tx.date}
+              </span>
+              <div className="col-span-1">
+                <p
+                  className={`${tx.status === "Succeed" ? "text-[#6CFF85] bg-[#007F1E36]" : "text-[#FF6C6F] bg-[#7F000236]"} text-center rounded-md px-1.5 py-1 font-bold w-full`}
+                >
+                  {tx.status}
+                </p>
+              </div>
             </div>
           </div>
         ))}

@@ -5,6 +5,9 @@ import React from "react";
 import Image from "next/image";
 import { useRouter } from "next/navigation";
 import { HeaderActions } from "~~/components/HeaderActions";
+import { Routes } from "~~/utils/Routes";
+import TransactionButtons from "~~/components/transactions/TransactionButtons";
+import TransactionTable from "../transaction/_components/TransactionTable";
 
 type Transaction = {
   id: number;
@@ -111,94 +114,14 @@ const Overview = () => {
           </p>
         </div>
         {/* Action Buttons */}
-        <div className="flex items-end gap-4 ">
-          <button className="w-[130px] flex justify-center button-bg px-6 py-3 rounded-lg items-center gap-2">
-            <span className="mr-2">
-              <Image src="/down.svg" width={10} height={10} alt="icon" />
-            </span>{" "}
-            Receive
-          </button>
-          <button
-            onClick={() => router.push("/send")}
-            className="w-[130px] button-bg px-6 py-3 rounded-lg flex justify-center items-center gap-2"
-          >
-            <span className="mr-2">
-              <Image src="/up.svg" width={10} height={10} alt="icon" />
-            </span>{" "}
-            Send
-          </button>
-          <button className="w-[130px] button-bg px-6 py-3 rounded-lg flex justify-center items-center gap-2">
-            <span className="mr-2">
-              <Image src="/swap.svg" width={14} height={14} alt="icon" />
-            </span>{" "}
-            Swap
-          </button>
-        </div>
+        <TransactionButtons />
       </div>
 
       {/* Main Content Grid */}
       <div className="grid grid-cols-3 gap-6">
         <div className="col-span-2 bg-black rounded-xl p-6">
-          <div className="flex justify-between items-center mb-6">
-            <div className="flex items-center gap-2">
-              <span>
-                <Image src="/info.svg" width={24} height={24} alt="icon" />
-              </span>
-              <h3 className="text-2xl gradient-text font-bold">
-                PENDING TRANSACTIONS
-              </h3>
-            </div>
-            <div className="relative w-[30%]">
-              <input
-                type="text"
-                placeholder="Search token"
-                className="bg-gray-800/50 rounded-lg px-4 py-4 w-full"
-              />
-              <span className="absolute right-4 top-1/2 -translate-y-1/2 text-gray-400">
-                ⌘ + K
-              </span>
-            </div>
-          </div>
-
-          <p className="text-gray-500 mb-6">
-            Lorem Ipsum has been the industry's standard
-          </p>
-
           {/* Transactions List */}
-          <div className="space-y-4">
-            {transactions.map((tx) => (
-              <div
-                key={tx.id}
-                className="flex items-center justify-between hover:bg-gray-800/30 p-2 rounded-lg"
-              >
-                <div className="flex items-center gap-4">
-                  <span className="text-gray-500">NO.{tx.id}</span>
-                  <span className="w-[100px] text-center  transaction-type-bg transaction-type-border px-4 py-1 rounded-lg">
-                    {tx.type}
-                  </span>
-                  <div className="flex items-center gap-2">
-                    <div className="bg-emerald-500 w-6 h-6 rounded-full flex items-center justify-center">
-                      {tx.token === "USDT" ? "T" : "$"}
-                    </div>
-                    <span>{tx.amount.toLocaleString()}</span>
-                    {tx.type === "Swap" && (
-                      <>
-                        <span className="text-gray-500">to</span>
-                        <div className="bg-orange-500 w-6 h-6 rounded-full flex items-center justify-center">
-                          ₿
-                        </div>
-                        <span>{tx.toAmount}</span>
-                      </>
-                    )}
-                  </div>
-                </div>
-                <div className="flex items-center gap-4">
-                  <span className="text-gray-500">{tx.date}</span>
-                  <span className="text-gray-500">›</span>
-                </div>
-              </div>
-            ))}
-          </div>
+          <TransactionTable />
         </div>
 
         {/* Balance Section */}

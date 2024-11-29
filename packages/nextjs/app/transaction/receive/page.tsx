@@ -1,12 +1,13 @@
 "use client";
 
 import React from "react";
+import { useRouter } from "next/navigation";
 import { HeaderActions } from "~~/components/HeaderActions";
 import TransactionTable from "../_components/TransactionTable";
-import SwapToken from "./_components/SwapToken";
 import TransactionButtons from "~~/components/transactions/TransactionButtons";
+import ReceiveToken from "./_component/ReceiveToken";
 
-const Swap = () => {
+const Receive = () => {
   return (
     <div className="p-8 min-h-screen relative">
       {/* Header Section */}
@@ -39,11 +40,11 @@ const Swap = () => {
         </div>
         {/* Balance Section */}
         <div className="bg-black/40 rounded-xl">
-          <SwapToken />
+          <ReceiveToken />
         </div>
       </div>
     </div>
   );
 };
 
-export default Swap;
+export default Receive;

@@ -15,9 +15,8 @@ const Wallet = ({
     connector: Connector,
   ) => void;
 }) => {
-  const [clicked, setClicked] = useState(false);
+  const [_, setClicked] = useState(false);
   const { resolvedTheme } = useTheme();
-  const isDarkMode = resolvedTheme === "dark";
 
   // connector has two : dark and light icon
   const icon =
@@ -27,25 +26,24 @@ const Wallet = ({
         : (connector.icon.light as string)
       : (connector.icon as string);
   return (
-    <button
-      className={`flex gap-4 items-center text-neutral  rounded-[4px] p-3 transition-all ${isDarkMode ? "hover:bg-[#385183] border-[#4f4ab7]" : "hover:bg-slate-200 border-[#5c4fe5]"} border ${clicked ? "bg-ligth" : ""}`}
-      onClick={(e) => {
+    <div
+      className="bg-white cursor-pointer rounded-md flex flex-col items-center justify-center w-[180px] h-[130px]"
+      onClick={(e: any) => {
         setClicked(true);
         handleConnectWallet(e, connector);
       }}
     >
-      <div className="h-[1.5rem] w-[1.5rem] rounded-[5px]">
-        <Image
-          alt={connector.name}
-          loader={loader}
-          src={icon}
-          width={70}
-          height={70}
-          className="h-full w-full object-cover rounded-[5px]"
-        />
-      </div>
-      <span className=" text-start m-0">{connector.name}</span>
-    </button>
+      <Image
+        alt={connector.name}
+        loader={loader}
+        src={icon}
+        width={50}
+        height={50}
+      />
+      <span className="text-[#111928] font-bold m-0 mt-3">
+        {connector.name}
+      </span>
+    </div>
   );
 };
 

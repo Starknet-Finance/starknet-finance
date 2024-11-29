@@ -124,6 +124,18 @@
   color: #d56aff;
 }
 
+.qrcode {
+  border-radius: 0px 0px 20px 20px;
+  background: linear-gradient(180deg, #efaeff 0%, #161616 100%);
+  filter: blur(0px);
+  background-position-y: bottom;
+}
+
+.connect-wallet-modal {
+  border-radius: 8.986px;
+  background: var(--Background, linear-gradient(180deg, #17083f 0%, #000 100%));
+}
+
 @keyframes slideIn {
   from {
     transform: translateX(100%);

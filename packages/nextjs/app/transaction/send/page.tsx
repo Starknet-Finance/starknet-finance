@@ -17,6 +17,7 @@ import toast from "react-hot-toast";
 import { parseEther } from "ethers";
 import scaffoldConfig from "~~/scaffold.config";
 
+
 interface TransactionData {
   amount: number;
   token: {

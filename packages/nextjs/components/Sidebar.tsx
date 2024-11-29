@@ -141,7 +141,7 @@ export default function Sidebar() {
   };
 
   return (
-    <div className="h-full dashboard w-full flex flex-col gap-6">
+    <div className="h-full dashboard w-full flex flex-col gap-6 overflow-y-auto">
       <div className="flex items-center justify-between">
         <div className="flex items-center gap-1">
           <Image src={"/logo-app.svg"} alt="logo" width={20} height={30} />

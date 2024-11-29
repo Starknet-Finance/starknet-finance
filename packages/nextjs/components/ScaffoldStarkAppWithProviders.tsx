@@ -16,9 +16,9 @@ const ScaffoldStarkApp = ({ children }: { children: React.ReactNode }) => {
   const isDarkMode = resolvedTheme === "dark";
   return (
     <>
-      <div className="flex h-full min-h-screen bg-black">
-        <div className="w-[15%]">
-          <div className="fixed top-0 w-[15%] h-full">
+      <div className="flex h-full min-h-screen bg-black gap-1">
+        <div className="w-[272px]">
+          <div className="fixed top-0 left-0  h-full">
             <Sidebar />
           </div>
         </div>
