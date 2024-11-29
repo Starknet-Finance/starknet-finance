@@ -1,43 +1,46 @@
 import Image from "next/image";
-import { useRouter } from "next/navigation";
+import { useRouter, usePathname } from "next/navigation";
 import { useState } from "react";
+import { Routes } from "~~/utils/Routes";
+import { OverViewIcon } from "./Icons/OverviewIcon";
+import { AddressBookIcon } from "./Icons/AddressBookIcon";
+import { MutilOwnerIcon } from "./Icons/MutilOwnerIcon";
+import { AiAssistantIcon } from "./Icons/AiAssistantIcon";
+import { StakeIcon } from "./Icons/StakeIcon";
+import { TransactionIcon } from "./Icons/TransactionIcon";
+import { BatchIcon } from "./Icons/BatchIcon";
 
-const MENU_ITEM = [
+export const MENU_ITEM = [
   {
     groupMenu: {
       name: "Actions",
       listMenu: [
         {
-          icon: "/overview.svg",
+          icon: <OverViewIcon />,
           title: "Overview",
-          active: true,
           isComingSoon: false,
-          path: "/overview",
+          path: Routes.overview,
         },
         {
-          icon: "/address-book-icon.svg",
+          icon: <AddressBookIcon />,
           title: "Address Book",
-          active: false,
           isComingSoon: false,
-          path: "/address-book",
+          path: Routes.addressBook,
         },
         {
-          icon: "/mutil-owner-icon.svg",
+          icon: <MutilOwnerIcon />,
           title: "Multi Owner",
-          active: false,
           isComingSoon: true,
         },
         {
-          icon: "/ai-assistant-icon.svg",
+          icon: <AiAssistantIcon />,
           title: "AI Assistant",
-          active: false,
           isComingSoon: false,
-          path: "/ai-assistant",
+          path: Routes.aiAssistant,
         },
         {
-          icon: "/stake-icon.svg",
+          icon: <StakeIcon />,
           title: "Stake",
-          active: false,
           isComingSoon: true,
         },
       ],
@@ -48,32 +51,34 @@ const MENU_ITEM = [
       name: "Actions",
       listMenu: [
         {
-          icon: "/transaction-icon.svg",
+          icon: <TransactionIcon />,
           title: "Transaction",
-          active: false,
           isComingSoon: false,
           subMenu: [
             {
               title: "Send",
-              active: false,
-              path: "/send",
+              path: Routes.transactionSend,
             },
             {
               title: "Receive",
-              active: false,
+              path: Routes.transactionReceive,
             },
             {
               title: "Swap",
-              active: false,
+              path: Routes.transactionSwap,
+            },
+            {
+              title: "NFT Send",
+              path: "/nft-send",
+              isComingSoon: true,
             },
           ],
         },
         {
-          icon: "/batch-icon.svg",
+          icon: <BatchIcon />,
           title: "Batch",
-          active: false,
           isComingSoon: false,
-          path: "/transaction-batch",
+          path: Routes.transactionBatch,
         },
       ],
     },
@@ -81,15 +86,14 @@ const MENU_ITEM = [
 ];
 
 interface MenuItem {
-  icon: string;
+  icon: any;
   title: string;
-  active: boolean;
   isComingSoon?: boolean;
   path?: string;
   subMenu?: {
     title: string;
-    active: boolean;
     path?: string;
+    isComingSoon?: boolean;
   }[];
 }
 
@@ -113,7 +117,7 @@ const Actions = ({ name, icon }: { name: string; icon: string }) => {
 
 export default function Sidebar() {
   const router = useRouter();
-
+  const pathname = usePathname();
   const [openSubmenu, setOpenSubmenu] = useState<string | null>(null);
 
   const toggleSubmenu = (menuTitle: string) => {
@@ -124,6 +128,16 @@ export default function Sidebar() {
     if (path && !hasSubMenu) {
       router.push(path);
     }
+  };
+
+  const isActive = (menuPath?: string) => {
+    if (!menuPath) return false;
+    return pathname === menuPath;
+  };
+
+  const hasActiveSubMenu = (subMenu?: { path?: string }[]) => {
+    if (!subMenu) return false;
+    return subMenu.some((item) => isActive(item.path));
   };
 
   return (
@@ -162,18 +176,13 @@ export default function Sidebar() {
                       }
                     }}
                     className={`cursor-pointer flex items-center justify-between py-3 px-3.5 rounded-lg ${
-                      menu.active
+                      isActive(menu.path) || hasActiveSubMenu(menu.subMenu)
                         ? "bg-[#252525] text-white font-semibold"
                         : "text-[#9BA1B0]"
                     }`}
                   >
                     <div className="flex gap-2.5">
-                      <Image
-                        src={menu.icon}
-                        width={24}
-                        height={24}
-                        alt="icon"
-                      />
+                      {menu.icon}
                       <span className="text-[15px]">{menu.title}</span>
                     </div>
                     <div className="flex items-center gap-2">
@@ -199,13 +208,16 @@ export default function Sidebar() {
                         <div
                           onClick={() => handleNavigation(subItem.path, false)}
                           key={subItem.title}
-                          className={`cursor-pointer py-2 px-3 rounded-lg hover:bg-[#252525] ${
-                            subItem.active
-                              ? "text-white font-semibold"
-                              : "text-[#9BA1B0]"
+                          className={`cursor-pointer text-[#9BA1B0] py-2 px-3 rounded-lg hover:bg-[#252525] ${
+                            isActive(subItem.path) ? "bg-[#252525]" : ""
                           }`}
                         >
-                          {subItem.title}
+                          <div className="flex items-center justify-between">
+                            {subItem.title}
+                            {subItem.isComingSoon && (
+                              <p className="comingsoon">Coming Soon</p>
+                            )}
+                          </div>
                         </div>
                       ))}
                     </div>

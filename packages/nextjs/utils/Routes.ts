@@ -4,4 +4,6 @@ export const Routes = {
   transactionSend: "/transaction/send",
   transactionReceive: "/transaction/receive",
   addressBook: "/address-book",
+  overview: "/overview",
+  aiAssistant: "/ai-assistant",
 };
