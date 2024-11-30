@@ -2,133 +2,145 @@
 @import "tailwindcss/components";
 @import "tailwindcss/utilities";
 
-:root,
-[data-theme] {
-  background: oklch(var(--b2));
+.bg {
+  background: linear-gradient(180deg, #17083f 0%, #000000 100%);
+  position: relative;
 }
 
-body {
-  min-height: 100vh;
-}
-
-h1,
-h2,
-h3,
-h4 {
-  margin-bottom: 0.5rem;
-  line-height: 1;
-}
-
-p {
-  margin: 1rem 0;
-}
-
-.btn {
-  @apply shadow-md;
-}
-
-.modal-box {
-  @apply min-h-[20rem] max-w-[25rem];
-}
-.btn.btn-ghost {
-  @apply shadow-none;
-}
-
-.circle-gradient {
-  border-radius: 630px;
-  background: #bd93f1;
-  filter: blur(229px);
+.bg::before {
+  content: "";
   position: absolute;
   top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: url("/bg.png") top left/cover no-repeat;
+  z-index: 1;
+  pointer-events: none;
 }
 
-.circle-gradient-blue {
-  border-radius: 630px;
-  background: #a6e8fe;
-  filter: blur(250px);
-  position: absolute;
-  top: 0;
-  right: 0;
+.button-bg {
+  background: linear-gradient(180deg, #552cd1 0%, #35176b 100%);
 }
 
-.border-gradient {
-  border: 1px solid #5c4fe5;
+/* Make sure your content is above the background */
+.bg > * {
+  position: relative;
+  z-index: 2;
+}
+.gradient-text {
+  background: linear-gradient(
+    90deg,
+    rgba(221, 142, 255, 1) 0%,
+    rgba(255, 255, 255, 1) 100%
+  );
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+  -webkit-text-fill-color: transparent;
 }
 
-.bg-modal {
-  backdrop-filter: blur(7.449999809265137px);
+.transaction-type-bg {
+  background: var(--Control-Active, rgba(248, 248, 248, 0.05));
+  background-blend-mode: luminosity;
 }
 
-.custom::after {
-  position: absolute !important;
-  display: block !important;
-  height: 0.5rem !important;
-  width: 0.5rem !important;
-  top: 1rem !important;
-  right: 1.4rem !important;
-  transform: translateY(-100%) rotate(45deg) !important;
-  transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1) !important;
-  content: "" !important;
-  box-shadow: 2px 2px !important;
-  pointer-events: none !important;
+.transaction-type-border {
+  border: 0.57px solid;
+
+  border-image-source: linear-gradient(
+    158.39deg,
+    rgba(255, 255, 255, 0.1) 14.19%,
+    rgba(255, 255, 255, 2.5e-5) 50.59%,
+    rgba(255, 255, 255, 2.5e-5) 68.79%,
+    rgba(255, 255, 255, 0.025) 105.18%
+  );
 }
 
-@layer utilities {
-  .clip-corner {
-    clip-path: polygon(0 0, calc(100% - 1rem) 0, 100% 1rem, 100% 100%, 0 100%);
+.next-button-bg {
+  background: linear-gradient(180deg, #552cd1 0%, #35176b 100%);
+}
+
+.customize-caret {
+  caret-color: rgba(213, 106, 255, 1);
+}
+
+.create-term-btn {
+  border-radius: 8px;
+  background: linear-gradient(180deg, #552cd1 0%, #35176b 100%);
+  padding: 10px 24px;
+  cursor: pointer;
+}
+
+.dashboard .starknet-finace-text {
+  color: #d56aff;
+  font-family: Bahnschrift;
+  font-size: 20px;
+  font-style: normal;
+  font-weight: 700;
+  line-height: 110%;
+  text-transform: uppercase;
+}
+
+.dashboard {
+  background: #1c1c1c;
+  padding: 14px;
+  border-radius: 8px;
+  height: 100vh;
+  width: 272px;
+}
+
+.dashboard .actions div:first-child {
+  border-top-right-radius: 8px;
+  border-top-left-radius: 8px;
+}
+
+.dashboard .actions div:last-child {
+  border-bottom-right-radius: 8px;
+  border-bottom-left-radius: 8px;
+}
+
+.dashboard .comingsoon {
+  color: #000;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  height: 21px;
+  width: 78px;
+  font-size: 11px;
+  font-weight: 600;
+  text-align: center;
+  border-radius: 7px;
+  background: linear-gradient(90deg, #dd8eff 0%, #fff 100%);
+}
+
+.ai-assistant-card {
+  border-radius: 5px;
+  background: rgba(136, 136, 136, 0.15);
+  background-blend-mode: luminosity;
+}
+
+.temp {
+  color: #d56aff;
+}
+
+.qrcode {
+  border-radius: 0px 0px 20px 20px;
+  background: linear-gradient(180deg, #efaeff 0%, #161616 100%);
+  filter: blur(0px);
+  background-position-y: bottom;
+}
+
+.connect-wallet-modal {
+  border-radius: 8.986px;
+  background: var(--Background, linear-gradient(180deg, #17083f 0%, #000 100%));
+}
+
+@keyframes slideIn {
+  from {
+    transform: translateX(100%);
   }
-
-  .clip-corner::before {
-    content: "";
-    position: absolute;
-    top: -1px;
-    right: -1px;
-    width: 1rem;
-    height: 1rem;
-    background: inherit;
-    border-top: 1px solid #8a45fc;
-    border-right: 1px solid #8a45fc;
-    clip-path: polygon(100% 0, 0 0, 100% 100%);
-    z-index: 10;
-  }
-}
-
-.circle-gradient-dark {
-  position: absolute;
-  top: 0;
-  left: 60px;
-  border-radius: 630px;
-  background: #7353d2;
-  filter: blur(229px);
-}
-
-.circle-gradient-blue-dark {
-  border-radius: 630px;
-  background: #0ea9ff;
-  filter: blur(250px);
-  position: absolute;
-  top: 0;
-  right: 0;
-}
-
-@layer utilities {
-  .trapeze {
-    width: 84px;
-    height: 6px;
-    clip-path: polygon(10% 100%, 90% 100%, 100% 0, 0 0);
-    position: relative;
-    background-color: #5c4fe5;
-    position: absolute;
-    top: -1px;
-  }
-  .trapeze::before {
-    content: "";
-    position: absolute;
-    top: -1px;
-    right: -1px;
-    width: 84px;
-    height: 6px;
-    background: inherit;
-    clip-path: polygon(100% 100%, 100% 0, 90% 100%);
+  to {
+    transform: translateX(0);
   }
 }
