@@ -237,6 +237,8 @@ const SwapToken = () => {
   };
 
   const handleAddToBatch = async () => {
+    if (!account) return toast.error("Please connect your wallet");
+
     try {
       if (
         !fromToken.address ||
