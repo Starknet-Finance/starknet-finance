@@ -27,10 +27,6 @@ const TransactionBatch = () => {
       clearTransactions();
     } catch (error: any) {
       console.error("Batch transaction failed:", error);
-      if (error?.message?.includes("Execute failed")) {
-        clearTransactions();
-        return;
-      }
       toast.error("Batch transaction failed. Please try again.");
     }
   };

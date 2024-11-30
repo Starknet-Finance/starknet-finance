@@ -16,7 +16,6 @@ import { universalErc20Abi } from "~~/utils/Constants";
 import toast from "react-hot-toast";
 import { parseEther } from "ethers";
 import scaffoldConfig from "~~/scaffold.config";
-import { notification } from "~~/utils/scaffold-stark";
 import { useTransactionStorage } from "~~/hooks/useTransactionStorage";
 
 interface TransactionData {
@@ -84,10 +83,6 @@ const Send = () => {
     } catch (error: any) {
       console.error("Batch transaction failed:", error);
       // Check if it's the user rejection error
-      if (error?.message?.includes("Execute failed")) {
-        // User rejected transaction - silent fail
-        return;
-      }
       // For all other errors, show error toast
       toast.error("Batch transaction failed. Please try again.");
     }
@@ -129,7 +124,6 @@ const Send = () => {
         `Added ${currentTransaction.amount} ${currentTransaction.token.symbol} transfer to batch`,
       );
 
-      // Reset states
       setCurrentTransaction(null);
       setIsNext(false);
     } catch (error) {
