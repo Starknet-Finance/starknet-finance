@@ -3,25 +3,37 @@
 import Image from "next/image";
 import { HeaderActions } from "~~/components/HeaderActions";
 import { useState } from "react";
-import { TransactionFinanceCardBlack } from "./_component/TransactionFinanceCard";
-
-const LIST_TRANSACTION = [
-  {
-    id: "1",
-    token: { symbol: "USDT", logo: "/usdt.svg" },
-    amount: 1000,
-    recipient: { name: "Jupeng", address: "0x123" },
-  },
-  {
-    id: "2",
-    token: { symbol: "USDT", logo: "/usdt.svg" },
-    amount: 2000,
-    recipient: { name: "Carlos", address: "0x456" },
-  },
-];
+import { useAccount } from "@starknet-react/core";
+import toast from "react-hot-toast";
+import { useTransactionStorage } from "~~/hooks/useTransactionStorage";
+import { notification } from "~~/utils/scaffold-stark";
+import { TransactionFinanceCard } from "../transaction/_components/TransactionFinanceCard";
 
 const TransactionBatch = () => {
   const [expandedId, setExpandedId] = useState<string | null>(null);
+  const { transactions, removeTransaction, clearTransactions } =
+    useTransactionStorage();
+  const { account } = useAccount();
+
+  const handleExecuteBatch = async () => {
+    if (!account || transactions.length === 0) {
+      notification.error("Please connect your wallet and add transactions");
+      return;
+    }
+
+    try {
+      await account.execute(transactions.map((tx) => tx.callData));
+      toast.success("Batch transactions submitted successfully!");
+      clearTransactions();
+    } catch (error: any) {
+      console.error("Batch transaction failed:", error);
+      if (error?.message?.includes("Execute failed")) {
+        clearTransactions();
+        return;
+      }
+      toast.error("Batch transaction failed. Please try again.");
+    }
+  };
   return (
     <div className="p-8 min-h-screen relative">
       {/* Header Section */}
@@ -62,14 +74,17 @@ const TransactionBatch = () => {
             </p>
             <div className="bg-[#656565] h-[1px] w-full mb-3 mt-2 opacity-40"></div>
             <div className="flex flex-col gap-2.5">
-              {LIST_TRANSACTION.map((transaction) => (
-                <TransactionFinanceCardBlack
+              {transactions.map((transaction) => (
+                <TransactionFinanceCard
+                  id={transaction.id}
                   key={transaction.id}
-                  {...transaction}
+                  {...transaction.meta}
                   isExpanded={expandedId === transaction.id}
                   onExpand={(isExpanded) => {
                     setExpandedId(isExpanded ? transaction.id : null);
                   }}
+                  canRemove={true}
+                  onRemove={() => removeTransaction(transaction.id)}
                 />
               ))}
             </div>
@@ -135,7 +150,11 @@ const TransactionBatch = () => {
                 </div>
               </div>
             </div>
-            <button className="flex-1 py-4 rounded-lg w-full text-xl button-bg mt-3.5">
+            <button
+              onClick={handleExecuteBatch}
+              className="flex-1 py-4 rounded-lg w-full text-xl button-bg mt-3.5"
+              disabled={transactions.length === 0}
+            >
               Confirm & Sign
             </button>
           </div>

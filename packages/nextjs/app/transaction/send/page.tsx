@@ -17,6 +17,7 @@ import toast from "react-hot-toast";
 import { parseEther } from "ethers";
 import scaffoldConfig from "~~/scaffold.config";
 import { notification } from "~~/utils/scaffold-stark";
+import { useTransactionStorage } from "~~/hooks/useTransactionStorage";
 
 interface TransactionData {
   amount: number;
@@ -39,7 +40,8 @@ const Send = () => {
     useGlobalState();
   const [currentTransaction, setCurrentTransaction] =
     useState<TransactionData | null>(null);
-  const [batch, setBatch] = useState<any[]>([]);
+  const { transactions, addTransaction, removeTransaction } =
+    useTransactionStorage();
   const { account } = useAccount();
 
   const handleTransactionSubmit = (transaction: TransactionData) => {
@@ -113,16 +115,13 @@ const Send = () => {
         parseEther(currentTransaction.amount.toString()),
       ]);
 
-      // Add metadata along with the transferCall
-      setBatch((prevBatch) => [
-        ...prevBatch,
-        {
-          meta: {
-            ...currentTransaction,
-          },
-          callData: transferCall,
+      // Add to storage instead of local state
+      addTransaction({
+        meta: {
+          ...currentTransaction,
         },
-      ]);
+        callData: transferCall,
+      });
 
       setOpenBatchedTransaction(true);
       window.scrollTo({ top: 0, behavior: "smooth" });
@@ -139,39 +138,18 @@ const Send = () => {
     }
   };
 
-  const handleRemoveFromBatch = (index: number) => {
-    setBatch((prevBatch) => prevBatch.filter((_, i) => i !== index));
-    toast.success("Transaction removed from batch");
-  };
-
   return (
     <div className="p-8 min-h-screen relative">
       {/* Header Section */}
       <HeaderActions />
+
       {openBatchedTransaction && (
         <BatchedTransaction
-          transactions={batch}
-          onRemoveTransaction={handleRemoveFromBatch}
-          onSubmit={async () => {
-            if (account && batch.length > 0) {
-              try {
-                await account.execute(batch.map((tx) => tx.callData));
-                toast.success("Batch transactions submitted successfully!");
-                setBatch([]);
-                setOpenBatchedTransaction(false);
-              } catch (error: any) {
-                console.error("Batch transaction failed:", error);
-                // Check if it's the user rejection error
-                if (error?.message?.includes("Execute failed")) {
-                  // User rejected transaction - silent fail
-                  return;
-                }
-                // For all other errors, show error toast
-                toast.error("Batch transaction failed. Please try again.");
-              }
-            } else {
-              notification.error("Please connect you wallet");
-            }
+          transactions={transactions}
+          onRemoveTransaction={(id: number) => removeTransaction(id.toString())}
+          onSubmit={() => {
+            setOpenBatchedTransaction(false);
+            router.push(Routes.transactionBatch);
           }}
         />
       )}
