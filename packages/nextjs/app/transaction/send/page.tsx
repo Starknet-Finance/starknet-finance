@@ -16,7 +16,7 @@ import { universalErc20Abi } from "~~/utils/Constants";
 import toast from "react-hot-toast";
 import { parseEther } from "ethers";
 import scaffoldConfig from "~~/scaffold.config";
-
+import { notification } from "~~/utils/scaffold-stark";
 
 interface TransactionData {
   amount: number;
@@ -79,9 +79,15 @@ const Send = () => {
       // Reset states
       setCurrentTransaction(null);
       setIsNext(false);
-    } catch (error) {
-      console.error("Transaction failed:", error);
-      toast.error("Transaction failed. Please try again.");
+    } catch (error: any) {
+      console.error("Batch transaction failed:", error);
+      // Check if it's the user rejection error
+      if (error?.message?.includes("Execute failed")) {
+        // User rejected transaction - silent fail
+        return;
+      }
+      // For all other errors, show error toast
+      toast.error("Batch transaction failed. Please try again.");
     }
   };
 
@@ -146,19 +152,25 @@ const Send = () => {
         <BatchedTransaction
           transactions={batch}
           onRemoveTransaction={handleRemoveFromBatch}
-          onSubmit={() => {
+          onSubmit={async () => {
             if (account && batch.length > 0) {
-              account
-                .execute(batch.map((tx) => tx.callData))
-                .then(() => {
-                  toast.success("Batch transactions submitted successfully!");
-                  setBatch([]);
-                  setOpenBatchedTransaction(false);
-                })
-                .catch((error) => {
-                  console.error("Batch transaction failed:", error);
-                  toast.error("Batch transaction failed. Please try again.");
-                });
+              try {
+                await account.execute(batch.map((tx) => tx.callData));
+                toast.success("Batch transactions submitted successfully!");
+                setBatch([]);
+                setOpenBatchedTransaction(false);
+              } catch (error: any) {
+                console.error("Batch transaction failed:", error);
+                // Check if it's the user rejection error
+                if (error?.message?.includes("Execute failed")) {
+                  // User rejected transaction - silent fail
+                  return;
+                }
+                // For all other errors, show error toast
+                toast.error("Batch transaction failed. Please try again.");
+              }
+            } else {
+              notification.error("Please connect you wallet");
             }
           }}
         />
