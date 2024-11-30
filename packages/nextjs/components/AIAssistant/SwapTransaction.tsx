@@ -30,12 +30,12 @@ const SwapTransaction = ({
 
     // get token uri
     const fromTokenUri = supportedTokens?.content?.find(
-      (token) => token.address === transaction.fromToken.address
+      (token) => token.address === transaction.fromToken.address,
     )?.logoUri;
     setFromTokenUri(fromTokenUri || "");
 
     const toTokenUri = supportedTokens?.content?.find(
-      (token) => token.address === transaction.toToken.address
+      (token) => token.address === transaction.toToken.address,
     )?.logoUri;
     setToTokenUri(toTokenUri || "");
 
@@ -45,7 +45,7 @@ const SwapTransaction = ({
     const addressBookAddress = addressBook?.find(
       (address: any) =>
         getChecksumAddress(address.address) ===
-        getChecksumAddress(transaction.receiver!)
+        getChecksumAddress(transaction.receiver!),
     );
     // Don't set empty string, keep it as null if not found
     setAddressBookAddress(addressBookAddress || null);

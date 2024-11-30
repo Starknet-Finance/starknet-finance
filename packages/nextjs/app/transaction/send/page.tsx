@@ -113,6 +113,7 @@ const Send = () => {
       // Add to storage instead of local state
       addTransaction({
         meta: {
+          type: "transfer",
           ...currentTransaction,
         },
         callData: transferCall,

@@ -11,6 +11,7 @@ import { ethers, formatUnits } from "ethers";
 import { num } from "starknet";
 import toast from "react-hot-toast";
 import { useAccount } from "~~/hooks/useAccount";
+import { useTransactionStorage } from "~~/hooks/useTransactionStorage";
 
 type Token = {
   symbol: string;
@@ -131,7 +132,7 @@ const SwapToken = () => {
     address: "",
   });
   const [selectedTokenType, setSelectedTokenType] = useState<"from" | "to">(
-    "from"
+    "from",
   );
   const [swapFromAmount, setSwapFromAmount] = useState<string>("");
   const [swapToAmount, setSwapToAmount] = useState<string>("");
@@ -142,6 +143,7 @@ const SwapToken = () => {
   const [bestQuote, setBestQuote] = useState<string | null>(null);
   const timeoutRef = useRef<NodeJS.Timeout>();
 
+  const { addTransaction } = useTransactionStorage();
   const { data: supportedTokens, isLoading } = useSupportedTokens();
 
   const handleTokenSelect = (type: "from" | "to") => {
@@ -190,14 +192,14 @@ const SwapToken = () => {
             sellTokenAddress: fromToken.address,
             buyTokenAddress: toToken.address,
             sellAmount: hexValue,
-          })
+          }),
         );
 
         if (response?.length > 0) {
           // set the amount back to number
           const amount = response[0].buyAmount;
           setSwapToAmount(
-            formatUnits(num.hexToDecimalString(amount.toString()), 18)
+            formatUnits(num.hexToDecimalString(amount.toString()), 18),
           );
           setBuyAmountInUSD(response[0].buyAmountInUsd.toString());
           setSellAmountInUSD(response[0].sellAmountInUsd.toString());
@@ -225,12 +227,77 @@ const SwapToken = () => {
         slippage: 0.05,
         includeApprove: true,
         takerAddress: account?.address as string,
-      })
+      }),
     );
     try {
       await account.execute(response?.calls);
     } catch (error) {
       console.log(error);
+    }
+  };
+
+  const handleAddToBatch = async () => {
+    try {
+      if (
+        !fromToken.address ||
+        !toToken.address ||
+        !swapFromAmount ||
+        !swapToAmount ||
+        !bestQuote
+      ) {
+        return toast.error("Please complete the swap details first");
+      }
+
+      // Get token metadata
+      const fromTokenMetadata = supportedTokens?.content?.find(
+        (token) => token.address === fromToken.address,
+      );
+      const toTokenMetadata = supportedTokens?.content?.find(
+        (token) => token.address === toToken.address,
+      );
+
+      // Build the swap transaction
+      const response = await JSON.parse(
+        await buildSwap({
+          quoteId: bestQuote,
+          slippage: 0.05,
+          includeApprove: true,
+          takerAddress: account?.address as string,
+        }),
+      );
+
+      // Add to batch storage
+      addTransaction({
+        meta: {
+          type: "swap",
+          fromToken: {
+            symbol: fromToken.symbol,
+            logo: fromToken.icon,
+            name: fromTokenMetadata?.name || fromToken.symbol,
+            address: fromToken.address,
+            amount: parseFloat(swapFromAmount),
+            amountUSD: parseFloat(sellAmountInUSD),
+          },
+          toToken: {
+            symbol: toToken.symbol,
+            logo: toToken.icon,
+            name: toTokenMetadata?.name || toToken.symbol,
+            address: toToken.address,
+            amount: parseFloat(swapToAmount),
+            amountUSD: parseFloat(buyAmountInUSD),
+          },
+          recipient: {
+            address: account?.address as string,
+            name: "Me",
+          },
+        },
+        callData: response.calls,
+      });
+
+      toast.success("Added swap to batch");
+    } catch (error) {
+      console.error("Failed to add swap to batch:", error);
+      toast.error("Failed to add to batch. Please try again.");
     }
   };
 
@@ -325,17 +392,22 @@ const SwapToken = () => {
         </div>
       </div>
 
-      <button
-        onClick={handleSwap}
-        disabled={!!quoteError || isLoadingQuote}
-        className={`w-full py-3 rounded-lg mt-5 ${
-          quoteError || isLoadingQuote
-            ? "bg-[#474747] opacity-50 cursor-not-allowed"
-            : "bg-[#474747] hover:bg-[#525252]"
-        }`}
-      >
-        {isLoadingQuote ? "Getting best quote..." : "Swap now"}
-      </button>
+      <div className="flex gap-2 mt-5">
+        <button
+          onClick={handleAddToBatch}
+          disabled={!!quoteError || isLoadingQuote}
+          className="flex-1 py-3 rounded-lg text-[#292929] bg-white hover:bg-gray-100"
+        >
+          Add to Batch
+        </button>
+        <button
+          onClick={handleSwap}
+          disabled={!!quoteError || isLoadingQuote}
+          className="flex-1 py-3 rounded-lg button-bg"
+        >
+          Swap now
+        </button>
+      </div>
 
       {quoteError && (
         <div className="mt-2 text-red-500 text-sm text-center">
