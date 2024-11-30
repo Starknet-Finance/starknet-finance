@@ -61,9 +61,11 @@ export const useTransactionStorage = (): UseTransactionStorageReturn => {
       timestamp: Date.now(),
     };
 
-    const updatedTransactions = [...transactions, newTransaction];
-    setStoredTransactions(updatedTransactions);
-    setTransactions(updatedTransactions);
+    setTransactions((prevTransactions) => {
+      const updatedTransactions = [...prevTransactions, newTransaction];
+      setStoredTransactions(updatedTransactions);
+      return updatedTransactions;
+    });
   };
 
   const removeTransaction = (id: string) => {
