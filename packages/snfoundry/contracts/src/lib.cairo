@@ -1,5 +1,9 @@
-mod YourContract;
-#[cfg(test)]
-mod test {
-    mod TestContract;
+mod MultisigFactory;
+mod Multisig;
+mod utils;
+mod MyNFT;
+
+mod interfaces {
+    pub mod IMultisigFactory;
+    pub mod IMultisig;
 }
