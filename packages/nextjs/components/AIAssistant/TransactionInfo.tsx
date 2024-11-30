@@ -191,6 +191,7 @@ export const TransactionInfoSingle = ({
   const { account } = useAccount();
   const [status, setStatus] = useState("");
   const { addTransaction } = useTransactionStorage();
+  const { data: supportedTokens } = useSupportedTokens();
 
   const handleOnConfirm = async () => {
     try {
@@ -204,18 +205,33 @@ export const TransactionInfoSingle = ({
 
   const handleAddToBatch = async () => {
     try {
+      // Get token metadata from supportedTokens
+      const tokenMetadata = supportedTokens?.content?.find(
+        (token) => token?.address === transaction.fromToken.address,
+      );
+
+      // Get recipient name from address book if available
+      const addressBook = JSON.parse(
+        localStorage.getItem("addressBook") || "[]",
+      );
+      const recipientData = addressBook.find(
+        (addr: any) =>
+          getChecksumAddress(addr.address) ===
+          getChecksumAddress(transaction.receiver!),
+      );
+
       // For single transactions
       addTransaction({
         meta: {
           amount: parseFloat(ethers.formatEther(transaction.toAmount || "0")),
           token: {
             symbol: transaction.fromToken.symbol,
-            logo: "", // You'll need to get this from supportedTokens
-            name: transaction.fromToken.symbol,
+            logo: tokenMetadata?.logoUri || "",
+            name: tokenMetadata?.name || transaction.fromToken.symbol,
             address: transaction.fromToken.address,
           },
           recipient: {
-            name: "", // You might want to get this from addressBook
+            name: recipientData?.name || "",
             address: transaction.receiver || "",
           },
         },
@@ -512,6 +528,7 @@ export const TransactionInfoBatch = ({
   const { account } = useAccount();
   const [status, setStatus] = useState("");
   const { addTransaction } = useTransactionStorage();
+  const { data: supportedTokens } = useSupportedTokens();
 
   const handleOnConfirm = async () => {
     try {
@@ -525,19 +542,36 @@ export const TransactionInfoBatch = ({
 
   const handleAddToBatch = async () => {
     try {
+      // Get address book data
+      const addressBook = JSON.parse(
+        localStorage.getItem("addressBook") || "[]",
+      );
+
       // For batch transactions, add each sub-transaction
       transaction.subTransactions?.forEach((subTx) => {
+        // Get token metadata from supportedTokens
+        const tokenMetadata = supportedTokens?.content?.find(
+          (token) => token?.address === subTx.fromToken.address,
+        );
+
+        // Get recipient data from address book
+        const recipientData = addressBook.find(
+          (addr: any) =>
+            getChecksumAddress(addr.address) ===
+            getChecksumAddress(subTx.receiver!),
+        );
+
         addTransaction({
           meta: {
             amount: parseFloat(ethers.formatEther(subTx.toAmount || "0")),
             token: {
               symbol: subTx.fromToken.symbol,
-              logo: "", // You'll need to get this from supportedTokens
-              name: subTx.fromToken.symbol,
+              logo: tokenMetadata?.logoUri || "",
+              name: tokenMetadata?.name || subTx.fromToken.symbol,
               address: subTx.fromToken.address,
             },
             recipient: {
-              name: "", // You might want to get this from addressBook
+              name: recipientData?.name || "",
               address: subTx.receiver || "",
             },
           },
