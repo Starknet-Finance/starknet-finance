@@ -40,20 +40,18 @@ export default function FormMessage() {
         sender: message.sender,
         content: message.content,
       }));
-
-      if (messages.length === 0) {
-        const addressBook = localStorage.getItem("addressBook");
-        const addressBookData = addressBook
-          ? `Here is the current connected account's address book: ${addressBook}, if user ask to do something with address book, you can use this data, for example, send 100 USDC to [name] in address book, you can read that address from name and construct the transaction`
-          : "";
-        tempMessages = [
-          {
-            sender: "user",
-            content: addressBookData,
-          },
-          ...tempMessages,
-        ];
-      }
+      let addressBookData = "";
+      const addressBook = localStorage.getItem("addressBook");
+      addressBookData = addressBook
+        ? `Here is the current connected account's address book: ${addressBook}, when the receiver is a name and you cant find it in the address book, give me error, else if user ask to do something with address book, you can use this data, for example, send 100 USDC to [name] in address book, you can read that address from name and construct the transaction`
+        : "";
+      tempMessages = [
+        {
+          sender: "user",
+          content: addressBookData,
+        },
+        ...tempMessages,
+      ];
 
       setMessages((prevMessages) => [
         ...prevMessages,
@@ -164,7 +162,7 @@ export default function FormMessage() {
   };
 
   return (
-    <div className="bg-white flex p-4 rounded-b-lg">
+    <div className="bg-white fixed bottom-0 w-[67.5vw] flex p-4 rounded-b-lg">
       <input
         className="bg-white outline-none px-3 flex-1 text-[#000]"
         placeholder="Ex: Transfer 100 USDT to address “0xd3j4333nejkjd87f76aa88vg9b”"

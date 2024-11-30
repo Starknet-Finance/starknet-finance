@@ -9,6 +9,8 @@ import { useAIAssistantState } from "~~/services/store/assistant";
 const AIAssistant = () => {
   const { messages } = useAIAssistantState();
 
+  console.log(messages);
+
   return (
     <div className="h-full">
       {messages.length <= 0 ? (
