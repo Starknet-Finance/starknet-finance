@@ -21,7 +21,6 @@ interface Transaction {
   isBatch?: boolean;
   subTransactions?: Transaction[];
   receiver?: string;
-  toAmount?: string;
   fromToken: {
     address: string;
     symbol: string;

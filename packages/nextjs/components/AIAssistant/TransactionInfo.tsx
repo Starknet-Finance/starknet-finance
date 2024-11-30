@@ -9,7 +9,7 @@ import { getChecksumAddress } from "starknet";
 import useSupportedTokens from "~~/hooks/useSupportedTokens";
 import { fetchPriceFromCoingecko } from "~~/services/web3/PriceService";
 import SwapTransaction from "./SwapTransaction";
-import SendToken from "~~/app/transaction/send/_component/SendToken";
+import { useTransactionStorage } from "~~/hooks/useTransactionStorage";
 
 const TransactionStatusSingle = ({
   transaction,
@@ -190,13 +190,12 @@ export const TransactionInfoSingle = ({
 }) => {
   const { account } = useAccount();
   const [status, setStatus] = useState("");
+  const { addTransaction } = useTransactionStorage();
 
   const handleOnConfirm = async () => {
     try {
       if (!account) return toast.error("Please connect your wallet");
       await account?.execute(transaction?.steps);
-
-      // success
       setStatus("Signed");
     } catch (error) {
       console.log(error);
@@ -204,8 +203,30 @@ export const TransactionInfoSingle = ({
   };
 
   const handleAddToBatch = async () => {
-    console.log("add to batch");
-    toast.success("Added to batch");
+    try {
+      // For single transactions
+      addTransaction({
+        meta: {
+          amount: parseFloat(ethers.formatEther(transaction.toAmount || "0")),
+          token: {
+            symbol: transaction.fromToken.symbol,
+            logo: "", // You'll need to get this from supportedTokens
+            name: transaction.fromToken.symbol,
+            address: transaction.fromToken.address,
+          },
+          recipient: {
+            name: "", // You might want to get this from addressBook
+            address: transaction.receiver || "",
+          },
+        },
+        callData: transaction.steps[0],
+      });
+
+      toast.success("Added to batch");
+    } catch (error) {
+      console.error("Failed to add to batch:", error);
+      toast.error("Failed to add to batch. Please try again.");
+    }
   };
 
   if (status) {
@@ -490,13 +511,12 @@ export const TransactionInfoBatch = ({
 }) => {
   const { account } = useAccount();
   const [status, setStatus] = useState("");
+  const { addTransaction } = useTransactionStorage();
 
   const handleOnConfirm = async () => {
     try {
       if (!account) return toast.error("Please connect your wallet");
       await account?.execute(transaction?.steps);
-
-      // success
       setStatus("Signed");
     } catch (error) {
       console.log(error);
@@ -504,8 +524,32 @@ export const TransactionInfoBatch = ({
   };
 
   const handleAddToBatch = async () => {
-    console.log("add to batch");
-    toast.success("Added to batch");
+    try {
+      // For batch transactions, add each sub-transaction
+      transaction.subTransactions?.forEach((subTx) => {
+        addTransaction({
+          meta: {
+            amount: parseFloat(ethers.formatEther(subTx.toAmount || "0")),
+            token: {
+              symbol: subTx.fromToken.symbol,
+              logo: "", // You'll need to get this from supportedTokens
+              name: subTx.fromToken.symbol,
+              address: subTx.fromToken.address,
+            },
+            recipient: {
+              name: "", // You might want to get this from addressBook
+              address: subTx.receiver || "",
+            },
+          },
+          callData: subTx.steps[0],
+        });
+      });
+
+      toast.success("Added to batch");
+    } catch (error) {
+      console.error("Failed to add to batch:", error);
+      toast.error("Failed to add to batch. Please try again.");
+    }
   };
 
   if (status) {
