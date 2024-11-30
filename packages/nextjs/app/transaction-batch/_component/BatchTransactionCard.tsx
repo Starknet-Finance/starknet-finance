@@ -43,7 +43,7 @@ export const BatchTransactionCard = ({
                   className="w-6 h-6 rounded-full"
                 />
                 <span className="text-lg">
-                  {transaction.meta.fromToken?.amount}{" "}
+                  {Number(transaction.meta.fromToken?.amount).toFixed(3)}{" "}
                   {transaction.meta.fromToken?.symbol}
                 </span>
                 <span className="text-sm text-gray-400">
@@ -64,7 +64,7 @@ export const BatchTransactionCard = ({
                   className="w-6 h-6"
                 />
                 <span className="text-lg">
-                  {transaction.meta.toToken?.amount}{" "}
+                  {Number(transaction.meta.toToken?.amount).toFixed(2)}{" "}
                   {transaction.meta.toToken?.symbol}
                 </span>
                 <span className="text-sm text-gray-400">

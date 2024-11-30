@@ -1,12 +1,13 @@
 import Image from "next/image";
 import { useGlobalState } from "~~/services/store/store";
-import { TransactionFinanceCard } from "./TransactionFinanceCard";
 import { useState } from "react";
+import { StoredTransaction } from "~~/hooks/useTransactionStorage";
+import { BatchTransactionCard } from "~~/app/transaction-batch/_component/BatchTransactionCard";
 
 interface BatchedTransactionProps {
-  transactions: any[];
+  transactions: StoredTransaction[];
   onSubmit: () => void;
-  onRemoveTransaction: (index: number) => void;
+  onRemoveTransaction: (id: string) => void;
 }
 
 export const BatchedTransaction = ({
@@ -17,25 +18,9 @@ export const BatchedTransaction = ({
   const { setOpenBatchedTransaction } = useGlobalState();
   const [expandedId, setExpandedId] = useState<string | null>(null);
 
-  const handleRemoveTransaction = (id: string) => {
-    const index = Number(id.split("-")[1]);
-    onRemoveTransaction(index);
-  };
-
-  const formatTransactions = (batch: any[]) => {
-    return batch.map((tx, index) => ({
-      id: `tx-${index}`,
-      token: tx.meta.token,
-      amount: tx.meta.amount,
-      recipient: tx.meta.recipient,
-      canRemove: true,
-    }));
-  };
-
-  const formattedTransactions = formatTransactions(transactions);
-
   return (
     <div className="flex flex-col absolute right-0 top-0 h-full bg-[#1C1C1C] w-[476px] p-4 z-50 animate-[slideIn_0.3s_ease-out] translate-x-0">
+      {/* Header */}
       <div className="flex items-center justify-between">
         <div>
           <div className="flex items-center gap-2">
@@ -72,23 +57,25 @@ export const BatchedTransaction = ({
         </div>
       </div>
 
+      {/* Divider */}
       <div className="h-[1px] bg-[#65656526] w-full mt-[22px] mb-[14px]"></div>
 
+      {/* Transaction List */}
       <div className="flex-1 flex flex-col gap-2.5 mb-6 max-h-[900px] overflow-y-auto">
-        {formattedTransactions.map((transaction) => (
-          <TransactionFinanceCard
+        {transactions.map((transaction) => (
+          <BatchTransactionCard
             key={transaction.id}
-            {...transaction}
+            transaction={transaction}
+            onRemove={onRemoveTransaction}
             isExpanded={expandedId === transaction.id}
             onExpand={(isExpanded) => {
               setExpandedId(isExpanded ? transaction.id : null);
             }}
-            canRemove={true}
-            onRemove={() => handleRemoveTransaction(transaction.id)}
           />
         ))}
       </div>
 
+      {/* Footer Actions */}
       <div className="flex gap-4">
         <button
           onClick={() => setOpenBatchedTransaction(false)}
