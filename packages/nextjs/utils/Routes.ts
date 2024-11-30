@@ -6,4 +6,5 @@ export const Routes = {
   addressBook: "/address-book",
   overview: "/overview",
   aiAssistant: "/ai-assistant",
+  multiOwner: "/multi-owner",
 };
