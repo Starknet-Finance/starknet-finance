@@ -243,7 +243,7 @@ export const TransactionInfoSingle = ({
               name: "Me",
             },
           },
-          callData: transaction.steps[1], // Using steps[1] for swap as that contains the multi_route_swap
+          callData: transaction.steps, // Using steps[1] for swap as that contains the multi_route_swap
         });
       } else {
         // Handle transfer transaction
@@ -275,7 +275,7 @@ export const TransactionInfoSingle = ({
               address: transaction.receiver || "",
             },
           },
-          callData: transaction.steps[0],
+          callData: transaction.steps,
         });
       }
 
@@ -623,7 +623,7 @@ export const TransactionInfoBatch = ({
                 amountUSD: subTx.toAmountUSD || 0,
               },
             },
-            callData: subTx.steps[1],
+            callData: subTx.steps,
           });
         } else {
           // Handle transfer transaction
@@ -652,7 +652,7 @@ export const TransactionInfoBatch = ({
                 address: subTx.receiver || "",
               },
             },
-            callData: subTx.steps[0],
+            callData: subTx.steps,
           });
         }
       });
