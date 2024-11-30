@@ -9,7 +9,7 @@ import { useAIAssistantState } from "~~/services/store/assistant";
 const AIAssistant = () => {
   const { messages } = useAIAssistantState();
 
-  console.log(messages);
+  console.log("The message are:", messages);
 
   return (
     <div className="h-full">

@@ -34,7 +34,7 @@ const TransactionStatusSingle = ({
   // get token price
   const handleInitSend = async () => {
     const tokenPrice = await fetchPriceFromCoingecko(
-      transaction?.fromToken?.symbol
+      transaction?.fromToken?.symbol,
     );
 
     const amount = ethers.formatEther(transaction?.toAmount || "0");
@@ -43,7 +43,7 @@ const TransactionStatusSingle = ({
 
     // get token uri
     const tokenUri = supportedTokens?.content?.find(
-      (token) => token?.address === transaction?.fromToken?.address
+      (token) => token?.address === transaction?.fromToken?.address,
     )?.logoUri;
     setTokenUri(tokenUri || "");
 
@@ -53,7 +53,7 @@ const TransactionStatusSingle = ({
     const addressBookAddress = addressBook?.find(
       (address: any) =>
         getChecksumAddress(address.address) ===
-        getChecksumAddress(transaction?.receiver!)
+        getChecksumAddress(transaction?.receiver!),
     );
     // Don't set empty string, keep it as null if not found
     setAddressBookAddress(addressBookAddress || null);
@@ -65,12 +65,12 @@ const TransactionStatusSingle = ({
 
     // get token uri
     const fromTokenUri = supportedTokens?.content?.find(
-      (token) => token?.address === transaction?.fromToken?.address
+      (token) => token?.address === transaction?.fromToken?.address,
     )?.logoUri;
     setFromTokenUri(fromTokenUri || "");
 
     const toTokenUri = supportedTokens?.content?.find(
-      (token) => token?.address === transaction?.toToken?.address
+      (token) => token?.address === transaction?.toToken?.address,
     )?.logoUri;
     setToTokenUri(toTokenUri || "");
 
@@ -80,7 +80,7 @@ const TransactionStatusSingle = ({
     const addressBookAddress = addressBook?.find(
       (address: any) =>
         getChecksumAddress(address.address) ===
-        getChecksumAddress(transaction?.receiver!)
+        getChecksumAddress(transaction?.receiver!),
     );
     // Don't set empty string, keep it as null if not found
     setAddressBookAddress(addressBookAddress || null);
@@ -216,8 +216,8 @@ export const TransactionInfoSingle = ({
 
   return (
     <div className="bg-[#2D2D2D] rounded-xl p-2 max-w-[352px]">
-      {transaction.steps?.map((step) => (
-        <div className="rounded-md">
+      {transaction.steps?.map((step, index) => (
+        <div key={index} className="rounded-md">
           <div className="flex flex-col gap-1">
             {/* -----transaction---- */}
             {step?.entrypoint == "multi_route_swap" && (
@@ -283,7 +283,7 @@ const TransactionStatusBatch = ({
   // get token price
   const handleInitSend = async (subTransaction: Transaction) => {
     const tokenPrice = await fetchPriceFromCoingecko(
-      subTransaction?.fromToken?.symbol
+      subTransaction?.fromToken?.symbol,
     );
 
     const amount = ethers.formatEther(subTransaction?.toAmount || "0");
@@ -292,7 +292,7 @@ const TransactionStatusBatch = ({
     // get token uri
     const tokenUri =
       supportedTokens?.content?.find(
-        (token) => token?.address === subTransaction?.fromToken?.address
+        (token) => token?.address === subTransaction?.fromToken?.address,
       )?.logoUri || "";
 
     // check if address is in address book
@@ -301,7 +301,7 @@ const TransactionStatusBatch = ({
     const addressBookAddress = addressBook?.find(
       (address: any) =>
         getChecksumAddress(address.address) ===
-        getChecksumAddress(subTransaction?.receiver!)
+        getChecksumAddress(subTransaction?.receiver!),
     );
 
     return {
@@ -317,11 +317,11 @@ const TransactionStatusBatch = ({
   const handleInitSwap = async (subTransaction: Transaction) => {
     // get token uri
     const fromTokenUri = supportedTokens?.content?.find(
-      (token) => token?.address === subTransaction?.fromToken?.address
+      (token) => token?.address === subTransaction?.fromToken?.address,
     )?.logoUri;
 
     const toTokenUri = supportedTokens?.content?.find(
-      (token) => token?.address === subTransaction?.toToken?.address
+      (token) => token?.address === subTransaction?.toToken?.address,
     )?.logoUri;
 
     return {
@@ -389,7 +389,7 @@ const TransactionStatusBatch = ({
                   />
                   <p className="text-lg font-medium">
                     {ethers.formatEther(
-                      (txStatus as BatchTransactionStatus).fromAmount || "0"
+                      (txStatus as BatchTransactionStatus).fromAmount || "0",
                     )}
                   </p>
                 </div>
@@ -409,7 +409,7 @@ const TransactionStatusBatch = ({
                   />
                   <p className="text-lg font-medium">
                     {ethers.formatEther(
-                      (txStatus as BatchTransactionStatus).toAmount || "0"
+                      (txStatus as BatchTransactionStatus).toAmount || "0",
                     )}
                   </p>
                 </div>
@@ -460,7 +460,7 @@ const TransactionStatusBatch = ({
                             .addressBookAddress == null
                             ? (txStatus as SingleTransactionStatus).receiver
                             : (txStatus as SingleTransactionStatus)
-                                ?.addressBookAddress?.name || ""
+                                ?.addressBookAddress?.name || "",
                         )}
                     </span>
                   </p>
@@ -516,9 +516,9 @@ export const TransactionInfoBatch = ({
     <div className="bg-[#2D2D2D] rounded-xl p-2 max-w-[352px]">
       <div>
         {transaction?.subTransactions?.map((transaction, index) => (
-          <div className="rounded-md">
-            {transaction.steps.map((step) => (
-              <div className="flex flex-col gap-1">
+          <div key={index} className="rounded-md">
+            {transaction.steps.map((step, index) => (
+              <div key={index} className="flex flex-col gap-1">
                 {/* -----transaction---- */}
                 {step?.entrypoint == "multi_route_swap" && (
                   <SwapTransaction step={step} transaction={transaction} />
