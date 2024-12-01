@@ -141,7 +141,7 @@ const Send = () => {
       {openBatchedTransaction && (
         <BatchedTransaction
           transactions={transactions}
-          onRemoveTransaction={(id: number) => removeTransaction(id.toString())}
+          onRemoveTransaction={(id: string) => removeTransaction(id.toString())}
           onSubmit={() => {
             setOpenBatchedTransaction(false);
             router.push(Routes.transactionBatch);
