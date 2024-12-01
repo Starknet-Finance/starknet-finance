@@ -95,7 +95,7 @@ const SendToken = ({ setIsNext, onTransactionSubmit }: SendTokenProps) => {
     if (selectedToken) {
       localStorage.setItem(
         STORAGE_KEYS.SELECTED_TOKEN,
-        JSON.stringify(selectedToken),
+        JSON.stringify(selectedToken)
       );
     }
   }, [selectedToken]);
@@ -153,7 +153,7 @@ const SendToken = ({ setIsNext, onTransactionSubmit }: SendTokenProps) => {
       const filtered = addressBook.filter(
         (entry) =>
           entry.name.toLowerCase().includes(recipientInput.toLowerCase()) ||
-          entry.address.toLowerCase().includes(recipientInput.toLowerCase()),
+          entry.address.toLowerCase().includes(recipientInput.toLowerCase())
       );
       setFilteredAddressBook(filtered);
     } else {

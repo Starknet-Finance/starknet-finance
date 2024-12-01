@@ -1,3 +1,4 @@
+
 /* eslint-disable react/no-unescaped-entities */
 "use client";
 
@@ -259,6 +260,7 @@ const MultiOwner = () => {
           </div>
         </div>
 
+
         {/* Balance Section */}
         <div className="bg-white rounded-xl text-black/80 flex flex-col justify-between">
           <div className="min-w-full">
@@ -314,6 +316,7 @@ const MultiOwner = () => {
               </div>
             </div>
           </div>
+
 
           <div className="px-3 py-4 w-full">
             <button
