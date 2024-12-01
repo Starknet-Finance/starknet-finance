@@ -9,8 +9,7 @@ import { AiAssistantIcon } from "./Icons/AiAssistantIcon";
 import { StakeIcon } from "./Icons/StakeIcon";
 import { TransactionIcon } from "./Icons/TransactionIcon";
 import { BatchIcon } from "./Icons/BatchIcon";
-import { Address } from "./scaffold-stark";
-import { useAccount } from "~~/hooks/useAccount";
+import { GlobeAsiaAustraliaIcon } from "@heroicons/react/24/solid";
 
 export const MENU_ITEM = [
   {
@@ -32,7 +31,6 @@ export const MENU_ITEM = [
         {
           icon: <MutilOwnerIcon />,
           title: "Multi Owner",
-          isComingSoon: true,
           path: Routes.multiOwner,
         },
         {
@@ -45,6 +43,11 @@ export const MENU_ITEM = [
           icon: <StakeIcon />,
           title: "Stake",
           isComingSoon: true,
+        },
+        {
+          icon: <GlobeAsiaAustraliaIcon className="h-6 w-6" />,
+          title: "Explore Apps",
+          path: Routes.explore,
         },
       ],
     },

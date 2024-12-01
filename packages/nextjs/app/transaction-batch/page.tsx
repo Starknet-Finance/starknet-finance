@@ -7,7 +7,7 @@ import { useAccount } from "@starknet-react/core";
 import toast from "react-hot-toast";
 import { useTransactionStorage } from "~~/hooks/useTransactionStorage";
 import { notification } from "~~/utils/scaffold-stark";
-import { TransactionFinanceCard } from "../transaction/_components/TransactionFinanceCard";
+import { BatchTransactionCard } from "./_component/BatchTransactionCard";
 
 const TransactionBatch = () => {
   const [expandedId, setExpandedId] = useState<string | null>(null);
@@ -22,18 +22,18 @@ const TransactionBatch = () => {
     }
 
     try {
-      await account.execute(transactions.map((tx) => tx.callData));
+      const flattenedCalls = transactions.flatMap((tx) =>
+        Array.isArray(tx.callData) ? tx.callData : [tx.callData],
+      );
+      await account.execute(flattenedCalls);
       toast.success("Batch transactions submitted successfully!");
       clearTransactions();
     } catch (error: any) {
       console.error("Batch transaction failed:", error);
-      if (error?.message?.includes("Execute failed")) {
-        clearTransactions();
-        return;
-      }
       toast.error("Batch transaction failed. Please try again.");
     }
   };
+
   return (
     <div className="p-8 min-h-screen relative">
       {/* Header Section */}
@@ -75,16 +75,14 @@ const TransactionBatch = () => {
             <div className="bg-[#656565] h-[1px] w-full mb-3 mt-2 opacity-40"></div>
             <div className="flex flex-col gap-2.5">
               {transactions.map((transaction) => (
-                <TransactionFinanceCard
-                  id={transaction.id}
+                <BatchTransactionCard
                   key={transaction.id}
-                  {...transaction.meta}
+                  transaction={transaction}
+                  onRemove={removeTransaction}
                   isExpanded={expandedId === transaction.id}
                   onExpand={(isExpanded) => {
                     setExpandedId(isExpanded ? transaction.id : null);
                   }}
-                  canRemove={true}
-                  onRemove={() => removeTransaction(transaction.id)}
                 />
               ))}
             </div>

@@ -3,16 +3,35 @@ import { useState } from "react";
 export interface StoredTransaction {
   id: string;
   meta: {
-    amount: number;
-    token: {
+    type: "transfer" | "swap";
+    // For transfers
+    amount?: number;
+    token?: {
       symbol: string;
       logo: string;
       name: string;
       address: string;
     };
-    recipient: {
+    recipient?: {
       name: string;
       address: string;
+    };
+    // For swaps
+    fromToken?: {
+      symbol: string;
+      logo: string;
+      name: string;
+      address: string;
+      amount: number;
+      amountUSD: number;
+    };
+    toToken?: {
+      symbol: string;
+      logo: string;
+      name: string;
+      address: string;
+      amount: number;
+      amountUSD: number;
     };
   };
   callData: any;
@@ -61,9 +80,11 @@ export const useTransactionStorage = (): UseTransactionStorageReturn => {
       timestamp: Date.now(),
     };
 
-    const updatedTransactions = [...transactions, newTransaction];
-    setStoredTransactions(updatedTransactions);
-    setTransactions(updatedTransactions);
+    setTransactions((prevTransactions) => {
+      const updatedTransactions = [...prevTransactions, newTransaction];
+      setStoredTransactions(updatedTransactions);
+      return updatedTransactions;
+    });
   };
 
   const removeTransaction = (id: string) => {

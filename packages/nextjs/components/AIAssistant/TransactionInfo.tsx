@@ -204,39 +204,80 @@ export const TransactionInfoSingle = ({
   };
 
   const handleAddToBatch = async () => {
+    if (!account) return toast.error("Please connect your wallet");
     try {
-      // Get token metadata from supportedTokens
-      const tokenMetadata = supportedTokens?.content?.find(
-        (token) => token?.address === transaction.fromToken.address,
-      );
+      if (transaction.steps[1]?.entrypoint === "multi_route_swap") {
+        // Handle swap transaction
+        const fromTokenMetadata = supportedTokens?.content?.find(
+          (token) => token?.address === transaction.fromToken.address,
+        );
+        const toTokenMetadata = supportedTokens?.content?.find(
+          (token) => token?.address === transaction.toToken.address,
+        );
 
-      // Get recipient name from address book if available
-      const addressBook = JSON.parse(
-        localStorage.getItem("addressBook") || "[]",
-      );
-      const recipientData = addressBook.find(
-        (addr: any) =>
-          getChecksumAddress(addr.address) ===
-          getChecksumAddress(transaction.receiver!),
-      );
+        addTransaction({
+          meta: {
+            type: "swap",
+            fromToken: {
+              symbol: transaction.fromToken.symbol,
+              logo: fromTokenMetadata?.logoUri || "",
+              name: fromTokenMetadata?.name || transaction.fromToken.symbol,
+              address: transaction.fromToken.address,
+              amount: parseFloat(
+                ethers.formatEther(transaction.fromAmount || "0"),
+              ),
+              amountUSD: transaction.fromAmountUSD || 0,
+            },
+            toToken: {
+              symbol: transaction.toToken.symbol,
+              logo: toTokenMetadata?.logoUri || "",
+              name: toTokenMetadata?.name || transaction.toToken.symbol,
+              address: transaction.toToken.address,
+              amount: parseFloat(
+                ethers.formatEther(transaction.toAmount || "0"),
+              ),
+              amountUSD: transaction.toAmountUSD || 0,
+            },
+            recipient: {
+              address: account?.address as string,
+              name: "Me",
+            },
+          },
+          callData: transaction.steps, // Using steps[1] for swap as that contains the multi_route_swap
+        });
+      } else {
+        // Handle transfer transaction
+        const tokenMetadata = supportedTokens?.content?.find(
+          (token) => token?.address === transaction.fromToken.address,
+        );
 
-      // For single transactions
-      addTransaction({
-        meta: {
-          amount: parseFloat(ethers.formatEther(transaction.toAmount || "0")),
-          token: {
-            symbol: transaction.fromToken.symbol,
-            logo: tokenMetadata?.logoUri || "",
-            name: tokenMetadata?.name || transaction.fromToken.symbol,
-            address: transaction.fromToken.address,
+        const addressBook = JSON.parse(
+          localStorage.getItem("addressBook") || "[]",
+        );
+        const recipientData = addressBook.find(
+          (addr: any) =>
+            getChecksumAddress(addr.address) ===
+            getChecksumAddress(transaction.receiver!),
+        );
+
+        addTransaction({
+          meta: {
+            type: "transfer",
+            amount: parseFloat(ethers.formatEther(transaction.toAmount || "0")),
+            token: {
+              symbol: transaction.fromToken.symbol,
+              logo: tokenMetadata?.logoUri || "",
+              name: tokenMetadata?.name || transaction.fromToken.symbol,
+              address: transaction.fromToken.address,
+            },
+            recipient: {
+              name: recipientData?.name || "",
+              address: transaction.receiver || "",
+            },
           },
-          recipient: {
-            name: recipientData?.name || "",
-            address: transaction.receiver || "",
-          },
-        },
-        callData: transaction.steps[0],
-      });
+          callData: transaction.steps,
+        });
+      }
 
       toast.success("Added to batch");
     } catch (error) {
@@ -520,6 +561,7 @@ const TransactionStatusBatch = ({
     </div>
   );
 };
+
 export const TransactionInfoBatch = ({
   transaction,
 }: {
@@ -541,42 +583,78 @@ export const TransactionInfoBatch = ({
   };
 
   const handleAddToBatch = async () => {
+    if (!account) return toast.error("Please connect your wallet");
     try {
-      // Get address book data
       const addressBook = JSON.parse(
         localStorage.getItem("addressBook") || "[]",
       );
 
-      // For batch transactions, add each sub-transaction
       transaction.subTransactions?.forEach((subTx) => {
-        // Get token metadata from supportedTokens
-        const tokenMetadata = supportedTokens?.content?.find(
-          (token) => token?.address === subTx.fromToken.address,
-        );
+        if (subTx.steps[1]?.entrypoint === "multi_route_swap") {
+          // Handle swap transaction
+          const fromTokenMetadata = supportedTokens?.content?.find(
+            (token) => token?.address === subTx.fromToken.address,
+          );
+          const toTokenMetadata = supportedTokens?.content?.find(
+            (token) => token?.address === subTx.toToken.address,
+          );
 
-        // Get recipient data from address book
-        const recipientData = addressBook.find(
-          (addr: any) =>
-            getChecksumAddress(addr.address) ===
-            getChecksumAddress(subTx.receiver!),
-        );
+          addTransaction({
+            meta: {
+              type: "swap",
+              recipient: {
+                address: account?.address as string,
+                name: "Me",
+              },
+              fromToken: {
+                symbol: subTx.fromToken.symbol,
+                logo: fromTokenMetadata?.logoUri || "",
+                name: fromTokenMetadata?.name || subTx.fromToken.symbol,
+                address: subTx.fromToken.address,
+                amount: parseFloat(ethers.formatEther(subTx.fromAmount || "0")),
+                amountUSD: subTx.fromAmountUSD || 0,
+              },
+              toToken: {
+                symbol: subTx.toToken.symbol,
+                logo: toTokenMetadata?.logoUri || "",
+                name: toTokenMetadata?.name || subTx.toToken.symbol,
+                address: subTx.toToken.address,
+                amount: parseFloat(ethers.formatEther(subTx.toAmount || "0")),
+                amountUSD: subTx.toAmountUSD || 0,
+              },
+            },
+            callData: subTx.steps,
+          });
+        } else {
+          // Handle transfer transaction
+          const tokenMetadata = supportedTokens?.content?.find(
+            (token) => token?.address === subTx.fromToken.address,
+          );
 
-        addTransaction({
-          meta: {
-            amount: parseFloat(ethers.formatEther(subTx.toAmount || "0")),
-            token: {
-              symbol: subTx.fromToken.symbol,
-              logo: tokenMetadata?.logoUri || "",
-              name: tokenMetadata?.name || subTx.fromToken.symbol,
-              address: subTx.fromToken.address,
+          const recipientData = addressBook.find(
+            (addr: any) =>
+              getChecksumAddress(addr.address) ===
+              getChecksumAddress(subTx.receiver!),
+          );
+
+          addTransaction({
+            meta: {
+              type: "transfer",
+              amount: parseFloat(ethers.formatEther(subTx.toAmount || "0")),
+              token: {
+                symbol: subTx.fromToken.symbol,
+                logo: tokenMetadata?.logoUri || "",
+                name: tokenMetadata?.name || subTx.fromToken.symbol,
+                address: subTx.fromToken.address,
+              },
+              recipient: {
+                name: recipientData?.name || "",
+                address: subTx.receiver || "",
+              },
             },
-            recipient: {
-              name: recipientData?.name || "",
-              address: subTx.receiver || "",
-            },
-          },
-          callData: subTx.steps[0],
-        });
+            callData: subTx.steps,
+          });
+        }
       });
 
       toast.success("Added to batch");
@@ -597,21 +675,26 @@ export const TransactionInfoBatch = ({
           <div key={index} className="rounded-md">
             {transaction.steps.map((step, index) => (
               <div key={index} className="flex flex-col gap-1">
-                {/* -----transaction---- */}
-                {step?.entrypoint == "multi_route_swap" && (
+                {step?.entrypoint === "multi_route_swap" && (
                   <SwapTransaction step={step} transaction={transaction} />
                 )}
-                <div className="flex items-center gap-1">
-                  <div className="bg-[#65656526] h-[1px] w-full"></div>
-                  <p className="text-[13px] text-[#4F4F4F] font-medium">Then</p>
-                  <div className="bg-[#65656526] h-[1px] w-full"></div>
-                </div>
-                {/* -----send to------ */}
-                {step?.entrypoint == "transfer" && (
-                  <SendTokenTransaction step={step} transaction={transaction} />
+                {step?.entrypoint === "transfer" && (
+                  <>
+                    {index > 0 && (
+                      <div className="flex items-center gap-1">
+                        <div className="bg-[#65656526] h-[1px] w-full"></div>
+                        <p className="text-[13px] text-[#4F4F4F] font-medium">
+                          Then
+                        </p>
+                        <div className="bg-[#65656526] h-[1px] w-full"></div>
+                      </div>
+                    )}
+                    <SendTokenTransaction
+                      step={step}
+                      transaction={transaction}
+                    />
+                  </>
                 )}
-
-                {/* -----then---- */}
               </div>
             ))}
           </div>
