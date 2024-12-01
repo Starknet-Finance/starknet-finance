@@ -8,7 +8,11 @@ import { HeaderActions } from "~~/components/HeaderActions";
 import { Routes } from "~~/utils/Routes";
 import TransactionButtons from "~~/components/transactions/TransactionButtons";
 import TransactionTable from "../transaction/_components/TransactionTable";
-import { ArrowRightIcon, CheckBadgeIcon } from "@heroicons/react/24/outline";
+import {
+  ArrowRightIcon,
+  CheckBadgeIcon,
+  InformationCircleIcon,
+} from "@heroicons/react/24/outline";
 
 type Transaction = {
   id: number;
@@ -105,17 +109,154 @@ const MultiOwner = () => {
       <HeaderActions />
       <div className="mb-8 grid grid-cols-3 gap-6">
         <div className="col-span-2">
-          <h1 className="text-5xl font-normal mt-5 mb-2">CREATE NEW ACCOUNT</h1>
+          <h1 className="text-5xl font-semibold gradient-text mt-5 mb-2">
+            CREATE NEW ACCOUNT
+          </h1>
         </div>
-        {/* Action Buttons */}
-        <TransactionButtons />
       </div>
 
       {/* Main Content Grid */}
       <div className="grid grid-cols-3 gap-6">
-        <div className="col-span-2 bg-black rounded-xl p-6">
-          {/* Transactions List */}
-          <TransactionTable />
+        <div className="col-span-2 rounded-xl flex flex-col gap-5">
+          <div className="border border-[#0b0b0b] p-6 bg-black rounded-xl flex flex-col">
+            <div className="flex flex-col border-b-gray-800 border-b-2 pb-4">
+              <div className="flex items-center gap-2">
+                <InformationCircleIcon className="h-5 w-5 text-gray-400" />
+                <h2 className="text-xl font-semibold gradient-text">
+                  Basic Setup
+                </h2>
+              </div>
+              <p className="text-gray-600">
+                Set the signer and how many need to confirm to execute a valid
+                transaction
+              </p>
+            </div>
+            <div className="flex flex-col mt-5 gap-1">
+              <h2 className="text-lg">Account Name</h2>
+              <input
+                type="text"
+                placeholder="account name"
+                className="flex-1 px-4 py-2 text-white bg-gray-700 rounded-lg"
+              />
+            </div>
+          </div>
+
+          <div className="border border-[#0b0b0b] p-6 bg-black rounded-xl flex flex-col">
+            <div className="flex flex-col border-b-gray-800 border-b-2 pb-4">
+              <div className="flex items-center gap-2">
+                <InformationCircleIcon className="h-5 w-5 text-gray-400" />
+                <h2 className="text-xl font-semibold gradient-text">
+                  Signers & Confirmation
+                </h2>
+              </div>
+              <p className="text-gray-600">
+                Set the signer and how many need to confirm to execute a valid
+                transaction
+              </p>
+            </div>
+
+            <div className="flex flex-col border-b-gray-800 border-b-2 pb-4 mt-5 gap-3">
+              <div className="flex w-full justify-between items-center">
+                <h2 className="text-lg">Signers</h2>
+                <button className="bg-gray-600 p-2 rounded">Add Signer</button>
+              </div>
+              <div className="flex flex-col gap-3">
+                <div className="flex">
+                  <input
+                    type="text"
+                    placeholder="Enter name"
+                    className="w-1/4 px-4 py-2 text-white bg-gray-700 rounded-l-lg border-r border-gray-600"
+                  />
+                  <input
+                    type="text"
+                    placeholder="Enter address"
+                    className="flex-1 px-4 py-2 text-white bg-gray-700 rounded-r-lg"
+                  />
+                </div>
+                <div className="flex">
+                  <input
+                    type="text"
+                    placeholder="Enter name"
+                    className="w-1/4 px-4 py-2 text-white bg-gray-700 rounded-l-lg border-r border-gray-600"
+                  />
+                  <input
+                    type="text"
+                    placeholder="Enter address"
+                    className="flex-1 px-4 py-2 text-white bg-gray-700 rounded-r-lg"
+                  />
+                </div>
+              </div>
+            </div>
+
+            <div className="flex justify-between border-b-gray-800 border-b-2 pb-4 mt-5">
+              <div className="flex flex-col">
+                <div className="flex items-center gap-2">
+                  <InformationCircleIcon className="h-5 w-5 text-gray-400" />
+                  <h2 className="text-xl font-semibold gradient-text">
+                    Threshold
+                  </h2>
+                </div>
+                <p className="text-gray-600">
+                  Any transaction requires the confirmation of:
+                </p>
+              </div>
+              <div className="join">
+                <button className="join-item btn">-</button>
+                <input
+                  type="number"
+                  className="join-item btn w-16"
+                  defaultValue={2}
+                  min={1}
+                  max={10}
+                />
+                <button className="join-item btn">+</button>
+              </div>
+            </div>
+
+            <div className="flex flex-col border-b-gray-800 border-b-2 pb-4 mt-5">
+              <div className="flex flex-col">
+                <div className="flex items-center gap-2">
+                  <InformationCircleIcon className="h-5 w-5 text-gray-400" />
+                  <h2 className="text-xl font-semibold gradient-text">
+                    Module setup
+                  </h2>
+                </div>
+                <p className="text-gray-600">Description</p>
+              </div>
+              <div className="flex mt-5 gap-4">
+                <div className="flex gap-1 items-center">
+                  <input
+                    className="checkbox checkbox-secondary checkbox-sm rounded"
+                    type="checkbox"
+                  />
+                  <p>ERC 20</p>
+                </div>
+                <div className="flex gap-1 items-center">
+                  <input
+                    className="checkbox checkbox-secondary checkbox-sm rounded"
+                    type="checkbox"
+                  />
+                  <p>ERC 721</p>
+                </div>
+                <div className="flex gap-1 items-center text-gray-800">
+                  <input
+                    className="checkbox disabled checkbox-secondary checkbox-sm rounded"
+                    disabled={true}
+                    type="checkbox"
+                  />
+                  <p>Auto MEME trading (locked)</p>
+                </div>
+                <div className="flex gap-1 items-center text-gray-800">
+                  <input
+                    disabled={true}
+                    className="checkbox disabled checkbox-secondary checkbox-sm rounded"
+                    type="checkbox"
+                  />
+                  <p>Auto Investing (locked)</p>
+                </div>
+              </div>
+            </div>
+          </div>
         </div>
 
         {/* Balance Section */}
@@ -123,7 +264,7 @@ const MultiOwner = () => {
           <div className="min-w-full">
             <div className="rounded-tr rounded-tl bg-white px-3 py-4">
               <div className="flex flex-col border-b-gray-300 border-b-2 pb-2">
-                <h3 className="text-3xl font-semibold gradient-text">
+                <h3 className="text-3xl font-semibold text-[#B248DD]">
                   Account Preivew
                 </h3>
                 <span className="text-black/60 text-base">
