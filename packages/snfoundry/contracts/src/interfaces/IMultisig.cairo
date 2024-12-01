@@ -27,6 +27,7 @@ pub struct TransactionSigned {
 pub struct Transaction {
     pub confirmations: u8,
     pub executed: bool,
+    pub hash: felt252,
 }
 
 #[derive(Drop, starknet::Event)]
@@ -37,7 +38,9 @@ pub struct TransactionExecuted {
 
 #[starknet::interface]
 pub trait IMultisig<ContractState> {
-    fn propose_transaction(ref self: ContractState, calls: Span<Call>);
+    fn propose_transaction(ref self: ContractState, calls: Array<Call>);
 
-    fn sign_transaction(ref self: ContractState, tx_id: u256, calls: Span<Call>);
+    fn sign_transaction(ref self: ContractState, tx_id: u256, calls: Array<Call>);
+
+    fn get_signers(self: @ContractState) -> Array<ContractAddress>;
 }

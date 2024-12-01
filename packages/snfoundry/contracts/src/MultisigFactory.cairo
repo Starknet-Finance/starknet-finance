@@ -1,6 +1,6 @@
 #[starknet::contract]
 mod MultisigFactory {
-    use contracts::interfaces::IMultisigFactory::{IMultisigFactory,SupportedModules, MultisigCreated};
+    use contracts::interfaces::IMultisigFactory::{IMultisigFactory, ModuleConfig, MultisigCreated};
     use starknet::{ContractAddress};
     use starknet::syscalls::deploy_syscall;
 
@@ -22,16 +22,16 @@ mod MultisigFactory {
     }
 
     #[abi(embed_v0)]
-    impl MultisigFactoryImpl of IMultisigFactory<ContractState>     {
+    impl MultisigFactoryImpl of IMultisigFactory<ContractState> {
         fn deploy_multisig(
             ref self: ContractState,
             signers: Array<ContractAddress>,
             threshold: u8,
-            module: Array<SupportedModules>,
+            module: Array<ModuleConfig>,
             salt: felt252
         ) {
             let mut calldata = array![];
-            
+
             signers.serialize(ref calldata);
             calldata.append(threshold.into());
             module.serialize(ref calldata);
@@ -42,13 +42,10 @@ mod MultisigFactory {
                 salt,
                 calldata.span(),
                 false // Set contract address as non-fixed
-            ).unwrap();
+            )
+                .unwrap();
 
-            self.emit(MultisigCreated {
-                signers: signers,
-                threshold: threshold,
-                module: module,
-            });
+            self.emit(MultisigCreated { signers: signers, threshold: threshold });
         }
     }
 }

@@ -1,19 +1,24 @@
 use starknet::{ContractAddress};
 
 
-#[derive(Drop, Copy, Serde, starknet::Store)]
-pub enum SupportedModules {
-    Whitelist,
-    ERC20,
-    ERC721
+#[derive(Drop, Copy, Serde, starknet::Store, PartialEq)]
+pub enum ModuleType {
+    Whitelist
 }
+
+#[derive(Drop, Copy, Serde, starknet::Store)]
+pub struct ModuleConfig {
+    pub module_type: ModuleType,
+    pub module_address: ContractAddress,
+    pub is_active: bool,
+}
+
 
 #[derive(Drop, starknet::Event)]
 pub struct MultisigCreated {
     #[key]
     pub signers: Array<ContractAddress>,
     pub threshold: u8,
-    pub module: Array<SupportedModules>,
 }
 
 #[starknet::interface]
@@ -25,7 +30,7 @@ pub trait IMultisigFactory<ContractState> {
         ref self: ContractState,
         signers: Array<ContractAddress>,
         threshold: u8,
-        module: Array<SupportedModules>,
+        module: Array<ModuleConfig>,
         salt: felt252
     );
 }
