@@ -31,7 +31,7 @@ export const MENU_ITEM = [
         {
           icon: <MutilOwnerIcon />,
           title: "Multi Owner",
-          isComingSoon: true,
+          path: Routes.multiOwner,
         },
         {
           icon: <AiAssistantIcon />,
