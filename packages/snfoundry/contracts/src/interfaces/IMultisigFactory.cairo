@@ -3,7 +3,8 @@ use starknet::{ContractAddress};
 
 #[derive(Drop, Copy, Serde, starknet::Store, PartialEq)]
 pub enum ModuleType {
-    Whitelist
+    Whitelist,
+    TimeWindow,
 }
 
 #[derive(Drop, Copy, Serde, starknet::Store)]

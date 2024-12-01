@@ -11,4 +11,5 @@ mod interfaces {
 
 mod modules {
     pub mod Whitelist;
+    pub mod TimeWindow;
 }
