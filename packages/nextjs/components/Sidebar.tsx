@@ -10,6 +10,8 @@ import { StakeIcon } from "./Icons/StakeIcon";
 import { TransactionIcon } from "./Icons/TransactionIcon";
 import { BatchIcon } from "./Icons/BatchIcon";
 import { GlobeAsiaAustraliaIcon } from "@heroicons/react/24/solid";
+import { Address } from "./scaffold-stark";
+import { useAccount } from "~~/hooks/useAccount";
 
 export const MENU_ITEM = [
   {

@@ -43,4 +43,6 @@ pub trait IMultisig<ContractState> {
     fn sign_transaction(ref self: ContractState, tx_id: u256, calls: Array<Call>);
 
     fn get_signers(self: @ContractState) -> Array<ContractAddress>;
+
+    fn is_signed(self: @ContractState, signer: ContractAddress, tx_id: u256) -> bool;
 }

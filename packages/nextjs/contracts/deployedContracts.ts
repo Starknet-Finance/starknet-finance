@@ -7,7 +7,7 @@ const deployedContracts = {
   devnet: {
     Multisig: {
       address:
-        "0x145631b84c378263d8e198ed3c14aec0ed1d002eff13866d894d2c4461794bc",
+        "0x6e4358736a3dfc4993690bb348e0f2ca2267fa8ac2b09eba33aa78800d06ecb",
       abi: [
         {
           type: "impl",
@@ -44,16 +44,6 @@ const deployedContracts = {
         },
         {
           type: "struct",
-          name: "core::array::Span::<core::starknet::account::Call>",
-          members: [
-            {
-              name: "snapshot",
-              type: "@core::array::Array::<core::starknet::account::Call>",
-            },
-          ],
-        },
-        {
-          type: "struct",
           name: "core::integer::u256",
           members: [
             {
@@ -67,6 +57,20 @@ const deployedContracts = {
           ],
         },
         {
+          type: "enum",
+          name: "core::bool",
+          variants: [
+            {
+              name: "False",
+              type: "()",
+            },
+            {
+              name: "True",
+              type: "()",
+            },
+          ],
+        },
+        {
           type: "interface",
           name: "contracts::interfaces::IMultisig::IMultisig",
           items: [
@@ -76,7 +80,7 @@ const deployedContracts = {
               inputs: [
                 {
                   name: "calls",
-                  type: "core::array::Span::<core::starknet::account::Call>",
+                  type: "core::array::Array::<core::starknet::account::Call>",
                 },
               ],
               outputs: [],
@@ -92,29 +96,74 @@ const deployedContracts = {
                 },
                 {
                   name: "calls",
-                  type: "core::array::Span::<core::starknet::account::Call>",
+                  type: "core::array::Array::<core::starknet::account::Call>",
                 },
               ],
               outputs: [],
               state_mutability: "external",
             },
+            {
+              type: "function",
+              name: "get_signers",
+              inputs: [],
+              outputs: [
+                {
+                  type: "core::array::Array::<core::starknet::contract_address::ContractAddress>",
+                },
+              ],
+              state_mutability: "view",
+            },
+            {
+              type: "function",
+              name: "is_signed",
+              inputs: [
+                {
+                  name: "signer",
+                  type: "core::starknet::contract_address::ContractAddress",
+                },
+                {
+                  name: "tx_id",
+                  type: "core::integer::u256",
+                },
+              ],
+              outputs: [
+                {
+                  type: "core::bool",
+                },
+              ],
+              state_mutability: "view",
+            },
           ],
         },
         {
           type: "enum",
-          name: "contracts::interfaces::IMultisigFactory::SupportedModules",
+          name: "contracts::interfaces::IMultisigFactory::ModuleType",
           variants: [
             {
               name: "Whitelist",
               type: "()",
             },
             {
-              name: "ERC20",
+              name: "TimeWindow",
               type: "()",
             },
+          ],
+        },
+        {
+          type: "struct",
+          name: "contracts::interfaces::IMultisigFactory::ModuleConfig",
+          members: [
             {
-              name: "ERC721",
-              type: "()",
+              name: "module_type",
+              type: "contracts::interfaces::IMultisigFactory::ModuleType",
+            },
+            {
+              name: "module_address",
+              type: "core::starknet::contract_address::ContractAddress",
+            },
+            {
+              name: "is_active",
+              type: "core::bool",
             },
           ],
         },
@@ -132,7 +181,17 @@ const deployedContracts = {
             },
             {
               name: "_module",
-              type: "core::array::Array::<contracts::interfaces::IMultisigFactory::SupportedModules>",
+              type: "core::array::Array::<contracts::interfaces::IMultisigFactory::ModuleConfig>",
+            },
+          ],
+        },
+        {
+          type: "struct",
+          name: "core::array::Span::<core::starknet::account::Call>",
+          members: [
+            {
+              name: "snapshot",
+              type: "@core::array::Array::<core::starknet::account::Call>",
             },
           ],
         },
@@ -206,117 +265,11 @@ const deployedContracts = {
         },
       ],
       classHash:
-        "0x715f7607936e14898c189dd98caec371f8a87a0d632514f70850b2b71bb2835",
-    },
-    MultisigFactory: {
-      address:
-        "0x576aceb27ab6e04d03afb14a1a3437674ae3e427d10f6584bb276e9f34aea16",
-      abi: [
-        {
-          type: "impl",
-          name: "MultisigFactoryImpl",
-          interface_name:
-            "contracts::interfaces::IMultisigFactory::IMultisigFactory",
-        },
-        {
-          type: "enum",
-          name: "contracts::interfaces::IMultisigFactory::SupportedModules",
-          variants: [
-            {
-              name: "Whitelist",
-              type: "()",
-            },
-            {
-              name: "ERC20",
-              type: "()",
-            },
-            {
-              name: "ERC721",
-              type: "()",
-            },
-          ],
-        },
-        {
-          type: "interface",
-          name: "contracts::interfaces::IMultisigFactory::IMultisigFactory",
-          items: [
-            {
-              type: "function",
-              name: "deploy_multisig",
-              inputs: [
-                {
-                  name: "signers",
-                  type: "core::array::Array::<core::starknet::contract_address::ContractAddress>",
-                },
-                {
-                  name: "threshold",
-                  type: "core::integer::u8",
-                },
-                {
-                  name: "module",
-                  type: "core::array::Array::<contracts::interfaces::IMultisigFactory::SupportedModules>",
-                },
-                {
-                  name: "salt",
-                  type: "core::felt252",
-                },
-              ],
-              outputs: [],
-              state_mutability: "external",
-            },
-          ],
-        },
-        {
-          type: "constructor",
-          name: "constructor",
-          inputs: [
-            {
-              name: "_multisig_classhash",
-              type: "core::felt252",
-            },
-          ],
-        },
-        {
-          type: "event",
-          name: "contracts::interfaces::IMultisigFactory::MultisigCreated",
-          kind: "struct",
-          members: [
-            {
-              name: "signers",
-              type: "core::array::Array::<core::starknet::contract_address::ContractAddress>",
-              kind: "key",
-            },
-            {
-              name: "threshold",
-              type: "core::integer::u8",
-              kind: "data",
-            },
-            {
-              name: "module",
-              type: "core::array::Array::<contracts::interfaces::IMultisigFactory::SupportedModules>",
-              kind: "data",
-            },
-          ],
-        },
-        {
-          type: "event",
-          name: "contracts::MultisigFactory::MultisigFactory::Event",
-          kind: "enum",
-          variants: [
-            {
-              name: "MultisigCreated",
-              type: "contracts::interfaces::IMultisigFactory::MultisigCreated",
-              kind: "nested",
-            },
-          ],
-        },
-      ],
-      classHash:
-        "0x17ba9570e814dc82d95f16b9ccb6621f6356ee7541fccbbc4da4241bb38f908",
+        "0x3a6f86ea712a0abb3cc590e43dd45ac337b35f100fec83c62dc8e2de75003ba",
     },
     MyNFT: {
       address:
-        "0x472d9365385047dedb0eefa64688584ce75b612f65af286acddba0b794ffedc",
+        "0x43e510f55932b75704e20de587039ebd3cb1eb3dcbea18491f24fcdef7aa0db",
       abi: [
         {
           type: "impl",
@@ -898,6 +851,108 @@ const deployedContracts = {
       ],
       classHash:
         "0x793d8d184ded76799fdd44ab64fba581dc8003184e37311300bbeed2df0c9c8",
+    },
+    MultisigFactory: {
+      address:
+        "0x4490ac00121821b99a036d95886d5fd5d0cc06a9c6a26dfcd0ff34579b96ee2",
+      abi: [
+        {
+          type: "impl",
+          name: "MultisigFactoryImpl",
+          interface_name:
+            "contracts::interfaces::IMultisigFactory::IMultisigFactory",
+        },
+        {
+          type: "enum",
+          name: "contracts::interfaces::IMultisigFactory::ModuleType",
+          variants: [
+            { name: "Whitelist", type: "()" },
+            { name: "TimeWindow", type: "()" },
+          ],
+        },
+        {
+          type: "enum",
+          name: "core::bool",
+          variants: [
+            { name: "False", type: "()" },
+            { name: "True", type: "()" },
+          ],
+        },
+        {
+          type: "struct",
+          name: "contracts::interfaces::IMultisigFactory::ModuleConfig",
+          members: [
+            {
+              name: "module_type",
+              type: "contracts::interfaces::IMultisigFactory::ModuleType",
+            },
+            {
+              name: "module_address",
+              type: "core::starknet::contract_address::ContractAddress",
+            },
+            { name: "is_active", type: "core::bool" },
+          ],
+        },
+        {
+          type: "interface",
+          name: "contracts::interfaces::IMultisigFactory::IMultisigFactory",
+          items: [
+            {
+              type: "function",
+              name: "deploy_multisig",
+              inputs: [
+                {
+                  name: "signers",
+                  type: "core::array::Array::<core::starknet::contract_address::ContractAddress>",
+                },
+                { name: "threshold", type: "core::integer::u8" },
+                {
+                  name: "module",
+                  type: "core::array::Array::<contracts::interfaces::IMultisigFactory::ModuleConfig>",
+                },
+                { name: "salt", type: "core::felt252" },
+              ],
+              outputs: [],
+              state_mutability: "external",
+            },
+          ],
+        },
+        {
+          type: "constructor",
+          name: "constructor",
+          inputs: [{ name: "_multisig_classhash", type: "core::felt252" }],
+        },
+        {
+          type: "event",
+          name: "contracts::interfaces::IMultisigFactory::MultisigCreated",
+          kind: "struct",
+          members: [
+            {
+              name: "signers",
+              type: "core::array::Array::<core::starknet::contract_address::ContractAddress>",
+              kind: "key",
+            },
+            {
+              name: "moa_address",
+              type: "core::starknet::contract_address::ContractAddress",
+              kind: "data",
+            },
+            { name: "threshold", type: "core::integer::u8", kind: "data" },
+          ],
+        },
+        {
+          type: "event",
+          name: "contracts::MultisigFactory::MultisigFactory::Event",
+          kind: "enum",
+          variants: [
+            {
+              name: "MultisigCreated",
+              type: "contracts::interfaces::IMultisigFactory::MultisigCreated",
+              kind: "nested",
+            },
+          ],
+        },
+      ],
     },
   },
 } as const;

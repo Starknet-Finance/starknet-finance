@@ -121,6 +121,10 @@ mod Multisig {
                     };
             addresses
         }
+
+        fn is_signed(self: @ContractState, signer: ContractAddress, tx_id: u256) -> bool {
+            self.transaction_signed.entry(tx_id).entry(signer).read()
+        }
     }
 
     #[generate_trait]

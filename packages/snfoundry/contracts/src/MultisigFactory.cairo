@@ -37,15 +37,19 @@ mod MultisigFactory {
             module.serialize(ref calldata);
 
             // Deploy the contract
-            deploy_syscall(
+            let (moa_address, _) = deploy_syscall(
                 self.multisig_class_hash.read().try_into().unwrap(),
                 salt,
                 calldata.span(),
                 false // Set contract address as non-fixed
             )
                 .unwrap();
-
-            self.emit(MultisigCreated { signers: signers, threshold: threshold });
+            self
+                .emit(
+                    MultisigCreated {
+                        signers: signers,  moa_address: moa_address, threshold: threshold
+                    }
+                );
         }
     }
 }

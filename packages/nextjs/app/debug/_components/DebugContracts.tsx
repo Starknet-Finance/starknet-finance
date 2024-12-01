@@ -3,6 +3,7 @@
 import { useEffect } from "react";
 import { useLocalStorage } from "usehooks-ts";
 import { ContractUI } from "~~/app/debug/_components/contract";
+import { Header } from "~~/components/Header";
 import { ContractName } from "~~/utils/scaffold-stark/contract";
 import { getAllContracts } from "~~/utils/scaffold-stark/contractsData";
 
@@ -14,7 +15,7 @@ export function DebugContracts() {
   const [selectedContract, setSelectedContract] = useLocalStorage<ContractName>(
     selectedContractStorageKey,
     contractNames[0],
-    { initializeWithValue: false },
+    { initializeWithValue: false }
   );
 
   useEffect(() => {
@@ -25,6 +26,7 @@ export function DebugContracts() {
 
   return (
     <div className="flex flex-col gap-y-6 lg:gap-y-8 py-8 lg:py-12 justify-center items-center">
+      <Header />
       {contractNames.length === 0 ? (
         <p className="text-3xl mt-14">No contracts found!</p>
       ) : (
