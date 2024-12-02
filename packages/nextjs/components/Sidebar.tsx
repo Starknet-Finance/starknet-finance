@@ -34,6 +34,12 @@ export const MENU_ITEM = [
           isComingSoon: true,
         },
         {
+          icon: <MutilOwnerIcon />,
+          title: "debug",
+          path: "/debug",
+        },
+
+        {
           icon: <AiAssistantIcon />,
           title: "AI Assistant",
           isComingSoon: false,
