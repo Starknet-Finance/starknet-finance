@@ -1,6 +1,6 @@
 import { argent, braavos, InjectedConnector } from "@starknet-react/core";
 import { getTargetNetworks } from "~~/utils/scaffold-stark";
-import { BurnerConnector } from "./stark-burner/BurnerConnector";
+import { StarknetFinanceConnector } from "./stark-burner/BurnerConnector";
 import scaffoldConfig from "~~/scaffold.config";
 import { LAST_CONNECTED_TIME_LOCALSTORAGE_KEY } from "~~/utils/Constants";
 
@@ -21,7 +21,7 @@ function withDisconnectWrapper(connector: InjectedConnector) {
 }
 
 function getConnectors() {
-  const connectors = [argent(), braavos(), new BurnerConnector()];
+  const connectors = [argent(), braavos(), new StarknetFinanceConnector()];
 
   return connectors.sort(() => Math.random() - 0.5).map(withDisconnectWrapper);
 }

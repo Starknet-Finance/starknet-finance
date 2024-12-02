@@ -4,7 +4,7 @@ import { useRef, useState } from "react";
 import Wallet from "~~/components/scaffold-stark/CustomConnectButton/Wallet";
 import { useLocalStorage } from "usehooks-ts";
 import { burnerAccounts } from "~~/utils/devnetAccounts";
-import { BurnerConnector } from "~~/services/web3/stark-burner/BurnerConnector";
+import { StarknetFinanceConnector } from "~~/services/web3/stark-burner/BurnerConnector";
 import { useTheme } from "next-themes";
 import { BlockieAvatar } from "../BlockieAvatar";
 import GenericModal from "./GenericModal";
@@ -48,7 +48,7 @@ const ConnectModal = () => {
     if (connector.id === "burner-wallet") {
       const connector = connectors.find(
         (it) => it.id == "burner-wallet",
-      ) as BurnerConnector;
+      ) as StarknetFinanceConnector;
       if (connector) {
         connect({ connector });
         setLastConnector({ id: connector.id });
@@ -69,7 +69,7 @@ const ConnectModal = () => {
   ) {
     const connector = connectors.find(
       (it) => it.id == "burner-wallet",
-    ) as BurnerConnector;
+    ) as StarknetFinanceConnector;
     if (connector) {
       connector.burnerAccount = burnerAccounts[ix];
       connect({ connector });

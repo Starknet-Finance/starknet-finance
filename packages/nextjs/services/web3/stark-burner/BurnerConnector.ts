@@ -81,7 +81,7 @@ class CustomAccount extends Account {
 }
 
 // https://github.com/apibara/starknet-react/blob/main/packages/core/src/connectors/injected.ts
-export class BurnerConnector extends InjectedConnector {
+export class StarknetFinanceConnector extends InjectedConnector {
   chain: Chain = devnet;
   burnerAccount: BurnerAccount = burnerAccounts[0];
   private parentAddress: string | null = null;
