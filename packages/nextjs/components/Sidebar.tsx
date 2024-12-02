@@ -10,6 +10,7 @@ import { StakeIcon } from "./Icons/StakeIcon";
 import { TransactionIcon } from "./Icons/TransactionIcon";
 import { BatchIcon } from "./Icons/BatchIcon";
 import { GlobeAsiaAustraliaIcon } from "@heroicons/react/24/solid";
+import { CustomConnectButton } from "./scaffold-stark/CustomConnectButton";
 
 export const MENU_ITEM = [
   {
@@ -162,7 +163,10 @@ export default function Sidebar() {
           <Image src={"/argentx-icon.svg"} alt="icon" width={24} height={24} />
           <p className="font-medium">0xBB...37e</p>
         </div>
-        <div className="bg-[#6565658A] h-[1px] w-full mt-2"></div>
+        {/* <div>
+          <CustomConnectButton />
+        </div> */}
+        <div className="bg-[#6565658A] h-[1px] w-full mt-5"></div>
       </div>
       <div className="flex-1 flex flex-col gap-1.5">
         {MENU_ITEM.map((item: MenuGroup, index) => (
