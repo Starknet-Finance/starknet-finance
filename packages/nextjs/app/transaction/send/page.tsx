@@ -48,6 +48,7 @@ const Send = () => {
   };
 
   const handleSend = async () => {
+    console.log("Sending transaction:", currentTransaction);
     if (!currentTransaction || !account) {
       toast.error("Missing transaction details or wallet not connected");
       return;

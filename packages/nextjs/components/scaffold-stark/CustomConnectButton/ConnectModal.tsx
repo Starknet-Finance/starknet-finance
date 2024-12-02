@@ -46,7 +46,15 @@ const ConnectModal = () => {
     connector: Connector,
   ): void {
     if (connector.id === "burner-wallet") {
-      setIsBurnerWallet(true);
+      const connector = connectors.find(
+        (it) => it.id == "burner-wallet",
+      ) as BurnerConnector;
+      if (connector) {
+        connect({ connector });
+        setLastConnector({ id: connector.id });
+        setLastConnectionTime(Date.now());
+        handleCloseModal();
+      }
       return;
     }
     connect({ connector });

@@ -21,15 +21,7 @@ function withDisconnectWrapper(connector: InjectedConnector) {
 }
 
 function getConnectors() {
-  const { targetNetworks } = scaffoldConfig;
-
-  const connectors = [argent(), braavos()];
-
-  if (
-    targetNetworks.some((network) => (network.network as string) === "devnet")
-  ) {
-    connectors.push(new BurnerConnector());
-  }
+  const connectors = [argent(), braavos(), new BurnerConnector()];
 
   return connectors.sort(() => Math.random() - 0.5).map(withDisconnectWrapper);
 }
