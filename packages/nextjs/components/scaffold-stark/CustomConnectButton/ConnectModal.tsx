@@ -98,7 +98,7 @@ const ConnectModal = () => {
       />
       <GenericModal
         modalId="connect-modal"
-        className="w-fit py-5 connect-wallet-modal"
+        className="z-[99999] w-fit py-5 connect-wallet-modal"
       >
         <div className="relative">
           <Image

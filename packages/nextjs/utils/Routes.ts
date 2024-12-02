@@ -7,4 +7,5 @@ export const Routes = {
   overview: "/overview",
   aiAssistant: "/ai-assistant",
   explore: "/explore",
+  multiOwner: "/multi-owner",
 };
