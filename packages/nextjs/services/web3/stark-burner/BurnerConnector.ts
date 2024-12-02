@@ -38,11 +38,16 @@ class CustomAccount extends Account {
   ): Promise<any> {
     console.log("🔥 BurnerConnector: custom execute() called");
 
+    if (typeof window === "undefined") {
+      return Promise.reject(new Error("Window is not defined"));
+    }
+
     console.log("Custom execute called", {
       compiledCalls,
       abis,
       transactOptions,
     });
+
     try {
       compiledCalls.forEach((element) => {
         //@ts-ignore
@@ -53,21 +58,21 @@ class CustomAccount extends Account {
         element.entrypoint = element.entry_point;
       });
 
-      if (typeof window === "undefined") {
-        return Promise.reject(new Error("Window is not defined"));
-      }
-
       return new Promise((resolve, reject) => {
         console.log("INSIDE PROMISE SENDING TRANSACTION....");
-        window.addEventListener("message", (event) => {
+
+        const messageHandler = (event: MessageEvent) => {
           if (event.data.type === "TRANSACTION_RESPONSE") {
+            window.removeEventListener("message", messageHandler);
             if (event.data.error) {
               reject(new Error(event.data.error));
             } else {
               resolve(event.data.result);
             }
           }
-        });
+        };
+
+        window.addEventListener("message", messageHandler);
 
         window.parent.postMessage(
           {
@@ -77,18 +82,18 @@ class CustomAccount extends Account {
           },
           "*",
         );
-      }) as any;
+      });
     } catch (e) {
       throw e;
     }
   }
 }
 
-// https://github.com/apibara/starknet-react/blob/main/packages/core/src/connectors/injected.ts
 export class StarknetFinanceConnector extends InjectedConnector {
   chain: Chain = devnet;
   burnerAccount: BurnerAccount = burnerAccounts[0];
   private parentAddress: string | null = null;
+  private messageHandler: ((event: MessageEvent) => void) | null = null;
 
   constructor() {
     console.log("🔥 BurnerConnector: constructor called");
@@ -99,17 +104,19 @@ export class StarknetFinanceConnector extends InjectedConnector {
         icon: { dark: burnerWalletIcon, light: burnerWalletIcon },
       },
     });
+
     this.chain = scaffoldConfig.targetNetworks[0];
 
-    // Set up parent address listener once during construction
-    window.addEventListener("message", (event) => {
-      if (event.data.type === "PARENT_ADDRESS") {
-        this.parentAddress = event.data.address;
-      }
-    });
+    if (typeof window !== "undefined") {
+      this.messageHandler = (event: MessageEvent) => {
+        if (event.data.type === "PARENT_ADDRESS") {
+          this.parentAddress = event.data.address;
+        }
+      };
 
-    // Request address from parent
-    window.parent.postMessage({ type: "GET_PARENT_ADDRESS" }, "*");
+      window.addEventListener("message", this.messageHandler);
+      window.parent.postMessage({ type: "GET_PARENT_ADDRESS" }, "*");
+    }
   }
 
   get id(): string {
@@ -124,6 +131,11 @@ export class StarknetFinanceConnector extends InjectedConnector {
 
   async account(): Promise<AccountInterface> {
     console.log("🔥 BurnerConnector: account() called");
+
+    if (typeof window === "undefined") {
+      return Promise.reject(new Error("Window is not defined"));
+    }
+
     // If we don't have parent address yet, wait for it
     if (!this.parentAddress) {
       await new Promise<void>((resolve) => {
@@ -150,7 +162,7 @@ export class StarknetFinanceConnector extends InjectedConnector {
   }
 
   available(): boolean {
-    return true;
+    return typeof window !== "undefined";
   }
 
   chainId(): Promise<bigint> {
@@ -165,12 +177,19 @@ export class StarknetFinanceConnector extends InjectedConnector {
   }
 
   async ready(): Promise<boolean> {
+    if (typeof window === "undefined") {
+      return false;
+    }
     return Promise.resolve(!!this.parentAddress);
   }
 
   async request<T extends RpcMessage["type"]>(
     call: RequestFnCall<T>,
   ): Promise<RpcTypeToMessageMap[T]["result"]> {
+    if (typeof window === "undefined") {
+      return Promise.reject(new Error("Window is not defined"));
+    }
+
     console.log("INSIDE PROMISE SENDING TRANSACTION....");
 
     if (call.params && "calls" in call.params) {
@@ -187,15 +206,19 @@ export class StarknetFinanceConnector extends InjectedConnector {
 
         return new Promise((resolve, reject) => {
           console.log("INSIDE PROMISE SENDING TRANSACTION....");
-          window.addEventListener("message", (event) => {
+
+          const messageHandler = (event: MessageEvent) => {
             if (event.data.type === "TRANSACTION_RESPONSE") {
+              window.removeEventListener("message", messageHandler);
               if (event.data.error) {
                 reject(new Error(event.data.error));
               } else {
                 resolve(event.data.result);
               }
             }
-          });
+          };
+
+          window.addEventListener("message", messageHandler);
 
           window.parent.postMessage(
             {
@@ -215,6 +238,11 @@ export class StarknetFinanceConnector extends InjectedConnector {
 
   async connect(): Promise<ConnectorData> {
     console.log("🔥 BurnerConnector: connect() called");
+
+    if (typeof window === "undefined") {
+      return Promise.reject(new Error("Window is not defined"));
+    }
+
     // Wait for parent address if not set yet
     if (!this.parentAddress) {
       await new Promise<void>((resolve) => {
@@ -235,6 +263,11 @@ export class StarknetFinanceConnector extends InjectedConnector {
 
   disconnect(): Promise<void> {
     console.log("🔥 BurnerConnector: disconnect() called");
+
+    if (typeof window !== "undefined" && this.messageHandler) {
+      window.removeEventListener("message", this.messageHandler);
+      this.messageHandler = null;
+    }
 
     this.parentAddress = null;
     return Promise.resolve();
