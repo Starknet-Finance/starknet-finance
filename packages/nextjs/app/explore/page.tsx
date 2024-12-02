@@ -9,7 +9,9 @@ const Explore: NextPage = () => {
   const { address: connectedAddress } = useAccount();
   const { addTransaction } = useTransactionStorage();
   const router = useRouter();
-  const [url, setUrl] = useState<string>("http://localhost:3001");
+  const [url, setUrl] = useState<string>(
+    "https://custom-starknet-app.vercel.app/",
+  );
   const [displayUrl, setDisplayUrl] = useState<string>("");
   const iframeRef = useRef<HTMLIFrameElement>(null);
 
