@@ -2,7 +2,7 @@ import Image from "next/image";
 import { useGlobalState } from "~~/services/store/store";
 import { useState } from "react";
 import { StoredTransaction } from "~~/hooks/useTransactionStorage";
-import { BatchTransactionCard } from "~~/app/transaction-batch/_component/BatchTransactionCard";
+import { BatchTransactionCard } from "../../transaction-batch/_component/BatchTransactionCard";
 
 interface BatchedTransactionProps {
   transactions: StoredTransaction[];

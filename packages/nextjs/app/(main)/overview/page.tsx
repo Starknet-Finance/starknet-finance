@@ -5,7 +5,6 @@ import React from "react";
 import Image from "next/image";
 import { useRouter } from "next/navigation";
 import { HeaderActions } from "~~/components/HeaderActions";
-import { Routes } from "~~/utils/Routes";
 import TransactionButtons from "~~/components/transactions/TransactionButtons";
 import TransactionTable from "../transaction/_components/TransactionTable";
 

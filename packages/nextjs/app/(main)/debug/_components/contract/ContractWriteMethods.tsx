@@ -1,5 +1,5 @@
 import { Abi } from "abi-wan-kanabi";
-import { WriteOnlyFunctionForm } from "~~/app/debug/_components/contract";
+import { WriteOnlyFunctionForm } from "~~/app/(main)/debug/_components/contract";
 import {
   Contract,
   ContractName,

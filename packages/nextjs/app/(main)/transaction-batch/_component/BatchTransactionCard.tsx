@@ -1,6 +1,6 @@
 import { parseEther } from "ethers";
 import Image from "next/image";
-import { TransactionFinanceCard } from "~~/app/transaction/_components/TransactionFinanceCard";
+import { TransactionFinanceCard } from "~~/app/(main)/transaction/_components/TransactionFinanceCard";
 import SwapTransaction from "~~/components/AIAssistant/SwapTransaction";
 import { StoredTransaction } from "~~/hooks/useTransactionStorage";
 
