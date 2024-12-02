@@ -1,19 +1,19 @@
 #[starknet::contract]
 mod Multisig {
-    use starknet::storage::MutableVecTrait;
+    use contracts::interfaces::IModule::{IModuleDispatcher, IModuleDispatcherTrait};
     use contracts::interfaces::IMultisig::{
         IMultisig, CallMeta, Transaction, TransactionExecuted, TransactionSigned,
         TransactionProposed
     };
     use contracts::interfaces::IMultisigFactory::{ModuleConfig};
-    use contracts::interfaces::IModule::{IModuleDispatcher, IModuleDispatcherTrait};
     use contracts::utils::{execute_calls};
-    use starknet::{ContractAddress, get_caller_address};
-    use starknet::{account::Call};
+    use core::poseidon::poseidon_hash_span;
+    use starknet::storage::MutableVecTrait;
     use starknet::storage::{
         StoragePathEntry, Map, Vec, StoragePointerReadAccess, StoragePointerWriteAccess, VecTrait,
     };
-    use core::poseidon::poseidon_hash_span;
+    use starknet::{ContractAddress, get_caller_address};
+    use starknet::{account::Call};
 
     #[storage]
     struct Storage {
@@ -113,12 +113,9 @@ mod Multisig {
 
         fn get_signers(self: @ContractState) -> Array<ContractAddress> {
             let mut addresses = array![];
-            for i in 0
-                ..self
-                    .signers
-                    .len() {
-                        addresses.append(self.signers.at(i).read());
-                    };
+            for i in 0..self.signers.len() {
+                addresses.append(self.signers.at(i).read());
+            };
             addresses
         }
 
@@ -156,7 +153,9 @@ mod Multisig {
                                 module_config.module_type == module_type, "Module type mismatch"
                             );
 
-                            assert!(module_dispatcher.check_transaction(calls), "Module check failed");
+                            assert!(
+                                module_dispatcher.check_transaction(calls), "Module check failed"
+                            );
                         }
                     }
         }

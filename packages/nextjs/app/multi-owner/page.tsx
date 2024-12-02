@@ -28,6 +28,7 @@ import { useScaffoldEventHistory } from "~~/hooks/scaffold-stark/useScaffoldEven
 import { useDeployedContractInfo } from "~~/hooks/scaffold-stark";
 import { universalErc20Abi, universalStrkAddress } from "~~/utils/Constants";
 import { v } from "@starknet-react/core/dist/index-Bhba1Jqa";
+import ManageAccountModal from "~~/components/Modals/ManageAccountModal";
 
 type Transaction = {
   id: number;
@@ -132,8 +133,8 @@ const MultiOwner = () => {
     functionName: "deploy_multisig",
     args: [
       [
-        "0x064b48806902a367c8598f4f95c305e8c1a1acba5f082d294a43793113115691",
-        "0x078662e7352d062084b0010068b99288486c2d8b914f6e2a55ce945f8792c8b1",
+        "0x00BDfb22Ee694229a502e3f36b08355160eFa439D83D7f034055A1D7ca02C74B",
+        "0x0732E3f7E43336eDC96F8D3f437240970cA927453089a42AE6D14e4b7519fA97",
       ],
       2,
       [
@@ -158,12 +159,14 @@ const MultiOwner = () => {
     watch: true,
   });
 
+  const { data: factoryContract } = useDeployedContractInfo("MultisigFactory");
+
   // filter out connected address multisig
   const handleFilterDeployedMultisig = () => {
     if (!address) return;
     const processedDeployMultisigEvents = deployedMultisig?.map((multisig) => ({
       signers: multisig.args?.signers.map((signer: any) =>
-        getChecksumAddress(num.toHex(signer))
+        getChecksumAddress(num.toHex(signer)),
       ),
       threshold: multisig.args?.threshold,
       moa_address: num.toHex(multisig.args?.moa_address || ""),
@@ -171,7 +174,7 @@ const MultiOwner = () => {
 
     // now filter out the connected address multisig
     const filteredDeployedMultisig = processedDeployMultisigEvents?.filter(
-      (multisig) => multisig.signers.includes(getChecksumAddress(address!))
+      (multisig) => multisig.signers.includes(getChecksumAddress(address!)),
     );
 
     setConnectedAccountMultisig(filteredDeployedMultisig);
@@ -181,7 +184,7 @@ const MultiOwner = () => {
   const handleProposeTransaction = async () => {
     // get the multisig address
 
-    const multisigAddress = connectedAccountMultisig[0].moa_address;
+    const multisigAddress = connectedAccountMultisig[0]?.moa_address;
     console.log(multisigAddress);
     // construct multisig contract instance
     const multisigContract = new Contract(multisigAbi?.abi!, multisigAddress);
@@ -207,7 +210,7 @@ const MultiOwner = () => {
             ],
           },
         ],
-      ]
+      ],
     );
 
     console.log(proposedTransactionCalldata);
@@ -221,7 +224,7 @@ const MultiOwner = () => {
   };
 
   const handleGetPendingTransactions = async () => {
-    const multisigAddress = connectedAccountMultisig[0].moa_address;
+    const multisigAddress = connectedAccountMultisig[0]?.moa_address;
     const provider = new RpcProvider({
       nodeUrl: `http://127.0.0.1:5050`,
     });
@@ -242,20 +245,20 @@ const MultiOwner = () => {
     const provider = new RpcProvider({
       nodeUrl: `http://127.0.0.1:5050`,
     });
-    const multisigAddress = connectedAccountMultisig[0].moa_address;
+    const multisigAddress = connectedAccountMultisig[0]?.moa_address;
     console.log(multisigAddress);
     // construct multisig contract instance
     const multisigContract = new Contract(
       multisigAbi?.abi!,
       multisigAddress,
-      provider
+      provider,
     );
     const isSigned = await multisigContract.is_signed(address, 1);
     console.log(isSigned);
   };
 
   const handleSignTransaction = async () => {
-    const multisigAddress = connectedAccountMultisig[0].moa_address;
+    const multisigAddress = connectedAccountMultisig[0]?.moa_address;
     // get first proposed transaction and his calldata
     const proposedTransaction = (await handleGetPendingTransactions())?.events
       .keys;
@@ -275,7 +278,7 @@ const MultiOwner = () => {
             ],
           },
         ],
-      ]
+      ],
     );
     console.log(signTransactionCalldata);
     try {
@@ -298,6 +301,8 @@ const MultiOwner = () => {
       console.log(error);
     }
   };
+
+  console.log("Factory contract:", factoryContract);
 
   return (
     <div className="p-8 min-h-screen relative">
@@ -354,31 +359,31 @@ const MultiOwner = () => {
             <div className="flex flex-col border-b-gray-800 border-b-2 pb-4 mt-5 gap-3">
               <div className="flex w-full justify-between items-center">
                 <h2 className="text-lg">Signers</h2>
-                <button className="bg-gray-600 p-2 rounded">Add Signer</button>
+                <button className="bg-[#2F2F2F] p-2 rounded">Add Signer</button>
               </div>
               <div className="flex flex-col gap-3">
                 <div className="flex">
                   <input
                     type="text"
                     placeholder="Enter name"
-                    className="w-1/4 px-4 py-2 text-white bg-gray-700 rounded-l-lg border-r border-gray-600"
+                    className="w-1/4 px-4 py-2 text-white bg-[#1E1E1E] rounded-l-lg border-r border-gray-600"
                   />
                   <input
                     type="text"
                     placeholder="Enter address"
-                    className="flex-1 px-4 py-2 text-white bg-gray-700 rounded-r-lg"
+                    className="flex-1 px-4 py-2 text-white bg-[#1E1E1E] rounded-r-lg"
                   />
                 </div>
                 <div className="flex">
                   <input
                     type="text"
                     placeholder="Enter name"
-                    className="w-1/4 px-4 py-2 text-white bg-gray-700 rounded-l-lg border-r border-gray-600"
+                    className="w-1/4 px-4 py-2 text-white bg-[#1E1E1E] rounded-l-lg border-r border-gray-600"
                   />
                   <input
                     type="text"
                     placeholder="Enter address"
-                    className="flex-1 px-4 py-2 text-white bg-gray-700 rounded-r-lg"
+                    className="flex-1 px-4 py-2 text-white bg-[#1E1E1E]  rounded-r-lg"
                   />
                 </div>
               </div>
@@ -513,7 +518,7 @@ const MultiOwner = () => {
 
           <div className="px-3 py-4 w-full">
             <button
-              onClick={handleIsSigned}
+              onClick={handleCreateAccount}
               type="submit"
               className="px-4 py-2 w-full text-white button-bg rounded-lg flex justify-center items-center gap-2"
             >
@@ -522,6 +527,7 @@ const MultiOwner = () => {
           </div>
         </div>
       </div>
+      <ManageAccountModal moaList={connectedAccountMultisig} />
     </div>
   );
 };

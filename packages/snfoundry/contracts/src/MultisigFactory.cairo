@@ -1,8 +1,8 @@
 #[starknet::contract]
 mod MultisigFactory {
     use contracts::interfaces::IMultisigFactory::{IMultisigFactory, ModuleConfig, MultisigCreated};
-    use starknet::{ContractAddress};
     use starknet::syscalls::deploy_syscall;
+    use starknet::{ContractAddress};
 
 
     #[storage]
@@ -47,7 +47,7 @@ mod MultisigFactory {
             self
                 .emit(
                     MultisigCreated {
-                        signers: signers,  moa_address: moa_address, threshold: threshold
+                        signers: signers, moa_address: moa_address, threshold: threshold
                     }
                 );
         }

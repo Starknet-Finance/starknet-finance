@@ -6,7 +6,7 @@ import { Message, ChatHistory, ChatState } from "~~/types/assistant";
 type AIAssistantState = {
   messages: Message[];
   setMessages: (
-    newMessages: Message[] | ((prev: Message[]) => Message[])
+    newMessages: Message[] | ((prev: Message[]) => Message[]),
   ) => void;
   isLoading: boolean;
   setIsLoading: (isLoading: boolean) => void;
@@ -41,7 +41,7 @@ export const useAIAssistantState = create<AIAssistantState>()(
                     updatedAt: Date.now(),
                     title: updatedMessages[0]?.content || "New Chat", // Use first message as title
                   }
-                : history
+                : history,
             );
 
             set((state) => ({
@@ -103,7 +103,7 @@ export const useAIAssistantState = create<AIAssistantState>()(
                 updatedAt: Date.now(),
                 title: messages[0]?.content || "New Chat",
               }
-            : history
+            : history,
         );
 
         set((state) => ({
@@ -117,6 +117,6 @@ export const useAIAssistantState = create<AIAssistantState>()(
     {
       name: "ai-assistant-storage",
       partialize: (state) => ({ chatState: state.chatState }),
-    }
-  )
+    },
+  ),
 );
