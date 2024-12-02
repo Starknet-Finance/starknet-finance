@@ -53,6 +53,10 @@ class CustomAccount extends Account {
         element.entrypoint = element.entry_point;
       });
 
+      if (typeof window === "undefined") {
+        return Promise.reject(new Error("Window is not defined"));
+      }
+
       return new Promise((resolve, reject) => {
         console.log("INSIDE PROMISE SENDING TRANSACTION....");
         window.addEventListener("message", (event) => {
