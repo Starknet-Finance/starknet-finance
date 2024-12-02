@@ -2,7 +2,7 @@ import Image from "next/image";
 
 export default function Polygon() {
   return (
-    <div className="flex items-center gap-2 my-10">
+    <div className="flex items-center gap-2 my-[90px]">
       <Image
         src="/landingpage/polygon-left.svg"
         alt="icon"

@@ -76,7 +76,7 @@ export default function AvaiableNow() {
   return (
     <div className="content">
       <p className="subtitle">AVAILABLE NOW</p>
-      <h2 className="title">Built for Everyone</h2>
+      <h2 className="title mb-14">Built for Everyone</h2>
       <div className="grid grid-cols-3 gap-2.5">
         {CARD_DATA.map((item) => (
           <Card key={item.title} {...item} />

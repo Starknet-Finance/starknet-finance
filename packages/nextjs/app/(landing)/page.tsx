@@ -31,7 +31,6 @@ export default function HomePage() {
         <PlatForm />
         <KeyFeature />
         <HowItWork />
-        <Polygon />
         <AvaiableNow />
         <Technical />
         <Managing />
