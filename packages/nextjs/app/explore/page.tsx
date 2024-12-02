@@ -1,16 +1,15 @@
 "use client";
 import type { NextPage } from "next";
 import { useState, useRef, useEffect } from "react";
+import { useRouter } from "next/navigation";
 import { useAccount } from "~~/hooks/useAccount";
-import {
-  useTransactionStorage,
-  StoredTransaction,
-} from "~~/hooks/useTransactionStorage";
+import { useTransactionStorage } from "~~/hooks/useTransactionStorage";
 
 const Explore: NextPage = () => {
   const { address: connectedAddress } = useAccount();
   const { addTransaction } = useTransactionStorage();
-  const [url, setUrl] = useState<string>("");
+  const router = useRouter();
+  const [url, setUrl] = useState<string>("http://localhost:3001");
   const [displayUrl, setDisplayUrl] = useState<string>("");
   const iframeRef = useRef<HTMLIFrameElement>(null);
 
@@ -61,6 +60,9 @@ const Explore: NextPage = () => {
               },
               callData: event.data.calls,
             });
+
+            // Redirect to transaction-batch page
+            router.push("/transaction-batch");
 
             iframeWindow.postMessage(
               {
