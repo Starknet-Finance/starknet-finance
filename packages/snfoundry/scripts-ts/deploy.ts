@@ -42,10 +42,24 @@ import { green } from "./helpers/colorize-log";
  * @returns {Promise<void>}
  */
 const deployScript = async (): Promise<void> => {
-  await deployContract({
-    contract: "YourContract",
+  const multisig = await deployContract({
+    contract: "Multisig",
     constructorArgs: {
-      owner: deployer.address,
+      signers: [],
+      threshold: 0,
+      _module: [],
+    },
+  });
+  await deployContract({
+    contract: "MultisigFactory",
+    constructorArgs: {
+      _multisig_classhash: multisig.classHash,
+    },
+  });
+  await deployContract({
+    contract: "MyNFT",
+    constructorArgs: {
+      recipient: deployer.address,
     },
   });
 };
