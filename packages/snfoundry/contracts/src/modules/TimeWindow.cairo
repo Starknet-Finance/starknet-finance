@@ -7,8 +7,8 @@ mod TimeWindowModule {
 
     #[storage]
     struct Storage {
-        start_hour: u8,  
-        end_hour: u8   
+        start_hour: u8,
+        end_hour: u8
     }
 
     #[constructor]
@@ -24,9 +24,9 @@ mod TimeWindowModule {
         fn check_transaction(self: @ContractState, calls: Span<Call>) -> bool {
             let timestamp = starknet::get_block_timestamp();
             let current_hour = (timestamp / 3600) % 24;
-            
-            current_hour >= self.start_hour.read().into() && 
-            current_hour <= self.end_hour.read().into()
+
+            current_hour >= self.start_hour.read().into()
+                && current_hour <= self.end_hour.read().into()
         }
 
         fn get_module_type(self: @ContractState) -> ModuleType {

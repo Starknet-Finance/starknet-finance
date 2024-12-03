@@ -28,11 +28,11 @@ const ConnectModal = () => {
     { id: "" },
     {
       initializeWithValue: false,
-    }
+    },
   );
   const [, setLastConnectionTime] = useLocalStorage<number>(
     LAST_CONNECTED_TIME_LOCALSTORAGE_KEY,
-    0
+    0,
   );
 
   const handleCloseModal = () => {
@@ -43,7 +43,7 @@ const ConnectModal = () => {
 
   function handleConnectWallet(
     e: React.MouseEvent<HTMLButtonElement>,
-    connector: Connector
+    connector: Connector,
   ): void {
     if (connector.id === "burner-wallet") {
       const connector = connectors.find(
@@ -65,11 +65,11 @@ const ConnectModal = () => {
 
   function handleConnectBurner(
     e: React.MouseEvent<HTMLButtonElement>,
-    ix: number
+    ix: number,
   ) {
     const connector = connectors.find(
       (it) => it.id == "burner-wallet",
-    ) as StarknetFinanceConnector;
+    ) as BurnerConnector;
     if (connector) {
       connector.burnerAccount = burnerAccounts[ix];
       connect({ connector });

@@ -1,11 +1,11 @@
 #[starknet::contract]
 mod MultisigFactory {
     use contracts::interfaces::IModule::{IModule};
-    use starknet::{ContractAddress};
     use contracts::interfaces::IMultisigFactory::{ModuleType};
-    use starknet::storage::{Map, Vec, VecTrait};
-    use starknet::{account::Call};
     use starknet::storage::MutableVecTrait;
+    use starknet::storage::{Map, Vec, VecTrait};
+    use starknet::{ContractAddress};
+    use starknet::{account::Call};
 
     #[storage]
     struct Storage {

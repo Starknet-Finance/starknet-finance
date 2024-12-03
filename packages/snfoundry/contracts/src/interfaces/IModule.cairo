@@ -1,5 +1,5 @@
-use starknet::{account::Call};
 use contracts::interfaces::IMultisigFactory::{ModuleType};
+use starknet::{account::Call};
 
 #[starknet::interface]
 pub trait IModule<TContractState> {

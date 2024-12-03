@@ -25,7 +25,7 @@ export default function SelectTokenList({
       (token) =>
         token.name.toLowerCase().includes(term.toLowerCase()) ||
         token.symbol.toLowerCase().includes(term.toLowerCase()) ||
-        token.address.toLowerCase().includes(term.toLowerCase())
+        token.address.toLowerCase().includes(term.toLowerCase()),
     );
     setFilteredTokens(filtered);
   };

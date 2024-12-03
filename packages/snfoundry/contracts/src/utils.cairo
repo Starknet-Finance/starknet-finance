@@ -1,7 +1,7 @@
 use core::num::traits::WideMul;
-use starknet::{TxInfo, SyscallResultTrait};
-use starknet::syscalls::call_contract_syscall;
 use starknet::account::Call;
+use starknet::syscalls::call_contract_syscall;
+use starknet::{TxInfo, SyscallResultTrait};
 
 pub fn execute_calls(mut calls: Span<Call>) -> Array<Span<felt252>> {
     let mut result = ArrayTrait::new();

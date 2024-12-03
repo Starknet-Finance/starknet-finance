@@ -93,6 +93,7 @@ export const WriteOnlyFunctionForm = ({
                 ]
               : [],
           );
+
         await writeTxn(makeWriteWithParams);
         onChange();
       } catch (e: any) {
