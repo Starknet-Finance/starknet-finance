@@ -3,10 +3,14 @@ import GenericModal from "../scaffold-stark/CustomConnectButton/GenericModal";
 import Image from "next/image";
 import { CloseIcon } from "../Icons/CloseIcon";
 import Divider from "../Divider";
+import { useGlobalState } from "~~/services/store/store";
 
 const ManageAccountModal = ({ moaList }: { moaList: any }) => {
+  const { setActiveMOA } = useGlobalState();
   const modalRef = useRef<HTMLInputElement>(null);
-  const [showSettings, setShowSettings] = useState(false);
+  const [showSettings, setShowSettings] = useState<{ [key: string]: boolean }>(
+    {}
+  );
 
   const handleClose = () => {
     if (modalRef.current) {
@@ -14,10 +18,17 @@ const ManageAccountModal = ({ moaList }: { moaList: any }) => {
     }
   };
 
-  const toggleSettings = () => {
-    setShowSettings((prevState) => !prevState);
+  const handleSelectMOA = (moa: any) => {
+    setActiveMOA(moa);
+    handleClose();
   };
 
+  const toggleSettings = (key: string) => {
+    setShowSettings((prev) => ({
+      ...prev,
+      [key]: !prev[key],
+    }));
+  };
   return (
     <div>
       <label htmlFor={`manage-account-modal`}>Manage your account</label>
@@ -53,45 +64,59 @@ const ManageAccountModal = ({ moaList }: { moaList: any }) => {
             </button>
           </div>
         </div>
-        <div className="h-[350px]">
-          <div className="flex items-baseline justify-between px-2.5 py-3">
-            <div className="flex items-center gap-1.5">
-              <div className="w-9 h-9 rounded-full bg-[#D56AFF]"></div>
-              <div>
-                <p className="text-[#D56AFF] font-medium">Jupeng</p>
-                <div className="flex items-center gap-1.5">
-                  <p className="text-sm font-medium">0xd75B...agd9</p>
+        <div className="h-[350px] overflow-y-auto">
+          {moaList.map((itemMoa: any, moaIndex: any) =>
+            itemMoa?.signers?.map((itemSigner: any, signerIndex: any) => (
+              <div
+                className="flex items-baseline justify-between px-2.5 py-3"
+                key={`${moaIndex}-${signerIndex}`}
+              >
+                <div
+                  className="flex items-center gap-1.5"
+                  onClick={handleSelectMOA}
+                >
+                  <div className="w-9 h-9 rounded-full bg-[#D56AFF]"></div>
+                  <div>
+                    <p className="text-[#D56AFF] font-medium">Jupeng</p>
+                    <div className="flex items-center gap-1.5">
+                      <p className="text-sm font-medium">
+                        {itemSigner?.slice(0, 6) +
+                          "..." +
+                          itemSigner?.slice(-4)}
+                      </p>
+                      <Image
+                        src={"/copy-icon.svg"}
+                        alt="icon"
+                        width={16}
+                        height={16}
+                      />
+                    </div>
+                  </div>
+                </div>
+                <div className="relative">
                   <Image
-                    src={"/copy-icon.svg"}
+                    src={"/dot-menu.svg"}
                     alt="icon"
-                    width={16}
-                    height={16}
+                    width={24}
+                    height={24}
+                    className="cursor-pointer"
+                    onClick={() => toggleSettings(`${moaIndex}-${signerIndex}`)}
                   />
+                  {showSettings[`${moaIndex}-${signerIndex}`] && (
+                    <div className="bg-[#2E2E2E] p-2 rounded-xl min-w-[165px] absolute right-0 z-40">
+                      <p className="text-[#747474]">Setting</p>
+                      <p className="bg-[#4A4A4A] rounded-md px-3 py-2 cursor-pointer my-1">
+                        Rename
+                      </p>
+                      <p className="bg-[#4A4A4A] rounded-md px-3 py-2 cursor-pointer">
+                        Remove Account
+                      </p>
+                    </div>
+                  )}
                 </div>
               </div>
-            </div>
-            <div className="relative">
-              <Image
-                src={"/dot-menu.svg"}
-                alt="icon"
-                width={24}
-                height={24}
-                className="cursor-pointer"
-                onClick={toggleSettings}
-              />
-              {showSettings && (
-                <div className="bg-[#2E2E2E] p-2 rounded-xl min-w-[165px] absolute right-0">
-                  <p className="text-[#747474]">Setting</p>
-                  <p className="bg-[#4A4A4A] rounded-md px-3 py-2 cursor-pointer my-1">
-                    Rename
-                  </p>
-                  <p className="bg-[#4A4A4A] rounded-md px-3 py-2 cursor-pointer">
-                    Remove Account
-                  </p>
-                </div>
-              )}
-            </div>
-          </div>
+            ))
+          )}
         </div>
         <Divider className="bg-[#3D3D3D] my-5" />
         <div className="flex justify-between items-center">

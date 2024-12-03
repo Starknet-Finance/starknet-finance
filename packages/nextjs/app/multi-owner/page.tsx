@@ -159,6 +159,8 @@ const MultiOwner = () => {
     watch: true,
   });
 
+
+
   const { data: factoryContract } = useDeployedContractInfo("MultisigFactory");
 
   // filter out connected address multisig
@@ -301,8 +303,6 @@ const MultiOwner = () => {
       console.log(error);
     }
   };
-
-  console.log("Factory contract:", factoryContract);
 
   return (
     <div className="p-8 min-h-screen relative">

@@ -7,7 +7,7 @@ const deployedContracts = {
   devnet: {
     Multisig: {
       address:
-        "0x6e4358736a3dfc4993690bb348e0f2ca2267fa8ac2b09eba33aa78800d06ecb",
+        "0x55595a9e56a0d804d2054e37e88f7f70217e87e7e299d67957294f5b587e70d",
       abi: [
         {
           type: "impl",
@@ -269,7 +269,7 @@ const deployedContracts = {
     },
     MyNFT: {
       address:
-        "0x43e510f55932b75704e20de587039ebd3cb1eb3dcbea18491f24fcdef7aa0db",
+        "0x285204f5c7d0cc350e4604f1f4528d1d571e611b44cc43a3f61676d60c51b16",
       abi: [
         {
           type: "impl",
@@ -854,7 +854,7 @@ const deployedContracts = {
     },
     MultisigFactory: {
       address:
-        "0x4490ac00121821b99a036d95886d5fd5d0cc06a9c6a26dfcd0ff34579b96ee2",
+        "0x2262dcbb7c14f812ecc2576c051f648c6fe8adef2288250b219d1ab0b6fe6a2",
       abi: [
         {
           type: "impl",

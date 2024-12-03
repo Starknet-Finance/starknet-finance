@@ -12,6 +12,9 @@ import { ChainWithAttributes } from "~~/utils/scaffold-stark";
  */
 
 type GlobalState = {
+  activeMOA: any;
+  setActiveMOA: (moa: any) => void;
+
   nativeCurrencyPrice: number;
   strkCurrencyPrice: number;
   setNativeCurrencyPrice: (newNativeCurrencyPriceState: number) => void;
@@ -27,6 +30,9 @@ type GlobalState = {
 };
 
 export const useGlobalState = create<GlobalState>((set) => ({
+  activeMOA: null,
+  setActiveMOA: (moa) => set({ activeMOA: moa }),
+
   nativeCurrencyPrice: 0,
   strkCurrencyPrice: 0,
   setNativeCurrencyPrice: (newValue: number): void =>
