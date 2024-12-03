@@ -15,7 +15,7 @@ import {
 import { useLocalStorage } from "usehooks-ts";
 import { BlockieAvatar, isENS } from "~~/components/scaffold-stark";
 import { useOutsideClick } from "~~/hooks/scaffold-stark";
-import { BurnerConnector } from "~~/services/web3/stark-burner/BurnerConnector";
+import { StarknetFinanceConnector } from "~~/services/web3/stark-burner/BurnerConnector";
 import { getTargetNetworks } from "~~/utils/scaffold-stark";
 import { burnerAccounts } from "~~/utils/devnetAccounts";
 import { Address } from "@starknet-react/chains";
@@ -62,7 +62,7 @@ export const AddressInfoDropdown = ({
   ) {
     const connector = connectors.find(
       (it) => it.id == "burner-wallet",
-    ) as BurnerConnector;
+    ) as StarknetFinanceConnector;
     if (connector) {
       connector.burnerAccount = burnerAccounts[ix];
       connect({ connector });

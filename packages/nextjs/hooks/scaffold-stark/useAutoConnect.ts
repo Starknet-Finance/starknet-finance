@@ -2,7 +2,7 @@ import { useReadLocalStorage } from "usehooks-ts";
 import { useEffect } from "react";
 import { useConnect } from "@starknet-react/core";
 import scaffoldConfig from "~~/scaffold.config";
-import type { BurnerConnector } from "~~/services/web3/stark-burner/BurnerConnector";
+import type { StarknetFinanceConnector } from "~~/services/web3/stark-burner/BurnerConnector";
 import { burnerAccounts } from "~~/utils/devnetAccounts";
 import { LAST_CONNECTED_TIME_LOCALSTORAGE_KEY } from "~~/utils/Constants";
 
@@ -35,7 +35,7 @@ export const useAutoConnect = (): void => {
             connector.id == "burner-wallet" &&
             savedConnector?.ix !== undefined
           ) {
-            (connector as BurnerConnector).burnerAccount =
+            (connector as StarknetFinanceConnector).burnerAccount =
               burnerAccounts[savedConnector.ix];
           }
           connect({ connector });

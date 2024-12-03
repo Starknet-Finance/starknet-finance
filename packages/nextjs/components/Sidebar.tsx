@@ -36,6 +36,12 @@ export const MENU_ITEM = [
           path: Routes.multiOwner,
         },
         {
+          icon: <MutilOwnerIcon />,
+          title: "debug",
+          path: "/debug",
+        },
+
+        {
           icon: <AiAssistantIcon />,
           title: "AI Assistant",
           isComingSoon: false,

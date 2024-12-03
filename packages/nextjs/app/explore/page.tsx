@@ -1,15 +1,100 @@
 "use client";
 import type { NextPage } from "next";
-import { useState, useRef } from "react";
+import { useState, useRef, useEffect } from "react";
+import { useRouter } from "next/navigation";
+import { useAccount } from "~~/hooks/useAccount";
+import { useTransactionStorage } from "~~/hooks/useTransactionStorage";
 
 const Explore: NextPage = () => {
-  const [url, setUrl] = useState<string>("");
+  const { address: connectedAddress } = useAccount();
+  const { addTransaction } = useTransactionStorage();
+  const router = useRouter();
+  const [url, setUrl] = useState<string>(
+    "https://custom-starknet-app.vercel.app/",
+  );
   const [displayUrl, setDisplayUrl] = useState<string>("");
   const iframeRef = useRef<HTMLIFrameElement>(null);
 
+  useEffect(() => {
+    const handleMessage = async (event: MessageEvent) => {
+      const iframeWindow = iframeRef.current?.contentWindow;
+      if (!iframeWindow) return;
+
+      switch (event.data.type) {
+        case "GET_PARENT_ADDRESS":
+          iframeWindow.postMessage(
+            {
+              type: "PARENT_ADDRESS",
+              address: connectedAddress,
+            },
+            "*",
+          );
+          break;
+
+        case "EXECUTE_TRANSACTION":
+          try {
+            console.log("Received transaction calls:", event.data.calls);
+
+            // Extract transaction details from the first call
+            const firstCall = event.data.calls[0];
+            const amount = BigInt(firstCall.calldata[1]);
+            const recipientAddress =
+              "0x" + BigInt(firstCall.calldata[0]).toString(16);
+
+            // Add transaction to storage
+            addTransaction({
+              meta: {
+                type: "transfer",
+                amount: Number(amount) / 1e18, // Convert from wei to ETH
+                token: {
+                  symbol: "ETH",
+                  logo: "/token-placeholder.png",
+                  name: "Ethereum",
+                  address: firstCall.contract_address,
+                },
+                recipient: {
+                  name:
+                    recipientAddress.slice(0, 6) +
+                    "..." +
+                    recipientAddress.slice(-4),
+                  address: recipientAddress,
+                },
+              },
+              callData: event.data.calls,
+            });
+
+            // Redirect to transaction-batch page
+            router.push("/transaction-batch");
+
+            iframeWindow.postMessage(
+              {
+                type: "TRANSACTION_RESPONSE",
+                result: {
+                  transaction_hash: "0x...", // Replace with actual transaction hash
+                },
+              },
+              "*",
+            );
+          } catch (error) {
+            iframeWindow.postMessage(
+              {
+                type: "TRANSACTION_RESPONSE",
+                error:
+                  error instanceof Error ? error.message : "Transaction failed",
+              },
+              "*",
+            );
+          }
+          break;
+      }
+    };
+
+    window.addEventListener("message", handleMessage);
+    return () => window.removeEventListener("message", handleMessage);
+  }, [connectedAddress, addTransaction]);
+
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    // Ensure URL has protocol
     let formattedUrl = url;
     if (!url.startsWith("http://") && !url.startsWith("https://")) {
       formattedUrl = `https://${url}`;
@@ -34,7 +119,6 @@ const Explore: NextPage = () => {
           Load
         </button>
       </form>
-
       {displayUrl && (
         <div className="w-full h-[80vh] rounded-lg overflow-hidden border border-gray-300">
           <iframe
@@ -42,7 +126,7 @@ const Explore: NextPage = () => {
             src={displayUrl}
             className="w-full h-full"
             title="Website Preview"
-            sandbox="allow-same-origin allow-scripts allow-popups allow-forms"
+            sandbox="allow-same-origin allow-scripts allow-popups allow-forms allow-presentation"
           />
         </div>
       )}

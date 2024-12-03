@@ -4,7 +4,7 @@ import { useConnect } from "@starknet-react/core";
 import { useReadLocalStorage } from "usehooks-ts";
 import scaffoldConfig from "~~/scaffold.config";
 import { burnerAccounts } from "~~/utils/devnetAccounts";
-import type { BurnerConnector } from "~~/services/web3/stark-burner/BurnerConnector";
+import type { StarknetFinanceConnector } from "~~/services/web3/stark-burner/BurnerConnector";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 
 // Mock the dependencies
