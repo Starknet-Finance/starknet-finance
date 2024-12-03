@@ -28,11 +28,11 @@ const ConnectModal = () => {
     { id: "" },
     {
       initializeWithValue: false,
-    }
+    },
   );
   const [, setLastConnectionTime] = useLocalStorage<number>(
     LAST_CONNECTED_TIME_LOCALSTORAGE_KEY,
-    0
+    0,
   );
 
   const handleCloseModal = () => {
@@ -43,7 +43,7 @@ const ConnectModal = () => {
 
   function handleConnectWallet(
     e: React.MouseEvent<HTMLButtonElement>,
-    connector: Connector
+    connector: Connector,
   ): void {
     if (connector.id === "burner-wallet") {
       const connector = connectors.find(
@@ -65,7 +65,7 @@ const ConnectModal = () => {
 
   function handleConnectBurner(
     e: React.MouseEvent<HTMLButtonElement>,
-    ix: number
+    ix: number,
   ) {
     const connector = connectors.find(
       (it) => it.id == "burner-wallet",
@@ -83,11 +83,9 @@ const ConnectModal = () => {
     <div>
       <label
         htmlFor="connect-modal"
-        className="rounded-lg px-3 py-2 cursor-pointer bg-white w-fit"
+        className="rounded-lg px-5 py-3 cursor-pointer button-bg block w-full text-center"
       >
-        <span className="text-[#292929] font-medium text-[15px]">
-          Connect Wallet
-        </span>
+        <span className="text-white font-medium">Connect Wallet</span>
       </label>
 
       <input

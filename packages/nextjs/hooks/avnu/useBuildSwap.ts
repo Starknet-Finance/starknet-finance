@@ -9,7 +9,7 @@ const useBuildSwap = (
         message: string;
       };
     };
-  }) => void
+  }) => void,
 ) => {
   return useMutation({
     mutationFn: buildSwap,

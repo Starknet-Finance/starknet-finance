@@ -7,7 +7,7 @@ const useBestQuote = (
     sellTokenAddress: string;
     buyTokenAddress: string;
     sellAmount: string;
-  } | null
+  } | null,
 ) => {
   return useQuery({
     queryKey: ["bestQuote"],

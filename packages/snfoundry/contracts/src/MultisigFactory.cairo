@@ -1,8 +1,8 @@
 #[starknet::contract]
 mod MultisigFactory {
     use contracts::interfaces::IMultisigFactory::{IMultisigFactory, ModuleConfig, MultisigCreated};
-    use starknet::{ContractAddress};
     use starknet::syscalls::deploy_syscall;
+    use starknet::{ContractAddress};
 
 
     #[storage]

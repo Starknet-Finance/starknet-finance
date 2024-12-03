@@ -1,15 +1,15 @@
-mod MultisigFactory;
 mod Multisig;
-mod utils;
+mod MultisigFactory;
 mod MyNFT;
+mod utils;
 
 mod interfaces {
-    pub mod IMultisigFactory;
-    pub mod IMultisig;
     pub mod IModule;
+    pub mod IMultisig;
+    pub mod IMultisigFactory;
 }
 
 mod modules {
-    pub mod Whitelist;
     pub mod TimeWindow;
+    pub mod Whitelist;
 }
