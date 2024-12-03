@@ -1,3 +1,5 @@
+"use client";
+
 import Image from "next/image";
 import "./landing.css";
 import PlatForm from "~~/components/Landinpage/Sections/Platform";
@@ -7,7 +9,7 @@ import AvaiableNow from "~~/components/Landinpage/Sections/AvaiableNow";
 import Technical from "~~/components/Landinpage/Sections/Technical";
 import Managing from "~~/components/Landinpage/Sections/Managing";
 import Footer from "~~/components/Landinpage/Sections/Footer";
-import Polygon from "~~/components/Landinpage/Polygon";
+import { Routes } from "~~/utils/Routes";
 
 export default function HomePage() {
   return (
@@ -21,7 +23,10 @@ export default function HomePage() {
               <span className="starknet-finance">finance</span>
             </div>
           </div>
-          <button className="bg-btn text-white font-medium px-5 py-3 rounded-xl">
+          <button
+            className="bg-btn text-white font-medium px-5 py-3 rounded-xl"
+            onClick={() => window.open(Routes.overview)}
+          >
             Launch App
           </button>
         </div>

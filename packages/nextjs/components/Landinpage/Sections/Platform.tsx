@@ -3,6 +3,7 @@
 
 import Image from "next/image";
 import { useEffect, useRef } from "react";
+import { Routes } from "~~/utils/Routes";
 
 export default function PlatForm() {
   const sectionRef = useRef<HTMLDivElement>(null);
@@ -46,7 +47,10 @@ export default function PlatForm() {
           </p>
         </div>
         <div className="flex justify-center mt-9 ">
-          <button className="bg-btn text-xl font-medium text-white border-2 border-[#C4AEFF] px-7 py-3 rounded-xl">
+          <button
+            className="bg-btn text-xl font-medium text-white border-2 border-[#C4AEFF] px-7 py-3 rounded-xl"
+            onClick={() => window.open(Routes.overview)}
+          >
             Launch App
           </button>
         </div>

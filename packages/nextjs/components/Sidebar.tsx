@@ -11,6 +11,8 @@ import { TransactionIcon } from "./Icons/TransactionIcon";
 import { BatchIcon } from "./Icons/BatchIcon";
 import { GlobeAsiaAustraliaIcon } from "@heroicons/react/24/solid";
 import { CustomConnectButton } from "./scaffold-stark/CustomConnectButton";
+import { Address } from "./scaffold-stark";
+import { useAccount } from "~~/hooks/useAccount";
 
 export const MENU_ITEM = [
   {
@@ -32,8 +34,14 @@ export const MENU_ITEM = [
         {
           icon: <MutilOwnerIcon />,
           title: "Multi Owner",
-          isComingSoon: true,
+          path: Routes.multiOwner,
         },
+        {
+          icon: <MutilOwnerIcon />,
+          title: "debug",
+          path: "/debug",
+        },
+
         {
           icon: <AiAssistantIcon />,
           title: "AI Assistant",
@@ -122,10 +130,20 @@ const Actions = ({ name, icon }: { name: string; icon: string }) => {
   );
 };
 
+const AccountActions = ({ address }: { address: string }) => {
+  return (
+    <div className="flex items-center justify-between px-2.5 py-3 bg-[#2C2C2C]">
+      <Address address={address as `0x${string}`} />
+    </div>
+  );
+};
+
 export default function Sidebar() {
   const router = useRouter();
   const pathname = usePathname();
   const [openSubmenu, setOpenSubmenu] = useState<string | null>(null);
+
+  const { address } = useAccount();
 
   const toggleSubmenu = (menuTitle: string) => {
     setOpenSubmenu(openSubmenu === menuTitle ? null : menuTitle);
@@ -159,7 +177,7 @@ export default function Sidebar() {
         </div>
       </div>
       <div>
-        <div className="flex items-center gap-1.5 bg-[#252525] rounded-lg px-5 py-2.5">
+        {/* <div className="flex items-center gap-1.5 bg-[#252525] rounded-lg px-5 py-2.5">
           <Image src={"/argentx-icon.svg"} alt="icon" width={24} height={24} />
           <p className="font-medium">0xBB...37e</p>
         </div>
@@ -239,6 +257,8 @@ export default function Sidebar() {
         ))}
       </div>
       <div className="actions">
+        {/* show account here */}
+        {address && <AccountActions address={address} />}
         <Actions name="What news?" icon="/gif.svg" />
         <div className="bg-[#7C7C7C] opacity-25 h-[1px] w-full"></div>
         <Actions name="Settings" icon="/setting.svg" />

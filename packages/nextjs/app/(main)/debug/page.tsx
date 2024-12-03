@@ -1,5 +1,6 @@
 import { DebugContracts } from "./_components/DebugContracts";
 import type { NextPage } from "next";
+import { Header } from "~~/components/Header";
 import { getMetadata } from "~~/utils/scaffold-stark/getMetadata";
 
 export const metadata = getMetadata({

@@ -75,10 +75,10 @@ export default function Footer() {
           <div className="bg-[#313131] rounded-[22px] pl-6 pr-3.5 py-3 flex justify-between items-center gap-3 w-[634px] relative z-20">
             <input
               placeholder="Leave email to get latest news"
-              className=" outline-none border-none px-2 text-white w-full"
+              className="outline-none border-none px-2 text-white w-full"
               style={{ background: "none" }}
             />
-            <button className="bg-white rounded-xl py-4 px-6">Submit</button>
+            <button className="bg-white rounded-xl py-4 px-7">Submit</button>
           </div>
         </div>
         <div className="relative z-20 mt-3">

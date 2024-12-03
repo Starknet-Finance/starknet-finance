@@ -1,3 +1,5 @@
+import { Routes } from "~~/utils/Routes";
+
 export default function Managing() {
   return (
     <div className="managing-bg flex flex-col items-center justify-center">
@@ -9,7 +11,10 @@ export default function Managing() {
           <button className="w-[305px] h-[45px] flex items-center justify-center rounded-lg text-sm text-white border border-[#A8A8A8]">
             Read Docs
           </button>
-          <button className="w-[305px] h-[45px] flex items-center justify-center  bg-btn text-sm text-white font-medium rounded-lg">
+          <button
+            className="w-[305px] h-[45px] flex items-center justify-center  bg-btn text-sm text-white font-medium rounded-lg"
+            onClick={() => window.open(Routes.overview)}
+          >
             Launch App
           </button>
         </div>

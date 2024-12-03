@@ -4,7 +4,7 @@ import { useRef, useState } from "react";
 import Wallet from "~~/components/scaffold-stark/CustomConnectButton/Wallet";
 import { useLocalStorage } from "usehooks-ts";
 import { burnerAccounts } from "~~/utils/devnetAccounts";
-import { BurnerConnector } from "~~/services/web3/stark-burner/BurnerConnector";
+import { StarknetFinanceConnector } from "~~/services/web3/stark-burner/BurnerConnector";
 import { useTheme } from "next-themes";
 import { BlockieAvatar } from "../BlockieAvatar";
 import GenericModal from "./GenericModal";
@@ -46,7 +46,15 @@ const ConnectModal = () => {
     connector: Connector,
   ): void {
     if (connector.id === "burner-wallet") {
-      setIsBurnerWallet(true);
+      const connector = connectors.find(
+        (it) => it.id == "burner-wallet",
+      ) as StarknetFinanceConnector;
+      if (connector) {
+        connect({ connector });
+        setLastConnector({ id: connector.id });
+        setLastConnectionTime(Date.now());
+        handleCloseModal();
+      }
       return;
     }
     connect({ connector });
@@ -61,7 +69,7 @@ const ConnectModal = () => {
   ) {
     const connector = connectors.find(
       (it) => it.id == "burner-wallet",
-    ) as BurnerConnector;
+    ) as StarknetFinanceConnector;
     if (connector) {
       connector.burnerAccount = burnerAccounts[ix];
       connect({ connector });
@@ -88,7 +96,7 @@ const ConnectModal = () => {
       />
       <GenericModal
         modalId="connect-modal"
-        className="w-fit py-5 connect-wallet-modal"
+        className="z-[99999] w-fit py-5 connect-wallet-modal"
       >
         <div className="relative">
           <Image
