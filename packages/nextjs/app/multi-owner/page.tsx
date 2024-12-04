@@ -159,8 +159,6 @@ const MultiOwner = () => {
     watch: true,
   });
 
-
-
   const { data: factoryContract } = useDeployedContractInfo("MultisigFactory");
 
   // filter out connected address multisig

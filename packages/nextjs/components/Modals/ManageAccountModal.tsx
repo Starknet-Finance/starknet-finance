@@ -6,10 +6,10 @@ import Divider from "../Divider";
 import { useGlobalState } from "~~/services/store/store";
 
 const ManageAccountModal = ({ moaList }: { moaList: any }) => {
-  const { activeMOA,setActiveMOA } = useGlobalState();
+  const { activeMOA, setActiveMOA } = useGlobalState();
   const modalRef = useRef<HTMLInputElement>(null);
   const [showSettings, setShowSettings] = useState<{ [key: string]: boolean }>(
-    {}
+    {},
   );
 
   const handleClose = () => {
@@ -118,7 +118,7 @@ const ManageAccountModal = ({ moaList }: { moaList: any }) => {
                   )}
                 </div>
               </div>
-            ))
+            )),
           )}
         </div>
         <Divider className="bg-[#3D3D3D] my-5" />

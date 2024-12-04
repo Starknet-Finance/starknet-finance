@@ -19,6 +19,15 @@ type Transaction = {
   status: "Succeed" | "Failed";
 };
 
+type PendingTransaction = {
+  transaction_hash: string;
+  block_hash: string;
+  from_address: string;
+  block_number: number;
+  signatures?: number;
+  isSigned?: boolean;
+};
+
 const transactionHistory: Transaction[] = [
   {
     id: 1,
@@ -45,93 +54,85 @@ export default function TransactionTable() {
   const { activeMOA } = useGlobalState();
   const { address, account } = useAccount();
   const { data: multisigAbi } = useDeployedContractInfo("Multisig");
-  const [listPendingTransaction, setListPendingTransaction] = useState<any>([]);
+  const [listPendingTransaction, setListPendingTransaction] = useState<
+    PendingTransaction[]
+  >([]);
   const [isSigned, setIsSigned] = useState(false);
+  const [loadingStates, setLoadingStates] = useState<Record<string, boolean>>(
+    {},
+  );
 
   const handleGetPendingTransactions = useCallback(async () => {
-    const multisigAddress = activeMOA?.moa_address;
-    if (!multisigAddress) {
-      notification.error("Select MutilsigAddress");
-      return;
-    }
-    const provider = new RpcProvider({
-      nodeUrl: `http://127.0.0.1:5050`,
-    });
-    const blockNumber = (await provider.getBlockLatestAccepted()).block_number;
+    try {
+      const multisigAddress = activeMOA?.moa_address;
+      if (!multisigAddress) {
+        notification.error("Select MutilsigAddress");
+        return;
+      }
 
-    const events = await provider.getEvents({
-      chunk_size: 100,
-      keys: [[hash.getSelectorFromName("TransactionProposed")]],
-      address: multisigAddress,
-      from_block: { block_number: Number(0) },
-      to_block: { block_number: blockNumber },
-    });
-    console.log(events);
-    setListPendingTransaction(events.events);
-    return(events)
+      const provider = new RpcProvider({ nodeUrl: `http://127.0.0.1:5050` });
+      const blockNumber = (await provider.getBlockLatestAccepted())
+        .block_number;
+
+      const events = await provider.getEvents({
+        chunk_size: 100,
+        keys: [[hash.getSelectorFromName("TransactionProposed")]],
+        address: multisigAddress,
+        from_block: { block_number: Number(0) },
+        to_block: { block_number: blockNumber },
+      });
+
+      setListPendingTransaction(events.events);
+      return events;
+    } catch (error) {
+      console.error("Error fetching pending transactions:", error);
+      notification.error("Failed to fetch pending transactions");
+    }
   }, [activeMOA?.moa_address]);
 
-  // const handleIsSigned = async () => {
-  //   const provider = new RpcProvider({
-  //     nodeUrl: `http://127.0.0.1:5050`,
-  //   });
-  //   const multisigAddress = activeMOA?.moa_address;
-  //   if (!multisigAddress) {
-  //     notification.error("Select MutilsigAddress");
-  //     return;
-  //   }
-  //   const multisigContract = new Contract(
-  //     multisigAbi?.abi!,
-  //     multisigAddress,
-  //     provider
-  //   );
-  //   const isSigned = await multisigContract.is_signed(address, 1);
-  //   console.log(isSigned);
-  //   setIsSigned(isSigned);
-  // };
-
-  const handleSignTransaction = async () => {
-    const multisigAddress = activeMOA?.moa_address;
-    if (!multisigAddress) {
-      notification.error("Select MutilsigAddress");
-      return;
-    }
-    // get first proposed transaction and his calldata
-    const proposedTransaction = (await handleGetPendingTransactions())?.events
-      .keys;
-    console.log(proposedTransaction);
-    const multisigContract = new Contract(multisigAbi?.abi!, multisigAddress);
-    const signTransactionCalldata = multisigContract?.populate(
-      "sign_transaction",
-      [
-        1n,
-        [
-          {
-            to: universalStrkAddress,
-            selector: hash.getSelectorFromName("transfer"),
-            calldata: [
-              "0x0135353f55784cb5f1c1c7d2ec3f5d4dab42eff301834a9d8588550ae7a33ed4",
-              10000n,
-            ],
-          },
-        ],
-      ]
-    );
-    console.log(signTransactionCalldata);
+  const handleSignTransaction = async (txHash: string) => {
     try {
-      const tx = await account?.execute(signTransactionCalldata);
-      console.log(tx);
-    } catch (error) {
-      console.log(error);
+      setLoadingStates((prev) => ({ ...prev, [txHash]: true }));
+      const multisigAddress = activeMOA?.moa_address;
+      if (!multisigAddress || !account) {
+        notification.error("Select MutilsigAddress or Connect wallet");
+        return;
+      }
+
+      const multisigContract = new Contract(multisigAbi?.abi!, multisigAddress);
+      const signTransactionCalldata = multisigContract?.populate(
+        "sign_transaction",
+        [
+          1n,
+          [
+            {
+              to: universalStrkAddress,
+              selector: hash.getSelectorFromName("transfer"),
+              calldata: [
+                "0x00BDfb22Ee694229a502e3f36b08355160eFa439D83D7f034055A1D7ca02C74B",
+                10000n,
+              ],
+            },
+          ],
+        ],
+      );
+
+      const tx = await account.execute(signTransactionCalldata);
+      if (tx) {
+        notification.success("Transaction signed successfully");
+        await handleGetPendingTransactions();
+      }
+    } catch (error: any) {
+      console.error("Error details:", error);
+      notification.error(error.message || "Failed to sign transaction");
+    } finally {
+      setLoadingStates((prev) => ({ ...prev, [txHash]: false }));
     }
   };
 
   const checkExecutedTransactions = useCallback(async () => {
     try {
-      const provider = new RpcProvider({
-        nodeUrl: `http://127.0.0.1:5050`,
-      });
-
+      const provider = new RpcProvider({ nodeUrl: `http://127.0.0.1:5050` });
       const multisigAddress = activeMOA?.moa_address;
       if (!multisigAddress) return;
 
@@ -147,7 +148,6 @@ export default function TransactionTable() {
       });
 
       if (events && events.events.length > 0) {
-        // Refetch pending transactions
         await handleGetPendingTransactions();
       }
     } catch (error) {
@@ -157,17 +157,13 @@ export default function TransactionTable() {
 
   useEffect(() => {
     handleGetPendingTransactions();
-
-    const interval = setInterval(checkExecutedTransactions, 3000);
+    const interval = setInterval(async () => {
+      await handleGetPendingTransactions();
+      await checkExecutedTransactions();
+    }, 3000);
 
     return () => clearInterval(interval);
   }, [handleGetPendingTransactions, checkExecutedTransactions]);
-
-  // useEffect(() => {
-  //   handleIsSigned()
-  // }, [handleIsSigned])
-
-  console.log(listPendingTransaction);
 
   return (
     <div className="border border-[#0b0b0b] bg-black rounded-xl p-6 h-full">
@@ -194,7 +190,7 @@ export default function TransactionTable() {
           </span>
         </div>
       </div>
-      <button onClick={handleGetPendingTransactions}>Fetch</button>
+
       <div className="flex items-center gap-4 pb-2 my-4 border-b border-[#65656580]">
         <p
           className={`text-sm cursor-pointer ${activeTab === "history" ? "text-white" : "text-[#3D3D3D]"}`}
@@ -257,7 +253,7 @@ export default function TransactionTable() {
         </div>
       ) : (
         <div className="flex flex-col max-h-[350px] gap-5 overflow-y-auto">
-          {listPendingTransaction?.map((item: any, index: number) => (
+          {listPendingTransaction?.map((item, index) => (
             <div
               key={index}
               className="flex justify-between items-center bg-gray-800/30 p-4 rounded-lg"
@@ -284,17 +280,14 @@ export default function TransactionTable() {
               </div>
               {!isSigned && (
                 <div className="flex items-center gap-4">
-                  {/* <div className="flex items-center gap-2">
-                  <p className="text-gray-400">Signatures:</p>
-                  <p className="font-medium tex-white">
-                    {item.signatures}/{`${activeMOA?.threshold}`}
-                  </p>
-                </div> */}
                   <button
-                    className="bg-green-500 hover:bg-green-600 text-white px-6 py-2 rounded-lg transition-colors"
-                    onClick={handleSignTransaction}
+                    className="bg-green-500 hover:bg-green-600 text-white px-6 py-2 rounded-lg transition-colors disabled:opacity-50"
+                    onClick={() => handleSignTransaction(item.transaction_hash)}
+                    disabled={loadingStates[item.transaction_hash]}
                   >
-                    Sign
+                    {loadingStates[item.transaction_hash]
+                      ? "Signing..."
+                      : "Sign"}
                   </button>
                 </div>
               )}
