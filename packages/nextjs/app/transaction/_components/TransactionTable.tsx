@@ -68,26 +68,27 @@ export default function TransactionTable() {
     });
     console.log(events);
     setListPendingTransaction(events.events);
+    return(events)
   }, [activeMOA?.moa_address]);
 
-  const handleIsSigned = async () => {
-    const provider = new RpcProvider({
-      nodeUrl: `http://127.0.0.1:5050`,
-    });
-    const multisigAddress = activeMOA?.moa_address;
-    if (!multisigAddress) {
-      notification.error("Select MutilsigAddress");
-      return;
-    }
-    const multisigContract = new Contract(
-      multisigAbi?.abi!,
-      multisigAddress,
-      provider
-    );
-    const isSigned = await multisigContract.is_signed(address, 1);
-    console.log(isSigned);
-    setIsSigned(isSigned);
-  };
+  // const handleIsSigned = async () => {
+  //   const provider = new RpcProvider({
+  //     nodeUrl: `http://127.0.0.1:5050`,
+  //   });
+  //   const multisigAddress = activeMOA?.moa_address;
+  //   if (!multisigAddress) {
+  //     notification.error("Select MutilsigAddress");
+  //     return;
+  //   }
+  //   const multisigContract = new Contract(
+  //     multisigAbi?.abi!,
+  //     multisigAddress,
+  //     provider
+  //   );
+  //   const isSigned = await multisigContract.is_signed(address, 1);
+  //   console.log(isSigned);
+  //   setIsSigned(isSigned);
+  // };
 
   const handleSignTransaction = async () => {
     const multisigAddress = activeMOA?.moa_address;
@@ -96,9 +97,9 @@ export default function TransactionTable() {
       return;
     }
     // get first proposed transaction and his calldata
-    // const proposedTransaction = (await handleGetPendingTransactions())?.events
-    //   .keys;
-    // console.log(proposedTransaction);
+    const proposedTransaction = (await handleGetPendingTransactions())?.events
+      .keys;
+    console.log(proposedTransaction);
     const multisigContract = new Contract(multisigAbi?.abi!, multisigAddress);
     const signTransactionCalldata = multisigContract?.populate(
       "sign_transaction",
@@ -161,6 +162,10 @@ export default function TransactionTable() {
 
     return () => clearInterval(interval);
   }, [handleGetPendingTransactions, checkExecutedTransactions]);
+
+  // useEffect(() => {
+  //   handleIsSigned()
+  // }, [handleIsSigned])
 
   console.log(listPendingTransaction);
 
@@ -287,7 +292,7 @@ export default function TransactionTable() {
                 </div> */}
                   <button
                     className="bg-green-500 hover:bg-green-600 text-white px-6 py-2 rounded-lg transition-colors"
-                    onClick={() => handleSignTransaction()}
+                    onClick={handleSignTransaction}
                   >
                     Sign
                   </button>
