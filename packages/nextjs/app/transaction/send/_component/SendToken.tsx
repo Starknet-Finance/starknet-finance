@@ -15,6 +15,7 @@ import { useDeployedContractInfo } from "~~/hooks/scaffold-stark";
 import { useGlobalState } from "~~/services/store/store";
 import { useAccount } from "~~/hooks/useAccount";
 import { notification } from "~~/utils/scaffold-stark";
+import { saveTxIdToStorage } from "~~/utils/helper";
 
 interface TransactionData {
   amount: number;
@@ -95,38 +96,37 @@ const SendToken = ({ setIsNext, onTransactionSubmit }: SendTokenProps) => {
   });
 
   const handleProposeTransaction = async () => {
-    // get the multisig address
-
-    const multisigAddress = activeMOA?.moa_address;
-    if (!multisigAddress) {
-      notification.error("Select MutilsigAddress");
-      return;
-    }
-    const multisigContract = new Contract(multisigAbi?.abi!, multisigAddress);
-    const proposedTransactionCalldata = multisigContract?.populate(
-      "propose_transaction",
-      [
-        [
-          {
-            to: universalStrkAddress,
-            selector: hash.getSelectorFromName("transfer"),
-            calldata: [
-              "0x00BDfb22Ee694229a502e3f36b08355160eFa439D83D7f034055A1D7ca02C74B",
-              10000n,
-            ],
-          },
-        ],
-      ],
-    );
-
     try {
+      const multisigAddress = activeMOA?.moa_address;
+      if (!multisigAddress) {
+        notification.error("Select MutilsigAddress");
+        return;
+      }
+      const multisigContract = new Contract(multisigAbi?.abi!, multisigAddress);
+      const proposedTransactionCalldata = multisigContract?.populate(
+        "propose_transaction",
+        [
+          [
+            {
+              to: universalStrkAddress,
+              selector: hash.getSelectorFromName("transfer"),
+              calldata: [
+                "0x00BDfb22Ee694229a502e3f36b08355160eFa439D83D7f034055A1D7ca02C74B",
+                10000n,
+              ],
+            },
+          ],
+        ],
+      );
+
       const tx = await account?.execute(proposedTransactionCalldata);
-      console.log("sendToken : ", tx);
+      if (tx) {
+        saveTxIdToStorage(tx.transaction_hash);
+      }
     } catch (error) {
       console.log(error);
     }
   };
-
   console.log(activeMOA);
 
   // Set default token when supported tokens load

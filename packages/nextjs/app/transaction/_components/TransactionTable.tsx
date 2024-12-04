@@ -5,6 +5,7 @@ import { useDeployedContractInfo } from "~~/hooks/scaffold-stark";
 import { useAccount } from "~~/hooks/useAccount";
 import { useGlobalState } from "~~/services/store/store";
 import { universalStrkAddress } from "~~/utils/Constants";
+import { getTxIdFromStorage } from "~~/utils/helper";
 import { notification } from "~~/utils/scaffold-stark";
 
 type Transaction = {
@@ -59,7 +60,7 @@ export default function TransactionTable() {
   >([]);
   const [isSigned, setIsSigned] = useState(false);
   const [loadingStates, setLoadingStates] = useState<Record<string, boolean>>(
-    {}
+    {},
   );
 
   const handleGetPendingTransactions = useCallback(async () => {
@@ -74,7 +75,7 @@ export default function TransactionTable() {
       const blockNumber = (await provider.getBlockLatestAccepted())
         .block_number;
 
-      const events = await provider.getEvents({
+      const proposedEvents = await provider.getEvents({
         chunk_size: 100,
         keys: [[hash.getSelectorFromName("TransactionProposed")]],
         address: multisigAddress,
@@ -82,8 +83,24 @@ export default function TransactionTable() {
         to_block: { block_number: blockNumber },
       });
 
-      setListPendingTransaction(events.events);
-      return events;
+      const executedEvents = await provider.getEvents({
+        chunk_size: 100,
+        keys: [[hash.getSelectorFromName("TransactionExecuted")]],
+        address: multisigAddress,
+        from_block: { block_number: Number(0) },
+        to_block: { block_number: blockNumber },
+      });
+
+      const executedTxHashes = executedEvents.events.map(
+        (event: any) => event.transaction_hash,
+      );
+
+      const pendingTxs = proposedEvents.events.filter(
+        (event: any) => !executedTxHashes.includes(event.transaction_hash),
+      );
+
+      setListPendingTransaction(pendingTxs);
+      return { events: pendingTxs };
     } catch (error) {
       console.error("Error fetching pending transactions:", error);
       notification.error("Failed to fetch pending transactions");
@@ -99,11 +116,13 @@ export default function TransactionTable() {
         return;
       }
 
+      const transactionId = getTxIdFromStorage(txHash);
+
       const multisigContract = new Contract(multisigAbi?.abi!, multisigAddress);
       const signTransactionCalldata = multisigContract?.populate(
         "sign_transaction",
         [
-          1n,
+          transactionId,
           [
             {
               to: universalStrkAddress,
@@ -114,7 +133,7 @@ export default function TransactionTable() {
               ],
             },
           ],
-        ]
+        ],
       );
 
       const tx = await account.execute(signTransactionCalldata);
