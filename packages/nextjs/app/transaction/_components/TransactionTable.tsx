@@ -52,14 +52,14 @@ const transactionHistory: Transaction[] = [
 export default function TransactionTable() {
   const [activeTab, setActiveTab] = useState<"history" | "pending">("history");
   const { activeMOA } = useGlobalState();
-  const { address, account } = useAccount();
+  const { account } = useAccount();
   const { data: multisigAbi } = useDeployedContractInfo("Multisig");
   const [listPendingTransaction, setListPendingTransaction] = useState<
     PendingTransaction[]
   >([]);
   const [isSigned, setIsSigned] = useState(false);
   const [loadingStates, setLoadingStates] = useState<Record<string, boolean>>(
-    {},
+    {}
   );
 
   const handleGetPendingTransactions = useCallback(async () => {
@@ -114,7 +114,7 @@ export default function TransactionTable() {
               ],
             },
           ],
-        ],
+        ]
       );
 
       const tx = await account.execute(signTransactionCalldata);
