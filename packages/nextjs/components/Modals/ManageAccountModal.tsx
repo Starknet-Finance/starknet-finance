@@ -6,7 +6,7 @@ import Divider from "../Divider";
 import { useGlobalState } from "~~/services/store/store";
 
 const ManageAccountModal = ({ moaList }: { moaList: any }) => {
-  const { setActiveMOA } = useGlobalState();
+  const { activeMOA,setActiveMOA } = useGlobalState();
   const modalRef = useRef<HTMLInputElement>(null);
   const [showSettings, setShowSettings] = useState<{ [key: string]: boolean }>(
     {}
@@ -29,6 +29,9 @@ const ManageAccountModal = ({ moaList }: { moaList: any }) => {
       [key]: !prev[key],
     }));
   };
+
+  console.log("manage account : ", activeMOA);
+
   return (
     <div>
       <label htmlFor={`manage-account-modal`}>Manage your account</label>
@@ -64,7 +67,7 @@ const ManageAccountModal = ({ moaList }: { moaList: any }) => {
             </button>
           </div>
         </div>
-        <div className="h-[350px] overflow-y-auto">
+        <div className="h-[350px] overflow-y-auto ">
           {moaList.map((itemMoa: any, moaIndex: any) =>
             itemMoa?.signers?.map((itemSigner: any, signerIndex: any) => (
               <div
@@ -73,7 +76,7 @@ const ManageAccountModal = ({ moaList }: { moaList: any }) => {
               >
                 <div
                   className="flex items-center gap-1.5"
-                  onClick={handleSelectMOA}
+                  onClick={() => handleSelectMOA(itemMoa)}
                 >
                   <div className="w-9 h-9 rounded-full bg-[#D56AFF]"></div>
                   <div>

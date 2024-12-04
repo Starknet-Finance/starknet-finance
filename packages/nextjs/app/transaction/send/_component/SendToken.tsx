@@ -3,8 +3,18 @@
 import React, { useState, useEffect } from "react";
 import toast from "react-hot-toast";
 import { CheckIcon } from "@heroicons/react/24/solid";
-import { getChecksumAddress, validateChecksumAddress } from "starknet";
+import {
+  Contract,
+  getChecksumAddress,
+  hash,
+  validateChecksumAddress,
+} from "starknet";
 import useSupportedTokens from "~~/hooks/useSupportedTokens";
+import { universalStrkAddress } from "~~/utils/Constants";
+import { useDeployedContractInfo } from "~~/hooks/scaffold-stark";
+import { useGlobalState } from "~~/services/store/store";
+import { useAccount } from "~~/hooks/useAccount";
+import { notification } from "~~/utils/scaffold-stark";
 
 interface TransactionData {
   amount: number;
@@ -47,7 +57,10 @@ const STORAGE_KEYS = {
 };
 
 const SendToken = ({ setIsNext, onTransactionSubmit }: SendTokenProps) => {
+  const { account } = useAccount();
+  const { data: multisigAbi } = useDeployedContractInfo("Multisig");
   const [amount, setAmount] = useState<number | null>(null);
+  const { activeMOA } = useGlobalState();
   const [isTokenDropdownOpen, setIsTokenDropdownOpen] = useState(false);
   const [isRecipientDropdownOpen, setIsRecipientDropdownOpen] = useState(false);
 
@@ -81,6 +94,41 @@ const SendToken = ({ setIsNext, onTransactionSubmit }: SendTokenProps) => {
     return [];
   });
 
+  const handleProposeTransaction = async () => {
+    // get the multisig address
+
+    const multisigAddress = activeMOA?.moa_address;
+    if (!multisigAddress) {
+      notification.error("Select MutilsigAddress");
+      return;
+    }
+    const multisigContract = new Contract(multisigAbi?.abi!, multisigAddress);
+    const proposedTransactionCalldata = multisigContract?.populate(
+      "propose_transaction",
+      [
+        [
+          {
+            to: universalStrkAddress,
+            selector: hash.getSelectorFromName("transfer"),
+            calldata: [
+              "0x00BDfb22Ee694229a502e3f36b08355160eFa439D83D7f034055A1D7ca02C74B",
+              10000n,
+            ],
+          },
+        ],
+      ]
+    );
+
+    try {
+      const tx = await account?.execute(proposedTransactionCalldata);
+      console.log("sendToken : ", tx);
+    } catch (error) {
+      console.log(error);
+    }
+  };
+
+  console.log(activeMOA);
+
   // Set default token when supported tokens load
   useEffect(() => {
     if (supportedTokenData && supportedTokenData.length > 0 && !selectedToken) {
@@ -95,7 +143,7 @@ const SendToken = ({ setIsNext, onTransactionSubmit }: SendTokenProps) => {
     if (selectedToken) {
       localStorage.setItem(
         STORAGE_KEYS.SELECTED_TOKEN,
-        JSON.stringify(selectedToken),
+        JSON.stringify(selectedToken)
       );
     }
   }, [selectedToken]);
@@ -153,7 +201,7 @@ const SendToken = ({ setIsNext, onTransactionSubmit }: SendTokenProps) => {
       const filtered = addressBook.filter(
         (entry) =>
           entry.name.toLowerCase().includes(recipientInput.toLowerCase()) ||
-          entry.address.toLowerCase().includes(recipientInput.toLowerCase()),
+          entry.address.toLowerCase().includes(recipientInput.toLowerCase())
       );
       setFilteredAddressBook(filtered);
     } else {
@@ -427,7 +475,7 @@ const SendToken = ({ setIsNext, onTransactionSubmit }: SendTokenProps) => {
       </div>
 
       {/* Confirm Button */}
-      <button
+      {/* <button
         disabled={!isNextButtonEnabled}
         className={`${
           isNextButtonEnabled
@@ -435,6 +483,16 @@ const SendToken = ({ setIsNext, onTransactionSubmit }: SendTokenProps) => {
             : "bg-[#474747] cursor-not-allowed"
         } w-full text-xl py-4 rounded-lg transition-all duration-200`}
         onClick={handleNext}
+      >
+        Confirm
+      </button> */}
+      <button
+        className={`${
+          isNextButtonEnabled
+            ? "next-button-bg border-[2.5px] border-[#c4aeff] cursor-pointer hover:brightness-110"
+            : "bg-[#474747]"
+        } w-full text-xl py-4 rounded-lg transition-all duration-200`}
+        onClick={handleProposeTransaction}
       >
         Confirm
       </button>

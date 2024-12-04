@@ -133,7 +133,7 @@ const MultiOwner = () => {
     functionName: "deploy_multisig",
     args: [
       [
-        "0x00BDfb22Ee694229a502e3f36b08355160eFa439D83D7f034055A1D7ca02C74B",
+        "0x056508c732d623A7E568cBbdf87FFfeaFe920c85dbd42A2D50346f055387C8E5",
         "0x0732E3f7E43336eDC96F8D3f437240970cA927453089a42AE6D14e4b7519fA97",
       ],
       2,
