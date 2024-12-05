@@ -1,0 +1,157 @@
+@import "tailwindcss/base";
+@import "tailwindcss/components";
+@import "tailwindcss/utilities";
+
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+  color: #000;
+}
+
+.content {
+  max-width: 1200px;
+  margin: auto;
+}
+
+.header {
+  border-radius: 20px;
+  border: 1px solid #e1e1e1;
+  background: rgba(245, 245, 245, 0.2);
+  backdrop-filter: blur(13.75px);
+  padding: 20px 24px;
+  display: flex;
+  max-width: 1200px;
+  margin: auto;
+}
+
+.starknet-finance {
+  font-size: 22px;
+  font-weight: 700;
+  text-transform: uppercase;
+}
+
+.bg-btn {
+  background: linear-gradient(180deg, #552cd1 0%, #35176b 100%);
+}
+
+.title {
+  color: #000;
+  text-align: center;
+  font-size: 56px;
+  font-style: normal;
+  font-weight: 600;
+  line-height: 100%; /* 56px */
+}
+
+.subtitle {
+  color: #d56aff;
+  text-align: center;
+  font-size: 20px;
+  font-style: normal;
+  font-weight: 600;
+  line-height: 120%; /* 24px */
+  margin-bottom: 12px;
+  text-transform: uppercase;
+}
+
+.managing-bg {
+  background-image: url("/landingpage/managaming.png");
+  background-position: center;
+  background-repeat: no-repeat;
+  background-size: cover;
+  height: 500px;
+  width: 100%;
+}
+
+.get-touch-btn {
+  border-radius: 12px;
+  border: 1px solid #b7b7b7;
+  background: rgba(255, 255, 255, 0.34);
+  backdrop-filter: blur(21.200000762939453px);
+  width: 292px;
+  height: 60px;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  color: white;
+}
+
+.footer-title {
+  background: linear-gradient(180deg, #c240ff 0%, rgba(255, 255, 255, 0) 100%);
+  background-clip: text;
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  font-size: 86px;
+  font-weight: 600;
+  text-transform: capitalize;
+  text-align: center;
+}
+
+.footer-subtitle {
+  background: var(
+    --Dark-Gra,
+    linear-gradient(92deg, #8f50fb 0.46%, #f539ff 71.7%)
+  );
+  background-clip: text;
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  font-size: 27px;
+  font-weight: 600;
+  line-height: 100%; /* 27px */
+}
+
+@keyframes scaleUp {
+  from {
+    transform: scale(0.5);
+    opacity: 0;
+  }
+  to {
+    transform: scale(1);
+    opacity: 1;
+  }
+}
+
+@keyframes slideLeftIcon {
+  from {
+    transform: translate(400%, 200%) rotate(0deg);
+    opacity: 0;
+  }
+  to {
+    transform: translate(0, 0) rotate(-12deg);
+    opacity: 1;
+  }
+}
+
+@keyframes slideRightIcon {
+  from {
+    transform: translate(-400%, 200%) rotate(0deg);
+    opacity: 0;
+  }
+  to {
+    transform: translate(0, 0) rotate(12deg);
+    opacity: 1;
+  }
+}
+
+.animate-macbook {
+  opacity: 0;
+}
+
+.animate-macbook.animate-visible {
+  opacity: 1;
+}
+
+.animate-visible .animate-scale {
+  animation: scaleUp 0.8s ease-out forwards;
+}
+
+.animate-visible .animate-left-icon {
+  animation: slideLeftIcon 1s ease-out 0.5s forwards;
+  opacity: 0;
+}
+
+.animate-visible .animate-right-icon {
+  animation: slideRightIcon 1s ease-out 0.5s forwards;
+  opacity: 0;
+}

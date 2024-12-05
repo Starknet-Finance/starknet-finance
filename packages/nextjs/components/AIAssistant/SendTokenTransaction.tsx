@@ -28,7 +28,7 @@ const SendTokenTransaction = ({
   // get token price
   const handleInit = async () => {
     const tokenPrice = await fetchPriceFromCoingecko(
-      transaction.fromToken.symbol
+      transaction.fromToken.symbol,
     );
 
     const amount = ethers.formatEther(transaction.toAmount || "0");
@@ -37,7 +37,7 @@ const SendTokenTransaction = ({
 
     // get token uri
     const tokenUri = supportedTokens?.content?.find(
-      (token) => token.address === transaction.fromToken.address
+      (token) => token.address === transaction.fromToken.address,
     )?.logoUri;
     setTokenUri(tokenUri || "");
 
@@ -47,7 +47,7 @@ const SendTokenTransaction = ({
     const addressBookAddress = addressBook?.find(
       (address: any) =>
         getChecksumAddress(address.address) ===
-        getChecksumAddress(transaction.receiver!)
+        getChecksumAddress(transaction.receiver!),
     );
     // Don't set empty string, keep it as null if not found
     setAddressBookAddress(addressBookAddress || null);
