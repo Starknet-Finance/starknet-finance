@@ -1,3 +1,5 @@
+import { notification } from "./scaffold-stark";
+
 export const saveTxIdToStorage = (txHash: string) => {
   const storedMapping = localStorage.getItem("txIdMapping");
   let mapping: Record<string, number> = {};
@@ -20,4 +22,14 @@ export const getTxIdFromStorage = (txHash: string): bigint => {
     return BigInt(mapping[txHash] || 1);
   }
   return 1n;
+};
+
+export const copyToClipboard = async (text: string) => {
+  try {
+    await navigator.clipboard.writeText(text);
+    notification.success("Copy successfully");
+  } catch (err) {
+    console.error("Failed to copy text: ", err);
+    notification.error("Copy failure");
+  }
 };

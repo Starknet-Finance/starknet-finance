@@ -175,14 +175,23 @@ export default function TransactionTable() {
   }, [activeMOA?.moa_address, handleGetPendingTransactions]);
 
   useEffect(() => {
-    handleGetPendingTransactions();
-    const interval = setInterval(async () => {
-      await handleGetPendingTransactions();
-      await checkExecutedTransactions();
-    }, 3000);
+    let interval: NodeJS.Timeout;
 
-    return () => clearInterval(interval);
-  }, [handleGetPendingTransactions, checkExecutedTransactions]);
+    if (activeTab === "pending") {
+      handleGetPendingTransactions();
+
+      interval = setInterval(async () => {
+        await handleGetPendingTransactions();
+        await checkExecutedTransactions();
+      }, 3000);
+    }
+
+    return () => {
+      if (interval) {
+        clearInterval(interval);
+      }
+    };
+  }, [activeTab, handleGetPendingTransactions, checkExecutedTransactions]);
 
   return (
     <div className="border border-[#0b0b0b] bg-black rounded-xl p-6 h-full">

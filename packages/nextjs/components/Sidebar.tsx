@@ -12,6 +12,10 @@ import { BatchIcon } from "./Icons/BatchIcon";
 import { GlobeAsiaAustraliaIcon } from "@heroicons/react/24/solid";
 import { Address } from "./scaffold-stark";
 import { useAccount } from "~~/hooks/useAccount";
+import ConnectModal from "./scaffold-stark/CustomConnectButton/ConnectModal";
+import { CustomConnectButton } from "./scaffold-stark/CustomConnectButton";
+import useConditionalStarkProfile from "~~/hooks/useConditionalStarkProfile";
+import { copyToClipboard } from "~~/utils/helper";
 
 export const MENU_ITEM = [
   {
@@ -131,8 +135,20 @@ const Actions = ({ name, icon }: { name: string; icon: string }) => {
 
 const AccountActions = ({ address }: { address: string }) => {
   return (
-    <div className="flex items-center justify-between px-2.5 py-3 bg-[#2C2C2C]">
-      <Address address={address as `0x${string}`} />
+    <div
+      className="flex items-center gap-2 px-2.5 py-3 bg-[#2C2C2C] cursor-pointer"
+      onClick={() => copyToClipboard(address)}
+    >
+      <Image
+        src={"/starknet-finance.svg"}
+        alt="Profile Picture"
+        className="rounded-full h-6 w-6"
+        width={24}
+        height={24}
+      />
+      <p className="text-sm text-[#D56AFF]">
+        {address.slice(0, 7) + "..." + address.slice(-7)}
+      </p>
     </div>
   );
 };
@@ -176,11 +192,8 @@ export default function Sidebar() {
         </div>
       </div>
       <div>
-        {/* <div className="flex items-center gap-1.5 bg-[#252525] rounded-lg px-5 py-2.5">
-          <Image src={"/argentx-icon.svg"} alt="icon" width={24} height={24} />
-          <p className="font-medium">0xBB...37e</p>
-        </div> */}
-        <div className="bg-[#6565658A] h-[1px] w-full mt-2"></div>
+        <CustomConnectButton />
+        <div className="bg-[#6565658A] h-[1px] w-full mt-7"></div>
       </div>
       <div className="flex-1 flex flex-col gap-1.5">
         {MENU_ITEM.map((item: MenuGroup, index) => (
