@@ -36,7 +36,7 @@ const TransactionCard: React.FC<TransactionCardProps> = ({
         <p className="text-sm text-white mb-2">Send</p>
         {/* Amount Section */}
         <div className="flex items-center gap-1 mb-6">
-          <img src={token.logo} alt={token.symbol} width={32} height={32} />
+          <Image src={token.logo} alt={token.symbol} width={32} height={32} />
           <div className="flex items-center gap-1.5">
             <span className="text-[26px] text-white">
               {amount} {token.symbol}

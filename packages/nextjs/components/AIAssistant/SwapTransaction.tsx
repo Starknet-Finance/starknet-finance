@@ -58,6 +58,7 @@ const SwapTransaction = ({
 
   useEffect(() => {
     handleInit();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [isLoading]);
   return (
     <div className="bg-[#131313] rounded-md relative">
@@ -78,7 +79,7 @@ const SwapTransaction = ({
           height={14}
           className="cursor-pointer absolute top-3 right-3"
         />
-        <img src={fromTokenUri} alt="icon" width={32} height={32} />
+        <Image src={fromTokenUri} alt="icon" width={32} height={32} />
         <p className="font-medium text-lg">
           {formatEther(transaction.fromAmount || "0")}
         </p>
@@ -88,7 +89,7 @@ const SwapTransaction = ({
       </div>
       <div className="bg-[#65656526] h-[1px] w-full"></div>
       <div className="flex items-center gap-1 px-3 py-5">
-        <img src={toTokenUri} alt="icon" width={32} height={32} />
+        <Image src={toTokenUri} alt="icon" width={32} height={32} />
         <p className="font-medium text-lg">
           {formatEther(transaction.toAmount || "0")}
         </p>

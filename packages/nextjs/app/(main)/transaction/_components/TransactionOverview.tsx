@@ -1,5 +1,6 @@
 import React, { useState } from "react";
 import { TransactionFinanceCard } from "./TransactionFinanceCard";
+import Image from "next/image";
 
 interface TransactionOverviewProps {
   amount: number;
@@ -34,7 +35,13 @@ const TransactionOverview: React.FC<TransactionOverviewProps> = ({
     <div className="h-full mx-auto bg-[#161616] p-6 text-white rounded-xl border border-[#FFFFFF0D]">
       {/* Header */}
       <div className="flex items-center gap-2 mb-3">
-        <img src="/info.svg" alt="info" className="w-6 h-6" />
+        <Image
+          src="/info.svg"
+          alt="info"
+          className="w-6 h-6"
+          width={24}
+          height={24}
+        />
         <h1 className="text-2xl font-bold gradient-text">
           TRANSACTION OVERVIEW
         </h1>
@@ -63,7 +70,7 @@ const TransactionOverview: React.FC<TransactionOverviewProps> = ({
             <span className="text-[#000] font-semibold">
               Transaction checks
             </span>
-            <img
+            <Image
               src="/transaction-check-noti.svg"
               alt="icon"
               width={14}

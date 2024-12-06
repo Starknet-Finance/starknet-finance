@@ -1,3 +1,5 @@
+/* eslint-disable react-hooks/exhaustive-deps */
+/* eslint-disable @next/next/no-img-element */
 import { ethers } from "ethers";
 import Image from "next/image";
 import { useEffect, useState } from "react";

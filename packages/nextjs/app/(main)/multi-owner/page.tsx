@@ -289,6 +289,7 @@ const MultiOwner = () => {
 
   useEffect(() => {
     handleFilterDeployedMultisig();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [deployedMultisig]);
 
   const handleCreateAccount = async () => {

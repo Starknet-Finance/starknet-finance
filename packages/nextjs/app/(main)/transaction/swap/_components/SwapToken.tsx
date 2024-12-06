@@ -58,7 +58,7 @@ const TokenSelector = ({
     onClick={onClick}
     className="flex items-center gap-[5px] bg-[#181818] rounded-[7px] w-fit p-1 cursor-pointer"
   >
-    <img src={token.icon} alt={token.symbol} width={20} height={20} />
+    <Image src={token.icon} alt={token.symbol} width={20} height={20} />
     <p className="text-sm">{token.symbol}</p>
     <Image src="/arrow-down.svg" alt="select token" width={16} height={16} />
   </div>

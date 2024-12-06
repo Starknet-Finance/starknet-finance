@@ -52,7 +52,7 @@ export const TransactionFinanceCard = ({
         </div>
         <div className="ml-2 flex-1">
           <div className="flex items-center gap-2">
-            <img
+            <Image
               src={token.logo}
               alt={token.symbol}
               className="w-6 h-6"

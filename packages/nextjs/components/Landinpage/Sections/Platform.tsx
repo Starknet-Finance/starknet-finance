@@ -24,6 +24,7 @@ export default function PlatForm() {
 
     return () => {
       if (sectionRef.current) {
+        // eslint-disable-next-line react-hooks/exhaustive-deps
         observer.unobserve(sectionRef.current);
       }
     };
