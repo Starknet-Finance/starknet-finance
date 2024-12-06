@@ -194,7 +194,7 @@ export default function TransactionTable() {
   }, [activeTab, handleGetPendingTransactions, checkExecutedTransactions]);
 
   return (
-    <div className="border border-[#0b0b0b] bg-black rounded-xl p-6 h-full">
+    <div className="bg-black rounded-xl p-4 h-full">
       <div className="flex justify-between items-center mb-6">
         <div>
           <div className="flex gap-2">

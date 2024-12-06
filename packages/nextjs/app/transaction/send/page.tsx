@@ -17,6 +17,7 @@ import toast from "react-hot-toast";
 import { parseEther } from "ethers";
 import scaffoldConfig from "~~/scaffold.config";
 import { useTransactionStorage } from "~~/hooks/useTransactionStorage";
+import TransactionButtons from "~~/components/transactions/TransactionButtons";
 
 interface TransactionData {
   amount: number;
@@ -97,7 +98,7 @@ const Send = () => {
 
     try {
       const provider = new RpcProvider({
-        nodeUrl: scaffoldConfig.targetNetworks[0].rpcUrls.blast.http[0],
+        nodeUrl: scaffoldConfig.targetNetworks[0].rpcUrls.public.http[0],
       });
 
       const tokenContract = new Contract(
@@ -162,32 +163,7 @@ const Send = () => {
           </p>
         </div>
         {/* Action Buttons */}
-        <div className="flex items-end gap-4">
-          <button className="w-[130px] flex justify-center button-bg px-6 py-3 rounded-lg items-center gap-2">
-            <span className="mr-2">
-              <Image src="/down.svg" width={10} height={10} alt="icon" />
-            </span>
-            Receive
-          </button>
-          <button
-            onClick={() => router.push(Routes.transactionSend)}
-            className="w-[130px] button-bg px-6 py-3 rounded-lg flex justify-center items-center gap-2 shadow-[inset_0_0_0_2.5px_#c4aeff]"
-          >
-            <span className="mr-2">
-              <Image src="/up.svg" width={10} height={10} alt="icon" />
-            </span>
-            Send
-          </button>
-          <button
-            className="w-[130px] button-bg px-6 py-3 rounded-lg flex justify-center items-center gap-2"
-            onClick={() => router.push(Routes.transactionSwap)}
-          >
-            <span className="mr-2">
-              <Image src="/swap.svg" width={14} height={14} alt="icon" />
-            </span>
-            Swap
-          </button>
-        </div>
+        <TransactionButtons />
       </div>
 
       {/* Main Content Grid */}

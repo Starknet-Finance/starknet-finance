@@ -119,7 +119,7 @@ const Overview = () => {
 
       {/* Main Content Grid */}
       <div className="grid grid-cols-3 gap-6">
-        <div className="col-span-2 bg-black rounded-xl p-6">
+        <div className="col-span-2 bg-black rounded-xl">
           {/* Transactions List */}
           <TransactionTable />
         </div>
