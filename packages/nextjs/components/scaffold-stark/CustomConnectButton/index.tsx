@@ -48,7 +48,7 @@ export const CustomConnectButton = () => {
 
   return (
     <>
-      <div className="flex flex-col items-center max-sm:mt-2">
+      {/* <div className="flex flex-col items-center max-sm:mt-2">
         <Balance
           address={accountAddress as Address}
           className="min-h-0 h-auto"
@@ -56,17 +56,17 @@ export const CustomConnectButton = () => {
         <span className="text-xs ml-1" style={{ color: networkColor }}>
           {chain.name}
         </span>
-      </div>
+      </div> */}
       <AddressInfoDropdown
         address={accountAddress as Address}
         displayName={""}
         ensAvatar={""}
         blockExplorerAddressLink={blockExplorerAddressLink}
       />
-      <AddressQRCodeModal
+      {/* <AddressQRCodeModal
         address={accountAddress as Address}
         modalId="qrcode-modal"
-      />
+      /> */}
     </>
   );
 };

@@ -89,10 +89,10 @@ const CreateNewAddressModal = ({
         className="flex flex-col gap-3 relative px-4 py-5 rounded-xl bg-[#0F0F0F] w-[422px]"
       >
         <div
-          className="bg-[#2D2F35] rounded-full p-1 cursor-pointer absolute right-2 top-2"
+          className="bg-[#2D2F35] rounded-full p-2 cursor-pointer absolute right-2 top-2"
           onClick={handleCloseModal}
         >
-          <Image src="/close-icon.svg" alt="icon" width={24} height={24} />
+          <Image src="/close-icon.svg" alt="icon" width={14} height={14} />
         </div>
         <div className="mx-auto mt-6">
           <Image

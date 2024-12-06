@@ -60,6 +60,7 @@ const SendTokenTransaction = ({
 
   useEffect(() => {
     handleInit();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [isLoading]);
 
   return (
@@ -75,7 +76,7 @@ const SendTokenTransaction = ({
           height={14}
           className="cursor-pointer absolute top-3 right-3"
         />
-        <img src={tokenUri} alt="icon" width={32} height={32} />
+        <Image src={tokenUri} alt="icon" width={32} height={32} />
         <p className="font-medium text-lg">
           {ethers.formatEther(transaction.toAmount || "0")}
         </p>

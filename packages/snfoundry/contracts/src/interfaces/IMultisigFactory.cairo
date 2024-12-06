@@ -3,8 +3,8 @@ use starknet::{ContractAddress};
 
 #[derive(Drop, Copy, Serde, starknet::Store, PartialEq)]
 pub enum ModuleType {
-    Whitelist,
-    TimeWindow,
+    Whitelist, // 0
+    TimeWindow, // 1
 }
 
 #[derive(Drop, Copy, Serde, starknet::Store)]
@@ -19,6 +19,7 @@ pub struct ModuleConfig {
 pub struct MultisigCreated {
     #[key]
     pub signers: Array<ContractAddress>,
+    pub moa_address: ContractAddress,
     pub threshold: u8,
 }
 

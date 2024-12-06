@@ -91,6 +91,7 @@ const Explore: NextPage = () => {
 
     window.addEventListener("message", handleMessage);
     return () => window.removeEventListener("message", handleMessage);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [connectedAddress, addTransaction]);
 
   const handleSubmit = (e: React.FormEvent) => {

@@ -1,3 +1,4 @@
+/* eslint-disable @next/next/no-img-element */
 import { ethers, formatEther } from "ethers";
 import Image from "next/image";
 import React, { useEffect, useState } from "react";
@@ -58,6 +59,7 @@ const SwapTransaction = ({
 
   useEffect(() => {
     handleInit();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [isLoading]);
   return (
     <div className="bg-[#131313] rounded-md relative">

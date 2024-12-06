@@ -1,10 +1,22 @@
+/* eslint-disable @next/next/no-img-element */
 "use client";
 
 import React, { useState, useEffect } from "react";
 import toast from "react-hot-toast";
 import { CheckIcon } from "@heroicons/react/24/solid";
-import { getChecksumAddress, validateChecksumAddress } from "starknet";
+import {
+  Contract,
+  getChecksumAddress,
+  hash,
+  validateChecksumAddress,
+} from "starknet";
 import useSupportedTokens from "~~/hooks/useSupportedTokens";
+import { universalStrkAddress } from "~~/utils/Constants";
+import { useDeployedContractInfo } from "~~/hooks/scaffold-stark";
+import { useGlobalState } from "~~/services/store/store";
+import { useAccount } from "~~/hooks/useAccount";
+import { notification } from "~~/utils/scaffold-stark";
+import { saveTxIdToStorage } from "~~/utils/helper";
 
 interface TransactionData {
   amount: number;
@@ -47,7 +59,10 @@ const STORAGE_KEYS = {
 };
 
 const SendToken = ({ setIsNext, onTransactionSubmit }: SendTokenProps) => {
+  const { account } = useAccount();
+  const { data: multisigAbi } = useDeployedContractInfo("Multisig");
   const [amount, setAmount] = useState<number | null>(null);
+  const { activeMOA } = useGlobalState();
   const [isTokenDropdownOpen, setIsTokenDropdownOpen] = useState(false);
   const [isRecipientDropdownOpen, setIsRecipientDropdownOpen] = useState(false);
 
@@ -80,6 +95,40 @@ const SendToken = ({ setIsNext, onTransactionSubmit }: SendTokenProps) => {
     }
     return [];
   });
+
+  const handleProposeTransaction = async () => {
+    try {
+      const multisigAddress = activeMOA?.moa_address;
+      if (!multisigAddress) {
+        notification.error("Select MutilsigAddress");
+        return;
+      }
+      const multisigContract = new Contract(multisigAbi?.abi!, multisigAddress);
+      const proposedTransactionCalldata = multisigContract?.populate(
+        "propose_transaction",
+        [
+          [
+            {
+              to: universalStrkAddress,
+              selector: hash.getSelectorFromName("transfer"),
+              calldata: [
+                "0x00BDfb22Ee694229a502e3f36b08355160eFa439D83D7f034055A1D7ca02C74B",
+                10000n,
+              ],
+            },
+          ],
+        ],
+      );
+
+      const tx = await account?.execute(proposedTransactionCalldata);
+      if (tx) {
+        saveTxIdToStorage(tx.transaction_hash);
+      }
+    } catch (error) {
+      console.log(error);
+    }
+  };
+  console.log(activeMOA);
 
   // Set default token when supported tokens load
   useEffect(() => {
@@ -251,9 +300,9 @@ const SendToken = ({ setIsNext, onTransactionSubmit }: SendTokenProps) => {
 
       {/* Token Selection Section */}
       <div className="mb-6 relative">
-        <label className="text-xl mb-2 block">Token</label>
+        <label className="mb-2 block">Send token</label>
         <div
-          className="bg-[#1E1E1E] h-[70px] border border-transparent transition hover:border-gray-500 p-3 rounded-lg flex items-center justify-between cursor-pointer"
+          className="bg-[#1E1E1E] h-12 border border-transparent transition hover:border-gray-500 p-3 rounded-lg flex items-center justify-between cursor-pointer"
           onClick={() => setIsTokenDropdownOpen(!isTokenDropdownOpen)}
         >
           {selectedToken && (
@@ -261,10 +310,10 @@ const SendToken = ({ setIsNext, onTransactionSubmit }: SendTokenProps) => {
               <img
                 src={selectedToken.logoUri}
                 alt={selectedToken.name}
-                className="w-8 h-8"
+                className="w-6 h-6"
               />
               <div className="flex flex-col">
-                <span className="text-xl">{selectedToken.symbol}</span>
+                <span className="text-sm">{selectedToken.symbol}</span>
                 <span className="text-sm text-gray-400">
                   {selectedToken.name}
                 </span>
@@ -333,9 +382,9 @@ const SendToken = ({ setIsNext, onTransactionSubmit }: SendTokenProps) => {
 
       {/* Recipient Selection Section */}
       <div className="mb-6 relative">
-        <label className="text-xl mb-2 block">Recipient Wallet</label>
+        <label className="mb-2 block">Recipient Wallet</label>
         <div
-          className="bg-[#1E1E1E] h-[70px] border border-transparent transition hover:border-gray-500 p-3 rounded-lg flex items-center justify-between cursor-pointer"
+          className="bg-[#1E1E1E] h-12 border border-transparent transition hover:border-gray-500 p-3 rounded-lg flex items-center justify-between cursor-pointer"
           onClick={() => setIsRecipientDropdownOpen(!isRecipientDropdownOpen)}
         >
           {selectedRecipient ? (
@@ -427,7 +476,7 @@ const SendToken = ({ setIsNext, onTransactionSubmit }: SendTokenProps) => {
       </div>
 
       {/* Confirm Button */}
-      <button
+      {/* <button
         disabled={!isNextButtonEnabled}
         className={`${
           isNextButtonEnabled
@@ -435,6 +484,16 @@ const SendToken = ({ setIsNext, onTransactionSubmit }: SendTokenProps) => {
             : "bg-[#474747] cursor-not-allowed"
         } w-full text-xl py-4 rounded-lg transition-all duration-200`}
         onClick={handleNext}
+      >
+        Confirm
+      </button> */}
+      <button
+        className={`${
+          isNextButtonEnabled
+            ? "next-button-bg border-[2.5px] border-[#c4aeff] cursor-pointer hover:brightness-110"
+            : "bg-[#474747]"
+        } w-full text-xl py-4 rounded-lg transition-all duration-200`}
+        onClick={handleProposeTransaction}
       >
         Confirm
       </button>

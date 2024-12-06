@@ -1,18 +1,32 @@
 /* eslint-disable react/no-unescaped-entities */
 "use client";
 
-import React from "react";
+import React, { useEffect, useState } from "react";
 import Image from "next/image";
 import { useRouter } from "next/navigation";
 import { HeaderActions } from "~~/components/HeaderActions";
 import { Routes } from "~~/utils/Routes";
 import TransactionButtons from "~~/components/transactions/TransactionButtons";
-import TransactionTable from "../transaction/_components/TransactionTable";
 import {
   ArrowRightIcon,
   CheckBadgeIcon,
   InformationCircleIcon,
 } from "@heroicons/react/24/outline";
+import { useScaffoldWriteContract } from "~~/hooks/scaffold-stark/useScaffoldWriteContract";
+import {
+  CairoCustomEnum,
+  Contract,
+  getChecksumAddress,
+  hash,
+  num,
+  RpcProvider,
+} from "starknet";
+import { useScaffoldEventHistory } from "~~/hooks/scaffold-stark/useScaffoldEventHistory";
+import { useDeployedContractInfo } from "~~/hooks/scaffold-stark";
+import { universalErc20Abi, universalStrkAddress } from "~~/utils/Constants";
+import { v } from "@starknet-react/core/dist/index-Bhba1Jqa";
+import ManageAccountModal from "~~/components/Modals/ManageAccountModal";
+import { useAccount } from "~~/hooks/useAccount";
 
 type Transaction = {
   id: number;
@@ -102,6 +116,190 @@ const assets: Asset[] = [
 
 const MultiOwner = () => {
   const router = useRouter();
+  const [connectedAccountMultisig, setConnectedAccountMultisig] = useState<
+    {
+      signers: string[];
+      threshold: number;
+      moa_address: string;
+    }[]
+  >([]);
+
+  // factory deploying account
+  const { address, account } = useAccount();
+  const { sendAsync: deployMultisig } = useScaffoldWriteContract({
+    contractName: "MultisigFactory",
+    functionName: "deploy_multisig",
+    args: [
+      [
+        "0x056508c732d623A7E568cBbdf87FFfeaFe920c85dbd42A2D50346f055387C8E5",
+        "0x0732E3f7E43336eDC96F8D3f437240970cA927453089a42AE6D14e4b7519fA97",
+      ],
+      2,
+      [
+        // this is how to specify module
+        // {
+        // module_type: new CairoCustomEnum({ Whitelist: "()" }),
+        // module_address:
+        //   "0x0000000000000000000000000000000000000000000000000000000000000000",
+        // is_active: true,
+        // },
+      ],
+      num.toHex(Date.now()),
+    ],
+  });
+  const { data: multisigAbi } = useDeployedContractInfo("Multisig");
+
+  // getting deployed multisig contract
+  const { data: deployedMultisig } = useScaffoldEventHistory({
+    contractName: "MultisigFactory",
+    eventName: "contracts::interfaces::IMultisigFactory::MultisigCreated",
+    fromBlock: 0n,
+    watch: true,
+  });
+
+  const { data: factoryContract } = useDeployedContractInfo("MultisigFactory");
+
+  // filter out connected address multisig
+  const handleFilterDeployedMultisig = () => {
+    if (!address) return;
+    const processedDeployMultisigEvents = deployedMultisig?.map((multisig) => ({
+      signers: multisig.args?.signers.map((signer: any) =>
+        getChecksumAddress(num.toHex(signer)),
+      ),
+      threshold: multisig.args?.threshold,
+      moa_address: num.toHex(multisig.args?.moa_address || ""),
+    }));
+
+    // now filter out the connected address multisig
+    const filteredDeployedMultisig = processedDeployMultisigEvents?.filter(
+      (multisig) => multisig.signers.includes(getChecksumAddress(address!)),
+    );
+
+    setConnectedAccountMultisig(filteredDeployedMultisig);
+  };
+
+  // propose transaction
+  const handleProposeTransaction = async () => {
+    // get the multisig address
+
+    const multisigAddress = connectedAccountMultisig[0]?.moa_address;
+    console.log(multisigAddress);
+    // construct multisig contract instance
+    const multisigContract = new Contract(multisigAbi?.abi!, multisigAddress);
+    // const transferContract = new Contract(
+    //   universalErc20Abi,
+    //   universalStrkAddress
+    // );
+    // const transferCalldata = transferContract.populate("transfer", [
+    //   "0x0135353f55784cb5f1c1c7d2ec3f5d4dab42eff301834a9d8588550ae7a33ed4",
+    //   10000n,
+    // ]);
+
+    const proposedTransactionCalldata = multisigContract?.populate(
+      "propose_transaction",
+      [
+        [
+          {
+            to: universalStrkAddress,
+            selector: hash.getSelectorFromName("transfer"),
+            calldata: [
+              "0x0135353f55784cb5f1c1c7d2ec3f5d4dab42eff301834a9d8588550ae7a33ed4",
+              10000n,
+            ],
+          },
+        ],
+      ],
+    );
+
+    console.log(proposedTransactionCalldata);
+
+    try {
+      const tx = await account?.execute(proposedTransactionCalldata);
+      console.log(tx);
+    } catch (error) {
+      console.log(error);
+    }
+  };
+
+  const handleGetPendingTransactions = async () => {
+    const multisigAddress = connectedAccountMultisig[0]?.moa_address;
+    const provider = new RpcProvider({
+      nodeUrl: `http://127.0.0.1:5050`,
+    });
+    const blockNumber = (await provider.getBlockLatestAccepted()).block_number;
+
+    const events = await provider.getEvents({
+      chunk_size: 100,
+      keys: [[hash.getSelectorFromName("TransactionProposed")]],
+      address: multisigAddress,
+      from_block: { block_number: Number(0) },
+      to_block: { block_number: blockNumber },
+    });
+    console.log(events);
+    return events;
+  };
+
+  const handleIsSigned = async () => {
+    const provider = new RpcProvider({
+      nodeUrl: `http://127.0.0.1:5050`,
+    });
+    const multisigAddress = connectedAccountMultisig[0]?.moa_address;
+    console.log(multisigAddress);
+    // construct multisig contract instance
+    const multisigContract = new Contract(
+      multisigAbi?.abi!,
+      multisigAddress,
+      provider,
+    );
+    const isSigned = await multisigContract.is_signed(address, 1);
+    console.log(isSigned);
+  };
+
+  const handleSignTransaction = async () => {
+    const multisigAddress = connectedAccountMultisig[0]?.moa_address;
+    // get first proposed transaction and his calldata
+    const proposedTransaction = (await handleGetPendingTransactions())?.events
+      .keys;
+    console.log(proposedTransaction);
+    const multisigContract = new Contract(multisigAbi?.abi!, multisigAddress);
+    const signTransactionCalldata = multisigContract?.populate(
+      "sign_transaction",
+      [
+        1n,
+        [
+          {
+            to: universalStrkAddress,
+            selector: hash.getSelectorFromName("transfer"),
+            calldata: [
+              "0x0135353f55784cb5f1c1c7d2ec3f5d4dab42eff301834a9d8588550ae7a33ed4",
+              10000n,
+            ],
+          },
+        ],
+      ],
+    );
+    console.log(signTransactionCalldata);
+    try {
+      const tx = await account?.execute(signTransactionCalldata);
+      console.log(tx);
+    } catch (error) {
+      console.log(error);
+    }
+  };
+
+  useEffect(() => {
+    handleFilterDeployedMultisig();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [deployedMultisig]);
+
+  const handleCreateAccount = async () => {
+    try {
+      const tx = await deployMultisig();
+      console.log(tx);
+    } catch (error) {
+      console.log(error);
+    }
+  };
 
   return (
     <div className="p-8 min-h-screen relative">
@@ -158,31 +356,31 @@ const MultiOwner = () => {
             <div className="flex flex-col border-b-gray-800 border-b-2 pb-4 mt-5 gap-3">
               <div className="flex w-full justify-between items-center">
                 <h2 className="text-lg">Signers</h2>
-                <button className="bg-gray-600 p-2 rounded">Add Signer</button>
+                <button className="bg-[#2F2F2F] p-2 rounded">Add Signer</button>
               </div>
               <div className="flex flex-col gap-3">
                 <div className="flex">
                   <input
                     type="text"
                     placeholder="Enter name"
-                    className="w-1/4 px-4 py-2 text-white bg-gray-700 rounded-l-lg border-r border-gray-600"
+                    className="w-1/4 px-4 py-2 text-white bg-[#1E1E1E] rounded-l-lg border-r border-gray-600"
                   />
                   <input
                     type="text"
                     placeholder="Enter address"
-                    className="flex-1 px-4 py-2 text-white bg-gray-700 rounded-r-lg"
+                    className="flex-1 px-4 py-2 text-white bg-[#1E1E1E] rounded-r-lg"
                   />
                 </div>
                 <div className="flex">
                   <input
                     type="text"
                     placeholder="Enter name"
-                    className="w-1/4 px-4 py-2 text-white bg-gray-700 rounded-l-lg border-r border-gray-600"
+                    className="w-1/4 px-4 py-2 text-white bg-[#1E1E1E] rounded-l-lg border-r border-gray-600"
                   />
                   <input
                     type="text"
                     placeholder="Enter address"
-                    className="flex-1 px-4 py-2 text-white bg-gray-700 rounded-r-lg"
+                    className="flex-1 px-4 py-2 text-white bg-[#1E1E1E]  rounded-r-lg"
                   />
                 </div>
               </div>
@@ -317,6 +515,7 @@ const MultiOwner = () => {
 
           <div className="px-3 py-4 w-full">
             <button
+              onClick={handleCreateAccount}
               type="submit"
               className="px-4 py-2 w-full text-white button-bg rounded-lg flex justify-center items-center gap-2"
             >
@@ -325,6 +524,7 @@ const MultiOwner = () => {
           </div>
         </div>
       </div>
+      <ManageAccountModal moaList={connectedAccountMultisig} />
     </div>
   );
 };

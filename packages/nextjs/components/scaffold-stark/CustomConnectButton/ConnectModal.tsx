@@ -69,7 +69,7 @@ const ConnectModal = () => {
   ) {
     const connector = connectors.find(
       (it) => it.id == "burner-wallet",
-    ) as StarknetFinanceConnector;
+    ) as BurnerConnector;
     if (connector) {
       connector.burnerAccount = burnerAccounts[ix];
       connect({ connector });
@@ -83,9 +83,9 @@ const ConnectModal = () => {
     <div>
       <label
         htmlFor="connect-modal"
-        className="rounded-lg px-5 py-3 cursor-pointer button-bg block w-full text-center"
+        className="rounded-lg px-3 py-2 cursor-pointer button-bg w-full text-center block"
       >
-        <span className="text-white font-medium">Connect Wallet</span>
+        <span className="font-medium text-[15px]">Connect Wallet</span>
       </label>
 
       <input

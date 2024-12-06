@@ -1,3 +1,4 @@
+/* eslint-disable @next/next/no-img-element */
 import { parseEther } from "ethers";
 import Image from "next/image";
 import { TransactionFinanceCard } from "~~/app/(main)/transaction/_components/TransactionFinanceCard";

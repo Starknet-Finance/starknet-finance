@@ -1,3 +1,4 @@
+/* eslint-disable @next/next/no-img-element */
 /* eslint-disable react/no-unescaped-entities */
 import Image from "next/image";
 import React, { use, useCallback, useEffect, useRef, useState } from "react";
@@ -398,7 +399,7 @@ const SwapToken = () => {
         <button
           onClick={handleAddToBatch}
           disabled={!!quoteError || isLoadingQuote}
-          className="flex-1 py-3 rounded-lg text-[#292929] bg-white hover:bg-gray-100"
+          className="flex-1 py-3 rounded-lg text-[#E8C2FF] border border-[#D56AFF]"
         >
           Add to Batch
         </button>

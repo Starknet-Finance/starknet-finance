@@ -14,11 +14,11 @@ const TransactionButton = ({ icon, label, path }: TransactionButtonProps) => {
 
   return (
     <button
-      className={`w-[130px] flex justify-center button-bg px-6 py-3 rounded-lg items-center gap-2
+      className={`w-full flex justify-center button-bg px-6 py-3 rounded-lg items-center gap-2
         ${pathname === path ? "shadow-[inset_0_0_0_2.5px_#c4aeff]" : ""}`}
       onClick={() => router.push(path)}
     >
-      <span className="mr-2">
+      <span className="mr-1">
         <Image
           src={icon}
           width={label === "Swap" ? 14 : 10}
