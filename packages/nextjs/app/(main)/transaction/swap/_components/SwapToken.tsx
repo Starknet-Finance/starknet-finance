@@ -1,3 +1,4 @@
+/* eslint-disable @next/next/no-img-element */
 /* eslint-disable react/no-unescaped-entities */
 import Image from "next/image";
 import React, { use, useCallback, useEffect, useRef, useState } from "react";
@@ -58,7 +59,7 @@ const TokenSelector = ({
     onClick={onClick}
     className="flex items-center gap-[5px] bg-[#181818] rounded-[7px] w-fit p-1 cursor-pointer"
   >
-    <Image src={token.icon} alt={token.symbol} width={20} height={20} />
+    <img src={token.icon} alt={token.symbol} width={20} height={20} />
     <p className="text-sm">{token.symbol}</p>
     <Image src="/arrow-down.svg" alt="select token" width={16} height={16} />
   </div>
@@ -398,7 +399,7 @@ const SwapToken = () => {
         <button
           onClick={handleAddToBatch}
           disabled={!!quoteError || isLoadingQuote}
-          className="flex-1 py-3 rounded-lg text-[#292929] bg-white hover:bg-gray-100"
+          className="flex-1 py-3 rounded-lg text-[#E8C2FF] border border-[#D56AFF]"
         >
           Add to Batch
         </button>

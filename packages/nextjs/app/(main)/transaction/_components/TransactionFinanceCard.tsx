@@ -1,3 +1,4 @@
+/* eslint-disable @next/next/no-img-element */
 import Image from "next/image";
 import TransactionCard from "~~/components/transactions/TransactionCard";
 
@@ -52,7 +53,7 @@ export const TransactionFinanceCard = ({
         </div>
         <div className="ml-2 flex-1">
           <div className="flex items-center gap-2">
-            <Image
+            <img
               src={token.logo}
               alt={token.symbol}
               className="w-6 h-6"

@@ -300,9 +300,9 @@ const SendToken = ({ setIsNext, onTransactionSubmit }: SendTokenProps) => {
 
       {/* Token Selection Section */}
       <div className="mb-6 relative">
-        <label className="text-xl mb-2 block">Token</label>
+        <label className="mb-2 block">Send token</label>
         <div
-          className="bg-[#1E1E1E] h-[70px] border border-transparent transition hover:border-gray-500 p-3 rounded-lg flex items-center justify-between cursor-pointer"
+          className="bg-[#1E1E1E] h-12 border border-transparent transition hover:border-gray-500 p-3 rounded-lg flex items-center justify-between cursor-pointer"
           onClick={() => setIsTokenDropdownOpen(!isTokenDropdownOpen)}
         >
           {selectedToken && (
@@ -310,10 +310,10 @@ const SendToken = ({ setIsNext, onTransactionSubmit }: SendTokenProps) => {
               <img
                 src={selectedToken.logoUri}
                 alt={selectedToken.name}
-                className="w-8 h-8"
+                className="w-6 h-6"
               />
               <div className="flex flex-col">
-                <span className="text-xl">{selectedToken.symbol}</span>
+                <span className="text-sm">{selectedToken.symbol}</span>
                 <span className="text-sm text-gray-400">
                   {selectedToken.name}
                 </span>
@@ -382,9 +382,9 @@ const SendToken = ({ setIsNext, onTransactionSubmit }: SendTokenProps) => {
 
       {/* Recipient Selection Section */}
       <div className="mb-6 relative">
-        <label className="text-xl mb-2 block">Recipient Wallet</label>
+        <label className="mb-2 block">Recipient Wallet</label>
         <div
-          className="bg-[#1E1E1E] h-[70px] border border-transparent transition hover:border-gray-500 p-3 rounded-lg flex items-center justify-between cursor-pointer"
+          className="bg-[#1E1E1E] h-12 border border-transparent transition hover:border-gray-500 p-3 rounded-lg flex items-center justify-between cursor-pointer"
           onClick={() => setIsRecipientDropdownOpen(!isRecipientDropdownOpen)}
         >
           {selectedRecipient ? (

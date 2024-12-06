@@ -242,7 +242,7 @@ export default function TransactionTable() {
                 <span className="text-[#666] col-span-1">
                   NO.<a className="text-[#D56AFF] no-underline">{tx.id}</a>
                 </span>
-                <span className="col-span-2 text-center transaction-type-bg transaction-type-border px-4 py-1 rounded-lg">
+                <span className="col-span-2 text-sm flex items-center justify-center text-center transaction-type-bg transaction-type-border px-4 py-1 rounded-lg w-[80px]">
                   {tx.type}
                 </span>
                 <div className="col-span-3 flex items-center gap-2">
