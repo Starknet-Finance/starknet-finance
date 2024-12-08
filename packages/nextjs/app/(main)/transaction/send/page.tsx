@@ -112,7 +112,10 @@ const Send = () => {
 
       const transferCall = tokenContract.populate("transfer", [
         currentTransaction.recipient.address,
-        parseEther(currentTransaction.amount.toString()),
+        parseUnits(
+          currentTransaction.amount.toString(),
+          currentTransaction.token.decimal
+        ),
       ]);
 
       // Add to storage instead of local state
