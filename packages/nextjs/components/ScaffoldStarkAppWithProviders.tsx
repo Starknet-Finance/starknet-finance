@@ -9,6 +9,8 @@ import { appChains, connectors } from "~~/services/web3/connectors";
 import provider from "~~/services/web3/provider";
 import { useNativeCurrencyPrice } from "~~/hooks/scaffold-stark/useNativeCurrencyPrice";
 import Sidebar from "./Sidebar";
+import ConnectModal from "./scaffold-stark/CustomConnectButton/ConnectModal";
+import { CustomConnectButton } from "./scaffold-stark/CustomConnectButton";
 
 const ScaffoldStarkApp = ({ children }: { children: React.ReactNode }) => {
   useNativeCurrencyPrice();
@@ -17,11 +19,12 @@ const ScaffoldStarkApp = ({ children }: { children: React.ReactNode }) => {
   return (
     <>
       <div className="flex h-full min-h-screen bg-black gap-1">
-        <div className="w-[272px]">
+        <div className="relative w-[272px]">
           <div className="fixed top-0 left-0  h-full">
             <Sidebar />
           </div>
         </div>
+
         <main className="h-full bg w-[85%] rounded overflow-hidden relative flex flex-col flex-1">
           {children}
         </main>
@@ -52,6 +55,7 @@ export const ScaffoldStarkAppWithProviders = ({
       explorer={starkscan}
     >
       <ProgressBar />
+
       <ScaffoldStarkApp>{children}</ScaffoldStarkApp>
     </StarknetConfig>
   );

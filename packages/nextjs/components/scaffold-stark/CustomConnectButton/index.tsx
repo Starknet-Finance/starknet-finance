@@ -48,7 +48,7 @@ export const CustomConnectButton = () => {
 
   return (
     <>
-      <div className="flex flex-col items-center max-sm:mt-2">
+      <div className="lex flex-col items-center max-sm:mt-2">
         <Balance
           address={accountAddress as Address}
           className="min-h-0 h-auto"
