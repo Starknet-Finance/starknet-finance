@@ -14,7 +14,7 @@ import { Contract, RpcProvider } from "starknet";
 import { useAccount } from "~~/hooks/useAccount";
 import { universalErc20Abi } from "~~/utils/Constants";
 import toast from "react-hot-toast";
-import { parseEther } from "ethers";
+import { parseEther, parseUnits } from "ethers";
 import scaffoldConfig from "~~/scaffold.config";
 import { useTransactionStorage } from "~~/hooks/useTransactionStorage";
 
@@ -25,6 +25,7 @@ interface TransactionData {
     logo: string;
     name: string;
     address: string;
+    decimal: number;
   };
   recipient: {
     name: string;
@@ -62,20 +63,23 @@ const Send = () => {
       const tokenContract = new Contract(
         universalErc20Abi,
         currentTransaction.token.address,
-        provider,
+        provider
       );
 
       // Create transfer call using contract's populate method
       const transferCall = tokenContract.populate("transfer", [
         currentTransaction.recipient.address,
-        parseEther(currentTransaction.amount.toString()),
+        parseUnits(
+          currentTransaction.amount.toString(),
+          currentTransaction.token.decimal
+        ),
       ]);
 
       // Execute the transaction
       const response = await account.execute([transferCall]);
       console.log("Transaction submitted:", response);
       toast.success(
-        `Successfully sent ${currentTransaction.amount} ${currentTransaction.token.symbol} to ${currentTransaction.recipient.name}`,
+        `Successfully sent ${currentTransaction.amount} ${currentTransaction.token.symbol} to ${currentTransaction.recipient.name}`
       );
 
       // Reset states
@@ -103,12 +107,15 @@ const Send = () => {
       const tokenContract = new Contract(
         universalErc20Abi,
         currentTransaction.token.address,
-        provider,
+        provider
       );
 
       const transferCall = tokenContract.populate("transfer", [
         currentTransaction.recipient.address,
-        parseEther(currentTransaction.amount.toString()),
+        parseUnits(
+          currentTransaction.amount.toString(),
+          currentTransaction.token.decimal
+        ),
       ]);
 
       // Add to storage instead of local state
@@ -123,7 +130,7 @@ const Send = () => {
       setOpenBatchedTransaction(true);
       window.scrollTo({ top: 0, behavior: "smooth" });
       toast.success(
-        `Added ${currentTransaction.amount} ${currentTransaction.token.symbol} transfer to batch`,
+        `Added ${currentTransaction.amount} ${currentTransaction.token.symbol} transfer to batch`
       );
 
       setCurrentTransaction(null);

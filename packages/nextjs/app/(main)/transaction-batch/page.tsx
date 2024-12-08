@@ -14,7 +14,7 @@ const TransactionBatch = () => {
   const { transactions, removeTransaction, clearTransactions } =
     useTransactionStorage();
   const { account } = useAccount();
-
+  console.log(transactions);
   const handleExecuteBatch = async () => {
     if (!account || transactions.length === 0) {
       notification.error("Please connect your wallet and add transactions");
@@ -23,7 +23,7 @@ const TransactionBatch = () => {
 
     try {
       const flattenedCalls = transactions.flatMap((tx) =>
-        Array.isArray(tx.callData) ? tx.callData : [tx.callData],
+        Array.isArray(tx.callData) ? tx.callData : [tx.callData]
       );
       await account.execute(flattenedCalls);
       toast.success("Batch transactions submitted successfully!");
